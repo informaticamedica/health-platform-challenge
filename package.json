@@ -1,0 +1,17 @@
+{
+  "name": "platform-challenge",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "core/packages/*",
+    "core/templates/*",
+    "mvp/producto1/producto1-front",
+    "mvp/producto1/producto1-back"
+  ],
+  "scripts": {
+    "bootstrap": "npm install --workspaces",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  }
+}

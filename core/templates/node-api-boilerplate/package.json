@@ -1,0 +1,24 @@
+{
+  "name": "@platform/node-api-boilerplate",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@platform/config": "file:../../packages/config",
+    "@platform/contracts": "file:../../packages/contracts",
+    "@platform/fhir": "file:../../packages/fhir",
+    "@platform/logger": "file:../../packages/logger",
+    "@platform/middleware": "file:../../packages/middleware",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.15.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@platform/producto1-back",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@platform/config": "file:../../../core/packages/config",
+    "@platform/contracts": "file:../../../core/packages/contracts",
+    "@platform/fhir": "file:../../../core/packages/fhir",
+    "@platform/logger": "file:../../../core/packages/logger",
+    "@platform/middleware": "file:../../../core/packages/middleware"
+  }
+}
