@@ -1,0 +1,25 @@
+services:
+  soc-postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soc-postgres
+    environment:
+      POSTGRES_DB: soc
+      POSTGRES_USER: soc
+      POSTGRES_PASSWORD: soc
+    ports:
+      - "55433:5432"
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/etc/postgresql/certs/server.crt
+      - -c
+      - ssl_key_file=/etc/postgresql/certs/server.key
+    volumes:
+      - soc_pg_data:/var/lib/postgresql/data
+
+volumes:
+  soc_pg_data:

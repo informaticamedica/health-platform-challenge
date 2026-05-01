@@ -1,21 +1,30 @@
-import express from "express";
-import { requestIdMiddleware } from "@platform/middleware";
-import { createLogger } from "@platform/logger";
+import app from "./app";
+import dotenv from "dotenv";
+import pool from "./db/postgres";
+import { loadLoincCodes } from "./utils/loincLoader";
 
-const app = express();
-const logger = createLogger("node-api-boilerplate");
+// Cargar variables de entorno
+dotenv.config();
 
-app.use(requestIdMiddleware);
+const PORT = process.env.PORT || 3000;
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
+const startServer = async () => {
+  try {
+    // Sincronizar la base de datos
+    await pool.query("SELECT 1");
+    console.log("Conexión a la base de datos exitosa.");
 
-app.get("/", (_req, res) => {
-  logger.info("Boilerplate backend activo");
-  res.json({ service: "node-api-boilerplate" });
-});
+    // Cargar códigos LOINC
+    await loadLoincCodes("src/db/csv/Loinc.csv");
+    console.log("Códigos LOINC cargados en memoria.");
 
-app.listen(3000, () => {
-  logger.info("Servidor escuchando en puerto 3000");
-});
+    // Iniciar el servidor
+    app.listen(PORT, () => {
+      console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Error al iniciar el servidor:", error);
+  }
+};
+
+startServer();
