@@ -4,6 +4,7 @@ import {
   PatientPayloadType,
   PatientTypeDto,
 } from "@/types/dto.type";
+import { ObservationCategoryType } from "@/types/fhir.type";
 import axios, { AxiosResponse } from "axios";
 
 // Importar getSession de NextAuth
@@ -206,5 +207,22 @@ export const deleteObservation = async (props: {
     return handleResponseBack<ObservationType>(res);
   } catch (error) {
     return handleErrorBack<ObservationType>(error);
+  }
+};
+
+export const getObservationCategories = async (accessToken: string) => {
+  try {
+    const res = await backend.get<{ data: ObservationCategoryType[]; error: boolean }>(
+      "/observations/categories",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    return handleResponseBack<ObservationCategoryType[]>(res);
+  } catch (error) {
+    return handleErrorBack<ObservationCategoryType[]>(error);
   }
 };

@@ -5,9 +5,8 @@ import { useAuth } from "@/context/auth";
 // import { PatientCard } from "@/components/patients/Patient";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import usePatientStore from "@/hooks/useStore";
-import { getObservations } from "@/services/backend";
+import { getObservationCategories, getObservations } from "@/services/backend";
 import { ObservationCategoryType } from "@/types/fhir.type";
-import axios from "axios";
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -52,12 +51,14 @@ export default function ObservationsPage() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const apiObservationsCategories = await axios.get(
-          "https://terminology.hl7.org/6.1.0/CodeSystem-observation-category.json"
-        );
-        const categories: ObservationCategoryType[] =
-          apiObservationsCategories.data.concept;
-        setObservationsCategories(categories);
+        if (!session?.accessToken) return;
+        const response = await getObservationCategories(session.accessToken);
+        if (response.error) {
+          setObservationsCategories(FALLBACK_CATEGORIES);
+          return;
+        }
+
+        setObservationsCategories(response.data);
       } catch {
         setObservationsCategories(FALLBACK_CATEGORIES);
       }
@@ -66,7 +67,7 @@ export default function ObservationsPage() {
     if (observationsCategories.length === 0) {
       void loadCategories();
     }
-  }, [observationsCategories.length, setObservationsCategories]);
+  }, [observationsCategories.length, session?.accessToken, setObservationsCategories]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-28 sm:px-6 lg:px-8">

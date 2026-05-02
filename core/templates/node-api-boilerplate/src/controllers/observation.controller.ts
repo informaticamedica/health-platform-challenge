@@ -7,6 +7,9 @@ import { NotFoundError } from "../services/error.service";
 import PatientService from "../services/patient.service";
 import ObservationService from "../services/observation.service";
 
+const OBSERVATION_CATEGORY_URL =
+  "https://terminology.hl7.org/6.1.0/CodeSystem-observation-category.json";
+
 // Lista las observaciones de un paciente
 export const getObservations = async (req: Request, res: Response) => {
   try {
@@ -30,6 +33,32 @@ export const getFhirObservation = async (req: Request, res: Response) => {
     const patientObservations = await ObservationService.getFhir(observationId);
 
     RoutesService.responseSuccess(res, patientObservations);
+  } catch (error) {
+    RoutesService.responseError(res, error as any);
+  }
+};
+
+export const getObservationCategories = async (_req: Request, res: Response) => {
+  try {
+    const response = await fetch(OBSERVATION_CATEGORY_URL);
+
+    if (!response.ok) {
+      throw new Error(`HL7 response status: ${response.status}`);
+    }
+
+    const payload = (await response.json()) as {
+      concept?: Array<{ code?: string; display?: string; definition?: string }>;
+    };
+
+    const categories = (payload.concept ?? [])
+      .filter((item) => item.code && item.display)
+      .map((item) => ({
+        code: item.code as string,
+        display: item.display as string,
+        definition: item.definition ?? item.display ?? "",
+      }));
+
+    RoutesService.responseSuccess(res, categories);
   } catch (error) {
     RoutesService.responseError(res, error as any);
   }
@@ -64,7 +93,11 @@ export const addObservation = async (req: Request, res: Response) => {
       components,
     });
 
-    RoutesService.responseSuccess(res, { ...observation, components }, 201);
+    RoutesService.responseSuccess(
+      res,
+      { ...observation, status, category, components },
+      201
+    );
   } catch (error) {
     console.log({ error });
 
@@ -139,7 +172,12 @@ export const updateObservation = async (req: Request, res: Response) => {
       status: observation.status,
     });
 
-    RoutesService.responseSuccess(res, editedObservation);
+    RoutesService.responseSuccess(res, {
+      ...editedObservation,
+      status,
+      category,
+      components,
+    });
   } catch (error) {
     RoutesService.responseError(res, error as any);
   }

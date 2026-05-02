@@ -1,4 +1,3 @@
-import { v4 } from "uuid";
 import pool from "../db/postgres";
 import { ObservationComponents, Observations } from "../types/dao.type";
 import { Observation } from "./observation.fhir.model";
@@ -25,8 +24,6 @@ const ObservationModel = {
     code,
     value,
     date,
-    status,
-    category,
     components,
   }: Omit<Observations, "id"> & {
     components: Omit<ObservationComponents, "id" | "observation_id">[];
@@ -35,23 +32,19 @@ const ObservationModel = {
     try {
       await client.query("BEGIN");
 
-      const observationId = v4();
       console.log({ value });
 
       // Inserta la observación principal
       const queryObservation = `
-        INSERT INTO observations (id, patient_id, user_id, code, value, date, status, category) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+        INSERT INTO observations (patient_id, user_id, code, value, date) 
+        VALUES ($1, $2, $3, $4, $5) 
         RETURNING *`;
       const { rows: observationRows } = await client.query(queryObservation, [
-        observationId,
         patient_id,
         user_id,
         code,
         value,
         date,
-        status,
-        category,
       ]);
 
       const observation = observationRows[0];
@@ -59,13 +52,11 @@ const ObservationModel = {
       // Inserta los componentes si los hay
       if (components && components.length > 0) {
         const queryComponent = `
-          INSERT INTO observation_components (id, observation_id, code, value, unit) 
-          VALUES ($1, $2, $3, $4, $5)`;
+          INSERT INTO observation_components (observation_id, code, value, unit) 
+          VALUES ($1, $2, $3, $4)`;
         for (const component of components) {
-          const componentId = v4();
           await client.query(queryComponent, [
-            componentId,
-            observationId,
+            observation.id,
             component.code,
             component.value,
             component.unit,
@@ -96,8 +87,6 @@ const ObservationModel = {
     code,
     value,
     date,
-    status,
-    category,
     components,
   }: Observation): Promise<Observation> {
     const client = await pool.connect();
@@ -107,8 +96,8 @@ const ObservationModel = {
       // Actualiza la observación principal
       const queryObservation = `
       UPDATE observations 
-      SET patient_id = $1, user_id = $2, code = $3, value = $4, date = $5, status = $6, category = $7 
-      WHERE id = $8 
+      SET patient_id = $1, user_id = $2, code = $3, value = $4, date = $5 
+      WHERE id = $6 
       RETURNING *`;
       const { rows: observationRows } = await client.query(queryObservation, [
         patient_id,
@@ -116,8 +105,6 @@ const ObservationModel = {
         code,
         value,
         date,
-        status,
-        category,
         id,
       ]);
 
@@ -133,17 +120,14 @@ const ObservationModel = {
       if (components && components.length > 0) {
         const queryComponent = `
         INSERT INTO observation_components (
-          id,
           observation_id,
           code,
           value,
           unit
         ) 
-        VALUES ($1, $2, $3, $4, $5)`;
+        VALUES ($1, $2, $3, $4)`;
         for (const component of components) {
-          const componentId = v4();
           await client.query(queryComponent, [
-            componentId,
             id,
             component.code,
             component.value,
