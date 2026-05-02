@@ -28,7 +28,7 @@ export type PatientType = {
 export type PatientPayloadType = Omit<PatientType, "id">;
 
 export type PatientTypeDto = PatientType & {
-  observations: number;
+  observations: string;
 };
 
 export type PatientObservationsType = PatientType & {

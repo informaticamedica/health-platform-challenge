@@ -8,6 +8,10 @@ import { PatientFormModal } from "./PatientFormModal";
 export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
   const navigate = useNavigate();
 
+  let observationsLabel = `${patient.observations} observaciones`;
+  if (patient.observations === "0") observationsLabel = "Sin observaciones";
+  else if (patient.observations === "1") observationsLabel = "1 observacion";
+  console.log({ patient });
   return (
     <Card
       variant="primary"
@@ -24,7 +28,7 @@ export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
       subtitle={`Genero: ${patient.gender}`}
       meta={
         <div className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
-          {patient.observations} observaciones
+          {observationsLabel}
         </div>
       }
       footer={
@@ -45,7 +49,10 @@ export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
               </button>
             }
           />
-          <DeletePatientModal patientId={patient.id} patientName={patient.name} />
+          <DeletePatientModal
+            patientId={patient.id}
+            patientName={patient.name}
+          />
         </div>
       }
     >

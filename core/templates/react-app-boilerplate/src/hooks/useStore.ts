@@ -8,13 +8,12 @@ interface Store {
   setPatients: (patients: PatientTypeDto[]) => void;
   patientObservations: PatientObservationsType;
   setPatientObservations: (
-    patientObservations: PatientObservationsType
+    patientObservations: PatientObservationsType,
   ) => void;
   observationsCategories: ObservationCategoryType[];
   setObservationsCategories: (o: ObservationCategoryType[]) => void;
 }
-//TODO: separar en dos stores
-//TODO: ver inferencia de tipos
+
 const usePatientStore = create<Store>()(
   devtools((set) => ({
     patients: [],
@@ -25,7 +24,7 @@ const usePatientStore = create<Store>()(
     observationsCategories: [],
     setObservationsCategories: (observationsCategories) =>
       set({ observationsCategories }),
-  }))
+  })),
 );
 
 export default usePatientStore;
