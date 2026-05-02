@@ -11,8 +11,14 @@ export const CardObservation = ({
 }: {
   observation: ObservationType;
   categories: ObservationCategoryType[];
-}) => (
-  <Card variant="secondary">
+}) => {
+  const categoryDisplay = observation.category
+    ? categories?.find((c) => c.code === observation.category)?.display ??
+      observation.category
+    : "Sin categoria";
+
+  return (
+    <Card variant="secondary">
     <div className="flex justify-between gap-4">
       <div className="flex w-full flex-col gap-4 md:flex-row">
         <div className="md:w-1/2">
@@ -21,7 +27,7 @@ export const CardObservation = ({
           </p>
           <p>
             <strong>Categoría:</strong>{" "}
-            {categories?.find((c) => c.code === observation.category)?.display}
+            {categoryDisplay}
           </p>
           <p>
             <strong>Código:</strong> {observation.code}
@@ -67,5 +73,6 @@ export const CardObservation = ({
         <DeleteObservationModal id={observation.id} />
       </div>
     </div>
-  </Card>
-);
+    </Card>
+  );
+};
