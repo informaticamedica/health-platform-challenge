@@ -63,7 +63,12 @@ export const DeleteObservationModal = ({ id }: { id: string }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild className="cursor-pointer">
-        <Trash2Icon className="hover:text-red-500" />
+        <button
+          type="button"
+          className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 p-2 text-red-600 transition hover:bg-red-100"
+        >
+          <Trash2Icon className="size-4" />
+        </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -73,11 +78,7 @@ export const DeleteObservationModal = ({ id }: { id: string }) => {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button
-            disabled={cargando}
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
+          <Button variant="destructive" disabled={cargando} onClick={handleSubmit}>
             <div className="flex text-center">
               {cargando && <LoadingSpinner color="text-white w-4 h-4" />}{" "}
               Eliminar

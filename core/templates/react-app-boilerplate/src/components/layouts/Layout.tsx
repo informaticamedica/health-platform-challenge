@@ -3,9 +3,9 @@ import React from "react";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div>
+    <div className="min-h-screen">
       <Header />
-      <main className="">{children}</main>
+      <main>{children}</main>
     </div>
   );
 };

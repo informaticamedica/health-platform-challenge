@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/auth";
+import { Button } from "@/components/ui";
 import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -11,19 +12,18 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-[#486b74] text-white p-4 z-10 shadow-md">
-      <div className="flex items-center justify-between">
-        <div className="text-xl font-semibold">
+    <header className="fixed left-0 right-0 top-0 z-20 border-b border-white/40 bg-white/70 px-4 py-3 text-slate-800 shadow-sm backdrop-blur-md">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+        <div className="text-xl font-semibold tracking-tight">
           <Link to="/">
-            <span className="text-white">Sistema de Gestión de Pacientes</span>
+            <span className="bg-gradient-to-r from-teal-700 via-cyan-700 to-sky-700 bg-clip-text text-transparent">
+              Sistema de Gestion de Pacientes
+            </span>
           </Link>
         </div>
-        <button
-          onClick={handleLogout}
-          className="bg-[#e47c61] text-white px-4 py-2 rounded hover:bg-[#ff5e36]"
-        >
+        <Button onClick={handleLogout} className="bg-slate-900 hover:bg-slate-800">
           Salir
-        </button>
+        </Button>
       </div>
     </header>
   );

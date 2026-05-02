@@ -1,6 +1,7 @@
 import {
   ObservationType,
   PatientObservationsType,
+  PatientPayloadType,
   PatientTypeDto,
 } from "@/types/dto.type";
 import axios, { AxiosResponse } from "axios";
@@ -60,6 +61,72 @@ export const getPatients = async (accessToken: string) => {
     console.error("Error en getPatients", error);
 
     return handleErrorBack<PatientTypeDto[]>(error);
+  }
+};
+
+export const createPatient = async (props: {
+  accessToken: string;
+  patient: PatientPayloadType;
+}) => {
+  try {
+    const { accessToken, patient } = props;
+    const res = await backend.post<{ data: PatientTypeDto; error: boolean }>(
+      "/patients",
+      patient,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    return handleResponseBack<PatientTypeDto>(res);
+  } catch (error) {
+    return handleErrorBack<PatientTypeDto>(error);
+  }
+};
+
+export const updatePatient = async (props: {
+  accessToken: string;
+  patientId: string;
+  patient: PatientPayloadType;
+}) => {
+  try {
+    const { accessToken, patientId, patient } = props;
+    const res = await backend.put<{ data: PatientTypeDto; error: boolean }>(
+      `/patients/${patientId}`,
+      patient,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    return handleResponseBack<PatientTypeDto>(res);
+  } catch (error) {
+    return handleErrorBack<PatientTypeDto>(error);
+  }
+};
+
+export const deletePatient = async (props: {
+  accessToken: string;
+  patientId: string;
+}) => {
+  try {
+    const { accessToken, patientId } = props;
+    const res = await backend.delete<{ data: PatientTypeDto; error: boolean }>(
+      `/patients/${patientId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    return handleResponseBack<PatientTypeDto>(res);
+  } catch (error) {
+    return handleErrorBack<PatientTypeDto>(error);
   }
 };
 

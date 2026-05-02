@@ -20,10 +20,12 @@ export type ComponentObservationTypeDto = {
 export type PatientType = {
   id: string;
   name: string;
-  gender: string;
+  gender: "male" | "female" | "other";
   birth_date: string;
   address: string;
 };
+
+export type PatientPayloadType = Omit<PatientType, "id">;
 
 export type PatientTypeDto = PatientType & {
   observations: number;

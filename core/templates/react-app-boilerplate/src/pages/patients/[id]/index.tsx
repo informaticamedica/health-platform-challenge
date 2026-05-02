@@ -1,5 +1,6 @@
 import { CardObservation } from "@/components/observations/CardObservation";
 import { NewObservationModal } from "@/components/observations/NewObservationModal";
+import { Button } from "@/components/ui";
 import { useAuth } from "@/context/auth";
 // import { PatientCard } from "@/components/patients/Patient";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,9 +8,9 @@ import usePatientStore from "@/hooks/useStore";
 import { getObservations } from "@/services/backend";
 import { ObservationCategoryType } from "@/types/fhir.type";
 import axios from "axios";
+import { ArrowLeftIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { v4 } from "uuid";
 
 const FALLBACK_CATEGORIES: ObservationCategoryType[] = [
   { code: "vital-signs", display: "Vital Signs", definition: "Vital signs" },
@@ -67,40 +68,48 @@ export default function ObservationsPage() {
     }
   }, [observationsCategories.length, setObservationsCategories]);
 
-  // const { observations, ...patient } = patientObservations;
   return (
-    <div>
-      <div className="container mx-auto p-6 pt-28">
-        <div className="flex  justify-between">
-          <div className="w-full">
-            {/* <PatientCard
-              patient={{ ...patient, observations: observations?.length }}
-            /> */}
-            <h1 className="text-2xl font-bold mb-4">
-              Observaciones de <strong>{patientObservations?.name}</strong>
-            </h1>
-            <div className="flex justify-between w-full">
-              <h2 className="text-xl font-bold mb-2 bg-white px-2 rounded">
-                Lista de Observaciones (
-                {patientObservations?.observations?.length}){" "}
-              </h2>
+    <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-28 sm:px-6 lg:px-8">
+      <Button
+        variant="outline"
+        className="mb-4"
+        onClick={() => navigate("/patients")}
+      >
+        <ArrowLeftIcon className="mr-1 size-4" />
+        Volver al listado
+      </Button>
 
-              <NewObservationModal />
-            </div>
-            <ScrollArea>
-              <div className=" pt-2  grid grid-cols-2 gap-6 w-full ">
-                {patientObservations?.observations?.toReversed()?.map((obs) => (
-                  <CardObservation
-                    key={v4()}
-                    observation={obs}
-                    categories={observationsCategories}
-                  />
-                ))}
-              </div>
-            </ScrollArea>
+      <div className="mb-6 rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-sm backdrop-blur">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+              Observaciones de {patientObservations?.name}
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Total: {patientObservations?.observations?.length ?? 0} registros clinicos
+            </p>
           </div>
+          <NewObservationModal />
         </div>
       </div>
+
+      <ScrollArea>
+        <div className="grid grid-cols-1 gap-5 pb-2 lg:grid-cols-2">
+          {patientObservations?.observations?.toReversed()?.map((obs) => (
+            <CardObservation
+              key={obs.id}
+              observation={obs}
+              categories={observationsCategories}
+            />
+          ))}
+        </div>
+      </ScrollArea>
+
+      {patientObservations?.observations?.length === 0 ? (
+        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white/70 p-8 text-center text-slate-500">
+          Este paciente todavia no tiene observaciones.
+        </div>
+      ) : null}
     </div>
   );
 }
