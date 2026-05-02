@@ -1,6 +1,6 @@
 // frontend/src/pages/index.tsx
 import { LoginCard } from "@/components/auth/LoginCard";
-import { Background } from "@/components/layouts/Background";
+import { Background } from "@ds";
 
 const HomePage = () => {
   return (

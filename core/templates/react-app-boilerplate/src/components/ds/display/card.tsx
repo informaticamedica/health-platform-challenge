@@ -18,7 +18,40 @@ type CardProps = {
   role?: string;
 };
 
-export function Card({
+const CardHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("mb-4 flex items-start justify-between gap-4", className)} {...props} />
+);
+
+const CardTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+  <h3 className={cn("text-lg font-semibold text-slate-900", className)} {...props} />
+);
+
+const CardSubtitle = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
+  <p className={cn("text-sm text-slate-500", className)} {...props} />
+);
+
+const CardMeta = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={className} {...props} />
+);
+
+const CardBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={className} {...props} />
+);
+
+const CardFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("mt-5 border-t border-slate-100 pt-4", className)} {...props} />
+);
+
+type CardComponent = ((props: CardProps) => JSX.Element) & {
+  Header: typeof CardHeader;
+  Title: typeof CardTitle;
+  Subtitle: typeof CardSubtitle;
+  Meta: typeof CardMeta;
+  Body: typeof CardBody;
+  Footer: typeof CardFooter;
+};
+
+export const Card = (({
   variant = "primary",
   title,
   subtitle,
@@ -31,7 +64,7 @@ export function Card({
   onKeyDown,
   tabIndex,
   role,
-}: CardProps) {
+}: CardProps) => {
   return (
     <article
       role={role}
@@ -47,18 +80,25 @@ export function Card({
       )}
     >
       {title || subtitle || meta ? (
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <CardHeader>
           <div>
-            {title ? <h3 className="text-lg font-semibold text-slate-900">{title}</h3> : null}
-            {subtitle ? <p className="text-sm text-slate-500">{subtitle}</p> : null}
+            {title ? <CardTitle>{title}</CardTitle> : null}
+            {subtitle ? <CardSubtitle>{subtitle}</CardSubtitle> : null}
           </div>
-          {meta}
-        </div>
+          {meta ? <CardMeta>{meta}</CardMeta> : null}
+        </CardHeader>
       ) : null}
 
-      <div className={bodyClassName}>{children}</div>
+      <CardBody className={bodyClassName}>{children}</CardBody>
 
-      {footer ? <div className="mt-5 border-t border-slate-100 pt-4">{footer}</div> : null}
+      {footer ? <CardFooter>{footer}</CardFooter> : null}
     </article>
   );
-}
+}) as CardComponent;
+
+Card.Header = CardHeader;
+Card.Title = CardTitle;
+Card.Subtitle = CardSubtitle;
+Card.Meta = CardMeta;
+Card.Body = CardBody;
+Card.Footer = CardFooter;

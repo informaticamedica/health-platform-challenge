@@ -1,25 +1,15 @@
 import { useAuth } from "@/context/auth";
-import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { createPatient, updatePatient } from "@/services/backend";
 import { PatientPayloadType, PatientTypeDto } from "@/types/dto.type";
 import {
+  useToast,
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Modal,
   Input,
+  LoadingSpinner,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@ds";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PlusIcon } from "lucide-react";
 import { ChangeEvent, ReactNode, useState } from "react";
 
@@ -50,7 +40,7 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
           gender: patient.gender,
           address: patient.address,
         }
-      : EMPTY_PATIENT
+      : EMPTY_PATIENT,
   );
 
   const isCreate = mode === "create";
@@ -76,7 +66,10 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
     };
 
     const response = isCreate
-      ? await createPatient({ accessToken: session.accessToken, patient: payload })
+      ? await createPatient({
+          accessToken: session.accessToken,
+          patient: payload,
+        })
       : await updatePatient({
           accessToken: session.accessToken,
           patientId: patient?.id ?? "",
@@ -97,7 +90,7 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
     setPatients(
       isCreate
         ? [...patients, saved]
-        : patients.map((item) => (item.id === saved.id ? saved : item))
+        : patients.map((item) => (item.id === saved.id ? saved : item)),
     );
 
     toast({
@@ -111,71 +104,61 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <Modal open={isOpen} onOpenChange={setIsOpen}>
+      <Modal.Trigger asChild>
         {trigger ?? (
           <Button className="bg-teal-700 hover:bg-teal-600">
             <PlusIcon /> Nuevo paciente
           </Button>
         )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[560px]">
-        <DialogHeader>
-          <DialogTitle>
+      </Modal.Trigger>
+      <Modal.Content className="sm:max-w-[560px]">
+        <Modal.Header>
+          <Modal.Title>
             {isCreate ? "Agregar paciente" : "Editar paciente"}
-          </DialogTitle>
-          <DialogDescription>
+          </Modal.Title>
+          <Modal.Description>
             Completa los datos clinicos basicos del paciente.
-          </DialogDescription>
-        </DialogHeader>
+          </Modal.Description>
+        </Modal.Header>
 
         <div className="grid gap-4 py-2">
-          <div>
-            <label className="mb-1 block text-sm font-medium">Nombre completo</label>
-            <Input name="name" value={form.name} onChange={onInput} />
-          </div>
+          <Input label="Nombre completo" name="name" value={form.name} onChange={onInput} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Fecha de nacimiento</label>
-              <Input
-                name="birth_date"
-                type="date"
-                value={form.birth_date}
-                onChange={onInput}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Genero</label>
-              <Select
-                value={form.gender}
-                onValueChange={(gender: "male" | "female" | "other") =>
-                  setForm((prev) => ({ ...prev, gender }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Masculino</SelectItem>
-                  <SelectItem value="female">Femenino</SelectItem>
-                  <SelectItem value="other">Otro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Input
+              label="Fecha de nacimiento"
+              name="birth_date"
+              type="date"
+              value={form.birth_date}
+              onChange={onInput}
+            />
+            <Select
+              label="Genero"
+              value={form.gender}
+              onValueChange={(gender: "male" | "female" | "other") =>
+                setForm((prev) => ({ ...prev, gender }))
+              }
+            >
+              <Select.Trigger>
+                <Select.Value />
+              </Select.Trigger>
+              <Select.Content>
+                <Select.Item value="male">Masculino</Select.Item>
+                <Select.Item value="female">Femenino</Select.Item>
+                <Select.Item value="other">Otro</Select.Item>
+              </Select.Content>
+            </Select>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">Direccion</label>
-            <Input name="address" value={form.address} onChange={onInput} />
-          </div>
+          <Input label="Direccion" name="address" value={form.address} onChange={onInput} />
         </div>
 
-        <DialogFooter>
+        <Modal.Footer>
           <Button disabled={isSaving || !isFormValid} onClick={onSubmit}>
             {isSaving ? <LoadingSpinner color="text-white w-4 h-4" /> : null}
             Guardar
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </Modal.Footer>
+      </Modal.Content>
+    </Modal>
   );
 };

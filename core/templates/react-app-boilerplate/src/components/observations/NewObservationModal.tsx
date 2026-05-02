@@ -1,22 +1,17 @@
-import { addObservation, getLoincSuggestions, LoincSuggestion } from "@/services/api";
-import { LoadingSpinner } from "../common/LoadingSpinner";
 import {
+  addObservation,
+  getLoincSuggestions,
+  LoincSuggestion,
+} from "@/services/api";
+import {
+  LoadingSpinner,
+  useToast,
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Modal,
   Input,
   ScrollArea,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@ds";
-import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";
 import { NewObservationType } from "@/types/observation-form.type";
@@ -25,8 +20,11 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { v4 } from "uuid";
 
 export const NewObservationModal = () => {
-  const { patientObservations, setPatientObservations, observationsCategories } =
-    usePatientStore();
+  const {
+    patientObservations,
+    setPatientObservations,
+    observationsCategories,
+  } = usePatientStore();
   const { toast } = useToast();
   const { getSession } = useAuth();
 
@@ -40,7 +38,9 @@ export const NewObservationModal = () => {
   const [newObservation, setNewObservation] = useState(initObservation);
   const [cargando, setCargando] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [loincSuggestions, setLoincSuggestions] = useState<LoincSuggestion[]>([]);
+  const [loincSuggestions, setLoincSuggestions] = useState<LoincSuggestion[]>(
+    [],
+  );
 
   const isMainFormValid =
     newObservation.category.trim().length > 0 &&
@@ -54,7 +54,7 @@ export const NewObservationModal = () => {
       component.unit.trim().length > 0 &&
       component.value !== null &&
       component.value !== undefined &&
-      String(component.value).trim().length > 0
+      String(component.value).trim().length > 0,
   );
 
   const isFormValid = isMainFormValid && areComponentsValid;
@@ -67,7 +67,7 @@ export const NewObservationModal = () => {
   const handleInputComponentChange = (
     index: number,
     field: string,
-    value: string | number
+    value: string | number,
   ) => {
     setNewObservation((prev) => {
       const newComponents = [...prev.components];
@@ -82,14 +82,17 @@ export const NewObservationModal = () => {
 
     try {
       setCargando(true);
-      const { data: addedObservation, error, message } = await addObservation(
-        session.accessToken,
-        {
-          ...newObservation,
-          components: newObservation.components.map(({ id: _, ...c }) => ({ ...c })),
-          patient_id: patientObservations.id,
-        }
-      );
+      const {
+        data: addedObservation,
+        error,
+        message,
+      } = await addObservation(session.accessToken, {
+        ...newObservation,
+        components: newObservation.components.map(({ id: _, ...c }) => ({
+          ...c,
+        })),
+        patient_id: patientObservations.id,
+      });
 
       if (error) {
         toast({ title: "Error", description: message, variant: "destructive" });
@@ -115,7 +118,7 @@ export const NewObservationModal = () => {
       const response = await getLoincSuggestions(
         session.accessToken,
         newObservation.code,
-        25
+        25,
       );
       if (!response.error) {
         setLoincSuggestions(response.data);
@@ -128,47 +131,44 @@ export const NewObservationModal = () => {
   }, [getSession, isOpen, newObservation.code]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild className="cursor-pointer">
-        <Button className="bg-slate-900 hover:bg-slate-800" onClick={() => setIsOpen(true)}>
+    <Modal open={isOpen} onOpenChange={setIsOpen}>
+      <Modal.Trigger asChild className="cursor-pointer">
+        <Button
+          className="bg-slate-900 hover:bg-slate-800"
+          onClick={() => setIsOpen(true)}
+        >
           <FilePlusIcon /> Nueva observacion
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[860px]">
-        <DialogHeader>
-          <DialogTitle>Agregar nueva observacion</DialogTitle>
-          <DialogDescription />
-        </DialogHeader>
+      </Modal.Trigger>
+      <Modal.Content className="sm:max-w-[860px]">
+        <Modal.Header>
+          <Modal.Title>Agregar nueva observacion</Modal.Title>
+          <Modal.Description />
+        </Modal.Header>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <div>
-              <label htmlFor="category" className="mb-1 block text-sm font-medium">
-                Categoria
-              </label>
-              <Select
-                onValueChange={(category) =>
-                  setNewObservation((prev) => ({ ...prev, category }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona una categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {observationsCategories.map((category) => (
-                    <SelectItem value={category.code} key={category.code}>
-                      {category.display}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              label="Categoria"
+              onValueChange={(category) =>
+                setNewObservation((prev) => ({ ...prev, category }))
+              }
+            >
+              <Select.Trigger id="category">
+                <Select.Value placeholder="Selecciona una categoria" />
+              </Select.Trigger>
+              <Select.Content>
+                {observationsCategories.map((category) => (
+                  <Select.Item value={category.code} key={category.code}>
+                    {category.display}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select>
 
             <div>
-              <label htmlFor="code" className="mb-1 block text-sm font-medium">
-                Codigo
-              </label>
               <Input
+                label="Codigo"
                 id="code"
                 name="code"
                 list="loinc-suggestions-main"
@@ -187,25 +187,23 @@ export const NewObservationModal = () => {
               </p>
             </div>
 
-            <div>
-              <label htmlFor="value" className="mb-1 block text-sm font-medium">
-                Valor
-              </label>
-              <Input id="value" name="value" value={newObservation.value} onChange={handleInputChange} />
-            </div>
 
-            <div>
-              <label htmlFor="date" className="mb-1 block text-sm font-medium">
-                Fecha
-              </label>
-              <Input
-                id="date"
-                name="date"
-                type="date"
-                value={newObservation.date}
-                onChange={handleInputChange}
-              />
-            </div>
+            <Input
+              label="Valor"
+              id="value"
+              name="value"
+              value={newObservation.value}
+              onChange={handleInputChange}
+            />
+
+            <Input
+              label="Fecha"
+              id="date"
+              name="date"
+              type="date"
+              value={newObservation.date}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="lg:col-span-2 rounded-xl border border-slate-200 p-4">
@@ -215,7 +213,10 @@ export const NewObservationModal = () => {
                 onClick={() =>
                   setNewObservation((prev) => ({
                     ...prev,
-                    components: [...prev.components, { code: "", value: 0, unit: "", id: v4() }],
+                    components: [
+                      ...prev.components,
+                      { code: "", value: 0, unit: "", id: v4() },
+                    ],
                   }))
                 }
               >
@@ -230,32 +231,32 @@ export const NewObservationModal = () => {
                   key={c.id}
                   className="mb-3 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
                 >
-                  <div>
-                    <label className="mb-1 block text-sm font-medium">Codigo</label>
-                    <Input
-                      list="loinc-suggestions-components"
-                      value={c.code}
-                      onChange={(e) => handleInputComponentChange(i, "code", e.target.value)}
-                      className="w-24 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium">Valor</label>
-                    <Input
-                      type="number"
-                      value={c.value}
-                      onChange={(e) => handleInputComponentChange(i, "value", e.target.value)}
-                      className="w-24 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium">Unidad</label>
-                    <Input
-                      value={c.unit}
-                      onChange={(e) => handleInputComponentChange(i, "unit", e.target.value)}
-                      className="w-24 bg-white"
-                    />
-                  </div>
+                  <Input
+                    label="Codigo"
+                    list="loinc-suggestions-components"
+                    value={c.code}
+                    onChange={(e) =>
+                      handleInputComponentChange(i, "code", e.target.value)
+                    }
+                    className="w-24 bg-white"
+                  />
+                  <Input
+                    label="Valor"
+                    type="number"
+                    value={c.value}
+                    onChange={(e) =>
+                      handleInputComponentChange(i, "value", e.target.value)
+                    }
+                    className="w-24 bg-white"
+                  />
+                  <Input
+                    label="Unidad"
+                    value={c.unit}
+                    onChange={(e) =>
+                      handleInputComponentChange(i, "unit", e.target.value)
+                    }
+                    className="w-24 bg-white"
+                  />
                   <Button
                     variant="ghost"
                     size="sm"
@@ -289,7 +290,7 @@ export const NewObservationModal = () => {
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </Modal.Content>
+    </Modal>
   );
 };

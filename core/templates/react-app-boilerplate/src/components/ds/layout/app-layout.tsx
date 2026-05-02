@@ -7,7 +7,7 @@ type AppLayoutProps = {
 
 export function AppLayout({ header, children }: AppLayoutProps) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       {header}
       <main>{children}</main>
     </div>

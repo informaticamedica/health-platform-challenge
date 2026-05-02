@@ -1,5 +1,4 @@
-import { LoadingSpinner } from "../common/LoadingSpinner";
-import { Redirect } from "../layouts/Redirect";
+import { LoadingSpinner, RedirectScreen } from "@ds";
 import { useAuth } from "@/context/auth";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +8,6 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const isAuthenticated = !!session; // Si hay sesión, está autenticado
   const isLoading = status === "loading";
-  // console.log({ session, status, isAuthenticated });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -27,7 +25,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <Redirect />; // Evita mostrar el contenido hasta que se redirija
+    return <RedirectScreen />; // Evita mostrar el contenido hasta que se redirija
   }
 
   return <>{children}</>;

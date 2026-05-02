@@ -17,33 +17,30 @@ export const CardObservation = ({
     : "Sin categoria";
 
   return (
-    <Card variant="secondary">
-    <div className="flex justify-between gap-4">
-      <div className="flex w-full flex-col gap-4 md:flex-row">
+    <Card
+      variant="secondary"
+      title={
+        <Card.Title className="text-base">
+          Observacion {observation.id}
+        </Card.Title>
+      }
+      subtitle={<Card.Subtitle>Categoria: {categoryDisplay}</Card.Subtitle>}
+      meta={
+        <Card.Meta>
+          <div className="flex items-center gap-2">
+            <EditObservationModal observation={observation} />
+            <DeleteObservationModal id={observation.id} />
+          </div>
+        </Card.Meta>
+      }
+    >
+      <Card.Body className="flex w-full flex-col gap-4 md:flex-row">
         <div className="md:w-1/2">
-          <p>
-            <strong>ID:</strong> {observation.id}
-          </p>
-          <p>
-            <strong>Categoría:</strong>{" "}
-            {categoryDisplay}
-          </p>
-          <p>
-            <strong>Código:</strong> {observation.code}
-          </p>
-          <p>
-            <strong>Valor:</strong> {observation.value}
-          </p>
-          <p>
-            <strong>Fecha:</strong>{" "}
-            {new Date(observation.date).toLocaleDateString()}
-          </p>
-          <p>
-            <strong>ID Paciente:</strong> {observation.patient_id}
-          </p>
-          <p>
-            <strong>ID Usuario:</strong> {observation.user_id}
-          </p>
+          <p><strong>Codigo:</strong> {observation.code}</p>
+          <p><strong>Valor:</strong> {observation.value}</p>
+          <p><strong>Fecha:</strong> {new Date(observation.date).toLocaleDateString()}</p>
+          <p><strong>ID Paciente:</strong> {observation.patient_id}</p>
+          <p><strong>ID Usuario:</strong> {observation.user_id}</p>
         </div>
         <div className="md:w-1/2">
           <strong className="text-slate-800">Componentes</strong>
@@ -52,7 +49,7 @@ export const CardObservation = ({
               <div key={`${observation.id}-${c.code}-${c.unit}`} className="mb-2">
                 <div className="flex flex-col rounded-md border border-slate-200 bg-white p-2">
                   <div className="flex pr-2">
-                    <strong>Código:</strong>
+                    <strong>Codigo:</strong>
                     <div className="px-2">{c.code}</div>
                   </div>
                   <div className="flex">
@@ -66,12 +63,7 @@ export const CardObservation = ({
             ))}
           </ScrollArea>
         </div>
-      </div>
-      <div className="flex flex-col justify-between gap-3">
-        <EditObservationModal observation={observation} />
-        <DeleteObservationModal id={observation.id} />
-      </div>
-    </div>
+      </Card.Body>
     </Card>
   );
 };

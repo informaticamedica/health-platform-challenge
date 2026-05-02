@@ -1,7 +1,22 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+const InputContainer = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
+  return <div className={cn("space-y-1", className)} {...props} />;
+};
+
+const InputLabel = React.forwardRef<HTMLLabelElement, React.ComponentPropsWithoutRef<"label">>(
+  ({ className, ...props }, ref) => {
+    return <label ref={ref} className={cn("block text-sm font-medium", className)} {...props} />;
+  }
+);
+InputLabel.displayName = "InputLabel";
+
+type InputProps = React.ComponentProps<"input"> & {
+  label?: React.ReactNode;
+};
+
+const InputBase = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
     return (
       <input
@@ -16,6 +31,31 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
     );
   }
 );
+InputBase.displayName = "Input";
+
+type InputComponent = React.ForwardRefExoticComponent<InputProps & React.RefAttributes<HTMLInputElement>> & {
+  Container: typeof InputContainer;
+  Label: typeof InputLabel;
+};
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, id, ...props }, ref) => {
+  const inputId = React.useId();
+  const resolvedId = id ?? inputId;
+
+  if (label === undefined) {
+    return <InputBase ref={ref} id={resolvedId} {...props} />;
+  }
+
+  return (
+    <InputContainer>
+      <InputLabel htmlFor={resolvedId}>{label}</InputLabel>
+      <InputBase ref={ref} id={resolvedId} {...props} />
+    </InputContainer>
+  );
+}) as InputComponent;
 Input.displayName = "Input";
+
+Input.Container = InputContainer;
+Input.Label = InputLabel;
 
 export { Input };

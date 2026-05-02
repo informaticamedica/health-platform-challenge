@@ -1,4 +1,3 @@
-// import { Background } from "@/components/layouts/Background";
 import { PatientCard } from "@/components/patients/Patient";
 import { PatientFormModal } from "@/components/patients/PatientFormModal";
 import { SectionBanner } from "@ds";

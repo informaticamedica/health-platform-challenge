@@ -1,7 +1,10 @@
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@ds";
+import {
+  Button,
+  Modal,
+  LoadingSpinner,
+  useToast,
+} from "@ds";
 import { useAuth } from "@/context/auth";
-import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { deletePatient } from "@/services/backend";
 import { Trash2Icon } from "lucide-react";
@@ -47,8 +50,8 @@ export const DeletePatientModal = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <Modal open={isOpen} onOpenChange={setIsOpen}>
+      <Modal.Trigger asChild>
         <button
           type="button"
           onClick={(event) => event.stopPropagation()}
@@ -56,21 +59,25 @@ export const DeletePatientModal = ({
         >
           <Trash2Icon className="size-4" />
         </button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[420px]">
-        <DialogHeader>
-          <DialogTitle>Eliminar paciente</DialogTitle>
-          <DialogDescription>
+      </Modal.Trigger>
+      <Modal.Content className="sm:max-w-[420px]">
+        <Modal.Header>
+          <Modal.Title>Eliminar paciente</Modal.Title>
+          <Modal.Description>
             Esta accion eliminara a {patientName}. No se puede deshacer.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="destructive" disabled={isDeleting} onClick={onDelete}>
+          </Modal.Description>
+        </Modal.Header>
+        <Modal.Footer>
+          <Button
+            variant="destructive"
+            disabled={isDeleting}
+            onClick={onDelete}
+          >
             {isDeleting ? <LoadingSpinner color="text-white w-4 h-4" /> : null}
             Eliminar
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </Modal.Footer>
+      </Modal.Content>
+    </Modal>
   );
 };

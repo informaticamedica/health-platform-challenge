@@ -3,12 +3,11 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const Dialog = DialogPrimitive.Root;
-const DialogTrigger = DialogPrimitive.Trigger;
-const DialogPortal = DialogPrimitive.Portal;
-const DialogClose = DialogPrimitive.Close;
+const ModalPortal = DialogPrimitive.Portal;
+const ModalTrigger = DialogPrimitive.Trigger;
+const ModalClose = DialogPrimitive.Close;
 
-const DialogOverlay = React.forwardRef<
+const ModalOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
@@ -21,14 +20,14 @@ const DialogOverlay = React.forwardRef<
     {...props}
   />
 ));
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+ModalOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
-const DialogContent = React.forwardRef<
+const ModalContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
+  <ModalPortal>
+    <ModalOverlay />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
@@ -43,21 +42,21 @@ const DialogContent = React.forwardRef<
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
-  </DialogPortal>
+  </ModalPortal>
 ));
-DialogContent.displayName = DialogPrimitive.Content.displayName;
+ModalContent.displayName = DialogPrimitive.Content.displayName;
 
-const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const ModalHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...props} />
 );
-DialogHeader.displayName = "DialogHeader";
+ModalHeader.displayName = "ModalHeader";
 
-const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const ModalFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)} {...props} />
 );
-DialogFooter.displayName = "DialogFooter";
+ModalFooter.displayName = "ModalFooter";
 
-const DialogTitle = React.forwardRef<
+const ModalTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
@@ -67,25 +66,40 @@ const DialogTitle = React.forwardRef<
     {...props}
   />
 ));
-DialogTitle.displayName = DialogPrimitive.Title.displayName;
+ModalTitle.displayName = DialogPrimitive.Title.displayName;
 
-const DialogDescription = React.forwardRef<
+const ModalDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
 ));
-DialogDescription.displayName = DialogPrimitive.Description.displayName;
+ModalDescription.displayName = DialogPrimitive.Description.displayName;
 
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogTrigger,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
+type ModalComponent = React.FC<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>> & {
+  Portal: typeof ModalPortal;
+  Overlay: typeof ModalOverlay;
+  Trigger: typeof ModalTrigger;
+  Close: typeof ModalClose;
+  Content: typeof ModalContent;
+  Header: typeof ModalHeader;
+  Footer: typeof ModalFooter;
+  Title: typeof ModalTitle;
+  Description: typeof ModalDescription;
 };
+
+const Modal = (({ children, ...props }) => {
+  return <DialogPrimitive.Root {...props}>{children}</DialogPrimitive.Root>;
+}) as ModalComponent;
+
+Modal.Portal = ModalPortal;
+Modal.Overlay = ModalOverlay;
+Modal.Trigger = ModalTrigger;
+Modal.Close = ModalClose;
+Modal.Content = ModalContent;
+Modal.Header = ModalHeader;
+Modal.Footer = ModalFooter;
+Modal.Title = ModalTitle;
+Modal.Description = ModalDescription;
+
+export { Modal };

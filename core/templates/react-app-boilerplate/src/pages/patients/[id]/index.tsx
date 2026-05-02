@@ -2,7 +2,6 @@ import { CardObservation } from "@/components/observations/CardObservation";
 import { NewObservationModal } from "@/components/observations/NewObservationModal";
 import { Button, ScrollArea, SectionBanner } from "@ds";
 import { useAuth } from "@/context/auth";
-// import { PatientCard } from "@/components/patients/Patient";
 import usePatientStore from "@/hooks/useStore";
 import { getObservationCategories, getObservations } from "@/services/backend";
 import { ObservationCategoryType } from "@/types/fhir.type";
@@ -70,7 +69,11 @@ export default function ObservationsPage() {
         console.error("Error loading observation categories", error);
       });
     }
-  }, [observationsCategories.length, session?.accessToken, setObservationsCategories]);
+  }, [
+    observationsCategories.length,
+    session?.accessToken,
+    setObservationsCategories,
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-28 sm:px-6 lg:px-8">

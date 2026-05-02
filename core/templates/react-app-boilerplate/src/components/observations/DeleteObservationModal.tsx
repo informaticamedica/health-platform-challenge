@@ -1,15 +1,9 @@
-import { LoadingSpinner } from "../common/LoadingSpinner";
 import {
+  LoadingSpinner,
+  useToast,
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Modal,
 } from "@ds";
-import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";
 import { removeObservation } from "@/services/api";
@@ -36,7 +30,7 @@ export const DeleteObservationModal = ({ id }: { id: string }) => {
       setCargando(true);
       const { error, message } = await removeObservation(
         session.accessToken,
-        id
+        id,
       );
 
       if (error) {
@@ -49,7 +43,7 @@ export const DeleteObservationModal = ({ id }: { id: string }) => {
         setPatientObservations({
           ...patientObservations,
           observations: patientObservations.observations.filter(
-            (obs) => obs.id !== id
+            (obs) => obs.id !== id,
           ),
         });
         setIsOpen(false); // Cerrar el modal después de guardar
@@ -61,31 +55,35 @@ export const DeleteObservationModal = ({ id }: { id: string }) => {
     }
   };
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild className="cursor-pointer">
+    <Modal open={isOpen} onOpenChange={setIsOpen}>
+      <Modal.Trigger asChild className="cursor-pointer">
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 p-2 text-red-600 transition hover:bg-red-100"
         >
           <Trash2Icon className="size-4" />
         </button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Eliminar observación</DialogTitle>
-          <DialogDescription>
+      </Modal.Trigger>
+      <Modal.Content className="sm:max-w-[425px]">
+        <Modal.Header>
+          <Modal.Title>Eliminar observación</Modal.Title>
+          <Modal.Description>
             ¿Estás seguro que deseas eliminar esta observación?
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="destructive" disabled={cargando} onClick={handleSubmit}>
+          </Modal.Description>
+        </Modal.Header>
+        <Modal.Footer>
+          <Button
+            variant="destructive"
+            disabled={cargando}
+            onClick={handleSubmit}
+          >
             <div className="flex text-center">
               {cargando && <LoadingSpinner color="text-white w-4 h-4" />}{" "}
               Eliminar
             </div>
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </Modal.Footer>
+      </Modal.Content>
+    </Modal>
   );
 };

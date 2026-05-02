@@ -1,4 +1,7 @@
-import { EditObservationType, NewObservationType } from "@/types/observation-form.type";
+import {
+  EditObservationType,
+  NewObservationType,
+} from "@/types/observation-form.type";
 import { ObservationType } from "@/types/dto.type";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 
@@ -40,7 +43,7 @@ export const api = axios.create({
 
 export async function addObservation(
   accessToken: string,
-  observation: NewObservationType & { patient_id: string }
+  observation: NewObservationType & { patient_id: string },
 ) {
   try {
     const response = await api.post(
@@ -50,7 +53,7 @@ export async function addObservation(
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     return handleResponseApi<ObservationType>(response);
@@ -61,14 +64,18 @@ export async function addObservation(
 
 export async function updateObservation(
   accessToken: string,
-  observation: EditObservationType
+  observation: EditObservationType,
 ) {
   try {
-    const response = await api.put(`/observations/${observation.id}`, observation, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const response = await api.put(
+      `/observations/${observation.id}`,
+      observation,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     return handleResponseApi<ObservationType>(response);
   } catch (error) {
@@ -78,7 +85,7 @@ export async function updateObservation(
 
 export async function removeObservation(
   accessToken: string,
-  observationId: string
+  observationId: string,
 ) {
   try {
     const response = await api.delete(`/observations/${observationId}`, {
@@ -95,7 +102,7 @@ export async function removeObservation(
 export async function getLoincSuggestions(
   accessToken: string,
   query: string,
-  limit = 20
+  limit = 20,
 ) {
   try {
     const response = await api.get("/observations/loinc", {
@@ -119,7 +126,6 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // signOut();
     return Promise.reject(new Error(error));
-  }
+  },
 );
