@@ -11,6 +11,8 @@ CREATE TABLE observations (
   code varchar(50) NOT NULL,
   value varchar(255) NOT NULL,
   date timestamp DEFAULT CURRENT_TIMESTAMP,
+  status varchar(20) NOT NULL DEFAULT 'final',
+  category varchar(50) NOT NULL DEFAULT 'vital-signs',
   patient_id int NOT NULL,
   user_id int NOT NULL,
   PRIMARY KEY (id)

@@ -105,7 +105,9 @@ export const addObservation = async (req: Request, res: Response) => {
     RoutesService.validationParams(req.params, idSchema);
     const patient_id = RoutesService.getParamAsString(req.params.id);
 
-    RoutesService.validationBody(req.body, baseObservationSchema);
+    const { patient_id: _ignoredPatientId, user_id: _ignoredUserId, ...payload } =
+      req.body;
+    RoutesService.validationBody(payload, baseObservationSchema);
     const {
       code,
       value,
@@ -113,7 +115,7 @@ export const addObservation = async (req: Request, res: Response) => {
       status = "final",
       category,
       components,
-    } = req.body;
+    } = payload;
 
     const observation = await ObservationModel.create({
       patient_id,
@@ -143,7 +145,9 @@ export const addObservationFhir = async (req: Request, res: Response) => {
   try {
     RoutesService.validationParams(req.params, idSchema);
     const patient_id = RoutesService.getParamAsString(req.params.id);
-    RoutesService.validationBody(req.body, baseObservationSchema);
+    const { patient_id: _ignoredPatientId, user_id: _ignoredUserId, ...payload } =
+      req.body;
+    RoutesService.validationBody(payload, baseObservationSchema);
     const {
       code,
       value,
@@ -151,7 +155,7 @@ export const addObservationFhir = async (req: Request, res: Response) => {
       status = "final",
       category,
       components,
-    } = req.body;
+    } = payload;
     const user_id = RoutesService.getUserId(req);
     console.log({
       code,

@@ -24,6 +24,8 @@ const ObservationModel = {
     code,
     value,
     date,
+    status,
+    category,
     components,
   }: Omit<Observations, "id"> & {
     components: Omit<ObservationComponents, "id" | "observation_id">[];
@@ -36,8 +38,8 @@ const ObservationModel = {
 
       // Inserta la observación principal
       const queryObservation = `
-        INSERT INTO observations (patient_id, user_id, code, value, date) 
-        VALUES ($1, $2, $3, $4, $5) 
+        INSERT INTO observations (patient_id, user_id, code, value, date, status, category) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7) 
         RETURNING *`;
       const { rows: observationRows } = await client.query(queryObservation, [
         patient_id,
@@ -45,6 +47,8 @@ const ObservationModel = {
         code,
         value,
         date,
+        status,
+        category,
       ]);
 
       const observation = observationRows[0];
@@ -87,6 +91,8 @@ const ObservationModel = {
     code,
     value,
     date,
+    status,
+    category,
     components,
   }: Observation): Promise<Observation> {
     const client = await pool.connect();
@@ -96,8 +102,8 @@ const ObservationModel = {
       // Actualiza la observación principal
       const queryObservation = `
       UPDATE observations 
-      SET patient_id = $1, user_id = $2, code = $3, value = $4, date = $5 
-      WHERE id = $6 
+      SET patient_id = $1, user_id = $2, code = $3, value = $4, date = $5, status = $6, category = $7
+      WHERE id = $8 
       RETURNING *`;
       const { rows: observationRows } = await client.query(queryObservation, [
         patient_id,
@@ -105,6 +111,8 @@ const ObservationModel = {
         code,
         value,
         date,
+        status,
+        category,
         id,
       ]);
 

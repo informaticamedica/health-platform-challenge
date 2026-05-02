@@ -96,32 +96,32 @@ BEGIN
     SELECT id INTO patient_carlos_id_int FROM patients WHERE name = 'Carlos Gomez' LIMIT 1;
 
     IF observations_has_status AND observations_has_category THEN
-      INSERT INTO observations (id, code, value, date, status, category, patient_id, user_id)
-      SELECT 'aaaaaaa1-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '8867-4', '120', NOW() - INTERVAL '3 day', 'final', 'vital-signs', patient_ana_id_int, admin_user_id_int
+      INSERT INTO observations (code, value, date, status, category, patient_id, user_id)
+      SELECT '8867-4', '120', NOW() - INTERVAL '3 day', 'final', 'vital-signs', patient_ana_id_int, admin_user_id_int
       WHERE NOT EXISTS (
         SELECT 1 FROM observations WHERE patient_id = patient_ana_id_int AND code = '8867-4' AND value = '120'
       );
 
-      INSERT INTO observations (id, code, value, date, status, category, patient_id, user_id)
-      SELECT 'aaaaaaa2-aaaa-4aaa-8aaa-aaaaaaaaaaa2', '8480-6', '78', NOW() - INTERVAL '2 day', 'final', 'vital-signs', patient_ana_id_int, default_user_id_int
+      INSERT INTO observations (code, value, date, status, category, patient_id, user_id)
+      SELECT '8480-6', '78', NOW() - INTERVAL '2 day', 'final', 'vital-signs', patient_ana_id_int, default_user_id_int
       WHERE NOT EXISTS (
         SELECT 1 FROM observations WHERE patient_id = patient_ana_id_int AND code = '8480-6' AND value = '78'
       );
 
-      INSERT INTO observations (id, code, value, date, status, category, patient_id, user_id)
-      SELECT 'bbbbbbb1-bbbb-4bbb-8bbb-bbbbbbbbbbb1', '8867-4', '130', NOW() - INTERVAL '1 day', 'final', 'vital-signs', patient_carlos_id_int, admin_user_id_int
+      INSERT INTO observations (code, value, date, status, category, patient_id, user_id)
+      SELECT '8867-4', '130', NOW() - INTERVAL '1 day', 'final', 'vital-signs', patient_carlos_id_int, admin_user_id_int
       WHERE NOT EXISTS (
         SELECT 1 FROM observations WHERE patient_id = patient_carlos_id_int AND code = '8867-4' AND value = '130'
       );
 
-      INSERT INTO observations (id, code, value, date, status, category, patient_id, user_id)
-      SELECT 'bbbbbbb2-bbbb-4bbb-8bbb-bbbbbbbbbbb2', '8310-5', '37.0', NOW() - INTERVAL '8 hour', 'final', 'vital-signs', patient_carlos_id_int, default_user_id_int
+      INSERT INTO observations (code, value, date, status, category, patient_id, user_id)
+      SELECT '8310-5', '37.0', NOW() - INTERVAL '8 hour', 'final', 'vital-signs', patient_carlos_id_int, default_user_id_int
       WHERE NOT EXISTS (
         SELECT 1 FROM observations WHERE patient_id = patient_carlos_id_int AND code = '8310-5' AND value = '37.0'
       );
 
-      INSERT INTO observations (id, code, value, date, status, category, patient_id, user_id)
-      SELECT 'bbbbbbb3-bbbb-4bbb-8bbb-bbbbbbbbbbb3', '29463-7', '81', NOW() - INTERVAL '2 hour', 'final', 'exam', patient_carlos_id_int, admin_user_id_int
+      INSERT INTO observations (code, value, date, status, category, patient_id, user_id)
+      SELECT '29463-7', '81', NOW() - INTERVAL '2 hour', 'final', 'exam', patient_carlos_id_int, admin_user_id_int
       WHERE NOT EXISTS (
         SELECT 1 FROM observations WHERE patient_id = patient_carlos_id_int AND code = '29463-7' AND value = '81'
       );
