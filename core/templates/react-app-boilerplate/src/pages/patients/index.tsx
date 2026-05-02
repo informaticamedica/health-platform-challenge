@@ -28,7 +28,9 @@ const PatientsPage = () => {
       setPatients(response.data);
     };
 
-    void loadPatients();
+    loadPatients().catch((error: unknown) => {
+      console.error("Error loading patients", error);
+    });
   }, [navigate, session?.accessToken, setPatients, signOut]);
 
   return (

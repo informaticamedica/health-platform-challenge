@@ -45,7 +45,9 @@ export default function ObservationsPage() {
       setPatientObservations(response.data);
     };
 
-    void loadPatient();
+    loadPatient().catch((error: unknown) => {
+      console.error("Error loading patient observations", error);
+    });
   }, [id, navigate, session?.accessToken, setPatientObservations, signOut]);
 
   useEffect(() => {
@@ -65,7 +67,9 @@ export default function ObservationsPage() {
     };
 
     if (observationsCategories.length === 0) {
-      void loadCategories();
+      loadCategories().catch((error: unknown) => {
+        console.error("Error loading observation categories", error);
+      });
     }
   }, [observationsCategories.length, session?.accessToken, setObservationsCategories]);
 

@@ -153,9 +153,10 @@ export const addObservationFhir = async (req: Request, res: Response) => {
 export const updateObservation = async (req: Request, res: Response) => {
   try {
     RoutesService.validationParams(req.params, idSchema);
-    RoutesService.validationBody(req.body, baseObservationSchema);
+    const { id: _ignoredId, ...payload } = req.body;
+    RoutesService.validationBody(payload, baseObservationSchema);
     const observationId = RoutesService.getParamAsString(req.params.id);
-    const { code, value, date, status, category, components } = req.body;
+    const { code, value, date, status, category, components } = payload;
     const user_id = RoutesService.getUserId(req);
 
     const observation = await ObservationModel.findOneById(observationId);
@@ -186,7 +187,8 @@ export const updateObservation = async (req: Request, res: Response) => {
 export const updateObservationFhir = async (req: Request, res: Response) => {
   try {
     RoutesService.validationParams(req.params, idSchema);
-    RoutesService.validationBody(req.body, baseObservationSchema);
+    const { id: _ignoredId, ...payload } = req.body;
+    RoutesService.validationBody(payload, baseObservationSchema);
     const observationId = RoutesService.getParamAsString(req.params.id);
     const {
       code,
@@ -195,7 +197,7 @@ export const updateObservationFhir = async (req: Request, res: Response) => {
       status = "final",
       category,
       components,
-    } = req.body;
+    } = payload;
     const user_id = RoutesService.getUserId(req);
 
     const observation = await ObservationModel.findOneById(observationId);
