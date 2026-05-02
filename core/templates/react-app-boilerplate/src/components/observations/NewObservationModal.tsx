@@ -43,6 +43,23 @@ export const NewObservationModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loincSuggestions, setLoincSuggestions] = useState<LoincSuggestion[]>([]);
 
+  const isMainFormValid =
+    newObservation.category.trim().length > 0 &&
+    newObservation.code.trim().length > 0 &&
+    newObservation.value.toString().trim().length > 0 &&
+    newObservation.date.trim().length > 0;
+
+  const areComponentsValid = newObservation.components.every(
+    (component) =>
+      component.code.trim().length > 0 &&
+      component.unit.trim().length > 0 &&
+      component.value !== null &&
+      component.value !== undefined &&
+      String(component.value).trim().length > 0
+  );
+
+  const isFormValid = isMainFormValid && areComponentsValid;
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewObservation((prev) => ({ ...prev, [name]: value }));
@@ -263,7 +280,11 @@ export const NewObservationModal = () => {
               </datalist>
             </ScrollArea>
 
-            <Button disabled={cargando} onClick={handleSubmit} className="mt-4 self-end bg-teal-700 hover:bg-teal-600">
+            <Button
+              disabled={cargando || !isFormValid}
+              onClick={handleSubmit}
+              className="mt-4 self-end bg-teal-700 hover:bg-teal-600"
+            >
               {cargando ? <LoadingSpinner color="text-white w-4 h-4" /> : null}
               Guardar
             </Button>

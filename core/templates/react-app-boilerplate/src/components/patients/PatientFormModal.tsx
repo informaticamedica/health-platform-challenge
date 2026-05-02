@@ -55,6 +55,11 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
   );
 
   const isCreate = mode === "create";
+  const isFormValid =
+    form.name.trim().length > 0 &&
+    form.birth_date.trim().length > 0 &&
+    form.gender.trim().length > 0 &&
+    form.address.trim().length > 0;
 
   const onInput = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -166,7 +171,7 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
         </div>
 
         <DialogFooter>
-          <Button disabled={isSaving} onClick={onSubmit}>
+          <Button disabled={isSaving || !isFormValid} onClick={onSubmit}>
             {isSaving ? <LoadingSpinner color="text-white w-4 h-4" /> : null}
             Guardar
           </Button>
