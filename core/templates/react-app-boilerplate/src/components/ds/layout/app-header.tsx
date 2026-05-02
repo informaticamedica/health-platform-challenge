@@ -8,12 +8,7 @@ type AppHeaderProps = {
   contentClassName?: string;
 };
 
-export function AppHeader({
-  brand,
-  actions,
-  className,
-  contentClassName,
-}: AppHeaderProps) {
+export function AppHeader({ brand, actions, className, contentClassName }: AppHeaderProps) {
   return (
     <header
       className={cn(

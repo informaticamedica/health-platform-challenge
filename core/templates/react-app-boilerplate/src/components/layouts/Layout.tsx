@@ -1,4 +1,4 @@
-import { AppLayout } from "@/components/ui";
+import { AppLayout } from "@ds";
 import Header from "./Header";
 import React from "react";
 

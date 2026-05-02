@@ -19,16 +19,9 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
+      <div className="flex h-screen items-center justify-center gap-3">
         <LoadingSpinner color="text-sky-500" />
-        <span style={{ marginLeft: "10px" }}>Cargando página...</span>
+        <span>Cargando pagina...</span>
       </div>
     ); // Muestra algo mientras se verifica la sesión
   }

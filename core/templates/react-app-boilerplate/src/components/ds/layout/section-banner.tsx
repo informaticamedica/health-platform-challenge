@@ -32,12 +32,7 @@ export function SectionBanner({
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
           {description ? (
-            <p
-              className={cn(
-                "mt-1 text-sm",
-                variant === "primary" ? "text-cyan-100" : "text-slate-500"
-              )}
-            >
+            <p className={cn("mt-1 text-sm", variant === "primary" ? "text-cyan-100" : "text-slate-500")}>
               {description}
             </p>
           ) : null}

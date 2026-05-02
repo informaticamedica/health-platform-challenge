@@ -1,7 +1,7 @@
 // frontend/src/components/LoginCard.tsx
 
 import { LoadingSpinner } from "../common/LoadingSpinner";
-import { Button, Input } from "../ui";
+import { Button, FormField, Input } from "@ds";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -78,13 +78,7 @@ export const LoginCard = () => {
         </h2>
         {/* {error && <div className="mb-4 text-sm text-red-600">{error}</div>} */}
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
+          <FormField label="Email" htmlFor="email" labelClassName="block text-sm font-medium text-gray-700">
             <Input
               id="email"
               type="email"
@@ -92,14 +86,12 @@ export const LoginCard = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
+          </FormField>
+          <FormField
+            label="Password"
+            htmlFor="password"
+            labelClassName="block text-sm font-medium text-gray-700"
+          >
             <Input
               id="password"
               type="password"
@@ -107,7 +99,7 @@ export const LoginCard = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </div>
+          </FormField>
           <Button
             type="submit"
             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 mt-4 flex items-center justify-center"

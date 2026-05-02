@@ -1,14 +1,5 @@
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Button } from "@/components/ui";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@ds";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";

@@ -1,6 +1,6 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import Layout from "@/components/layouts/Layout";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@ds";
 import { AuthProvider } from "@/context/auth";
 import HomePage from "@/pages/index";
 import ObservationsPage from "@/pages/patients/[id]/index";

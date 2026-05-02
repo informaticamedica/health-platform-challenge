@@ -1,5 +1,4 @@
-import { Card } from "@/components/ui";
-import { ScrollArea } from "../ui/scroll-area";
+import { Card, ScrollArea } from "@ds";
 import { DeleteObservationModal } from "./DeleteObservationModal";
 import { EditObservationModal } from "./EditObservationModal";
 import { ObservationType } from "@/types/dto.type";

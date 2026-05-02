@@ -1,9 +1,8 @@
 import { CardObservation } from "@/components/observations/CardObservation";
 import { NewObservationModal } from "@/components/observations/NewObservationModal";
-import { Button, SectionBanner } from "@/components/ui";
+import { Button, ScrollArea, SectionBanner } from "@ds";
 import { useAuth } from "@/context/auth";
 // import { PatientCard } from "@/components/patients/Patient";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import usePatientStore from "@/hooks/useStore";
 import { getObservationCategories, getObservations } from "@/services/backend";
 import { ObservationCategoryType } from "@/types/fhir.type";

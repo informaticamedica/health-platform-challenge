@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/auth";
-import { AppHeader, Button } from "@/components/ui";
+import { AppHeader, Button } from "@ds";
 import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {

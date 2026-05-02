@@ -13,7 +13,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@ds": ["./src/components/ds/index.ts"],
+      "@ds/*": ["./src/components/ds/*"]
     }
   },
   "include": ["src", "vite.config.ts"],

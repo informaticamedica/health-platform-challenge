@@ -1,5 +1,5 @@
 import { PatientTypeDto } from "@/types/dto.type";
-import { Card } from "@/components/ui";
+import { Card } from "@ds";
 import { CalendarDaysIcon, MapPinIcon, PencilIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { DeletePatientModal } from "./DeletePatientModal";
@@ -10,7 +10,11 @@ export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
 
   const isInteractiveTarget = (target: EventTarget | null) => {
     if (!(target instanceof HTMLElement)) return false;
-    return Boolean(target.closest("button, a, [data-no-card-nav='true']"));
+    return Boolean(
+      target.closest(
+        "button, a, input, textarea, select, [contenteditable='true'], [data-no-card-nav='true']"
+      )
+    );
   };
 
   return (
@@ -23,6 +27,7 @@ export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
         navigate(`/patients/${patient.id}`);
       }}
       onKeyDown={(event) => {
+        if (event.currentTarget !== event.target) return;
         if (isInteractiveTarget(event.target)) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();

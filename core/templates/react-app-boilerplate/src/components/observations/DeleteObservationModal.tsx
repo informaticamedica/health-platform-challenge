@@ -1,6 +1,6 @@
 import { LoadingSpinner } from "../common/LoadingSpinner";
-import { Button } from "../ui";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "@ds";
 import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";

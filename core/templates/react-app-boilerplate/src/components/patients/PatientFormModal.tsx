@@ -4,6 +4,7 @@ import usePatientStore from "@/hooks/useStore";
 import { createPatient, updatePatient } from "@/services/backend";
 import { PatientPayloadType, PatientTypeDto } from "@/types/dto.type";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -11,15 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import {
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button, Input } from "@/components/ui";
+} from "@ds";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { PlusIcon } from "lucide-react";
 import { ChangeEvent, ReactNode, useState } from "react";
@@ -115,7 +114,7 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-[#0f766e] hover:bg-[#0d625b]">
+          <Button className="bg-teal-700 hover:bg-teal-600">
             <PlusIcon /> Nuevo paciente
           </Button>
         )}

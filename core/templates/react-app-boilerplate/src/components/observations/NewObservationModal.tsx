@@ -1,22 +1,21 @@
 import { addObservation, getLoincSuggestions, LoincSuggestion } from "@/services/api";
 import { LoadingSpinner } from "../common/LoadingSpinner";
-import { Button, Input } from "../ui";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { ScrollArea } from "../ui/scroll-area";
-import {
+  Input,
+  ScrollArea,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "@ds";
 import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";

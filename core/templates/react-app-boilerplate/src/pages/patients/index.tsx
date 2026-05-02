@@ -1,7 +1,7 @@
 // import { Background } from "@/components/layouts/Background";
 import { PatientCard } from "@/components/patients/Patient";
 import { PatientFormModal } from "@/components/patients/PatientFormModal";
-import { SectionBanner } from "@/components/ui";
+import { SectionBanner } from "@ds";
 import { useAuth } from "@/context/auth";
 import usePatientStore from "@/hooks/useStore";
 import { getPatients } from "@/services/backend";
