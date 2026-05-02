@@ -203,7 +203,7 @@ export const EditObservationModal = ({
             <ScrollArea className="mt-4 h-52" type="always">
               {newObservation.components?.map((c, i) => (
                 <div
-                  key={c.id}
+                  key={c.id ?? `${observation.id}-${c.code}-${c.unit}-${i}`}
                   className="mb-3 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
                 >
                   <Input

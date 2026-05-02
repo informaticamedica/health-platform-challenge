@@ -13,6 +13,8 @@ type CardProps = {
   className?: string;
   bodyClassName?: string;
   clickable?: boolean;
+  clickableLabel?: string;
+  onClickablePress?: () => void;
 };
 
 const CardHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -70,7 +72,10 @@ export const Card = (({
   className,
   bodyClassName,
   clickable = false,
+  clickableLabel,
+  onClickablePress,
 }: CardProps) => {
+  const isClickable = clickable && Boolean(onClickablePress);
   const renderTitle = () => {
     if (title === null || title === undefined) return null;
     return isValidElement(title) ? title : <CardTitle>{title}</CardTitle>;
@@ -84,14 +89,23 @@ export const Card = (({
   return (
     <article
       className={cn(
-        "rounded-2xl border p-5 shadow-sm transition",
+        "relative rounded-2xl border p-5 shadow-sm transition",
         variant === "primary"
           ? "border-slate-200 bg-white/80 shadow-slate-200/60 backdrop-blur hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-300/40"
           : "border-slate-200 bg-white hover:shadow-md",
-        clickable && "cursor-pointer",
+        isClickable && "cursor-pointer",
         className
       )}
     >
+      {isClickable ? (
+        <button
+          type="button"
+          aria-label={clickableLabel ?? "Abrir detalle"}
+          className="absolute inset-0 z-10 rounded-2xl"
+          onClick={onClickablePress}
+        />
+      ) : null}
+
       {title || subtitle || meta ? (
         <CardHeader>
           <div>

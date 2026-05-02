@@ -11,11 +11,13 @@ export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
   let observationsLabel = `${patient.observations} observaciones`;
   if (patient.observations === "0") observationsLabel = "Sin observaciones";
   else if (patient.observations === "1") observationsLabel = "1 observacion";
-  console.log({ patient });
+
   return (
     <Card
       variant="primary"
       clickable
+      clickableLabel={`Ver detalle de ${patient.name}`}
+      onClickablePress={() => navigate(`/patients/${patient.id}`)}
       className="group relative"
       title={
         <Link
@@ -56,13 +58,7 @@ export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
         </div>
       }
     >
-      <button
-        type="button"
-        aria-label={`Ver detalle de ${patient.name}`}
-        className="absolute inset-0 z-0 rounded-2xl"
-        onClick={() => navigate(`/patients/${patient.id}`)}
-      />
-      <div className="relative z-10 space-y-2 text-sm text-slate-600">
+      <div className="space-y-2 text-sm text-slate-600">
         <p className="flex items-center gap-2">
           <CalendarDaysIcon className="size-4 text-slate-400" />
           {new Date(patient.birth_date).toLocaleDateString()}
