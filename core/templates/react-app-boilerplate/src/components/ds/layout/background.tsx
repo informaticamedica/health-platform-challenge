@@ -10,9 +10,27 @@ type BackgroundProps = Readonly<{
 
 export function Background({ children, imageUrl = "/zentricx-background.jpg", className, overlayClassName }: BackgroundProps) {
   return (
-    <div className={cn("relative h-screen bg-cover bg-center", className)} style={{ backgroundImage: `url(${imageUrl})` }}>
-      <div className={cn("absolute inset-0 bg-black/50 blur-md", overlayClassName)} />
-      <div className="absolute inset-0 flex items-center justify-center">{children}</div>
+    <div className={cn("relative min-h-dvh overflow-hidden", className)}>
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-10"
+        style={{ backgroundImage: `url(${imageUrl})` }}
+      />
+      <div
+        className={cn(
+          "absolute inset-0 bg-gradient-to-br from-[#0059A8] via-[#0667BA] to-[#0A74CD]",
+          overlayClassName,
+        )}
+      />
+
+      <div className="pointer-events-none absolute -left-20 top-12 h-56 w-56 rounded-full border-[28px] border-[#0E7BD2]/60" />
+      <div className="pointer-events-none absolute -right-14 -top-14 h-72 w-72 rounded-full border-[32px] border-[#157FCF]/45" />
+      <div className="pointer-events-none absolute right-20 top-32 text-5xl font-black text-[#FF8A1C]">+</div>
+      <div className="pointer-events-none absolute left-16 bottom-24 text-6xl font-black text-white/90">+</div>
+      <div className="pointer-events-none absolute left-48 bottom-16 text-5xl font-black text-[#1FA2FF]/70">+</div>
+
+      <div className="relative z-10 flex min-h-dvh items-center justify-center px-4 py-10 sm:px-6">
+        {children}
+      </div>
     </div>
   );
 }

@@ -26,7 +26,7 @@ type CardTitleProps = Omit<React.HTMLAttributes<HTMLHeadingElement>, "children">
 }>;
 
 const CardTitle = ({ className, children, ...props }: CardTitleProps) => (
-  <h3 className={cn("text-lg font-semibold text-slate-900", className)} {...props}>
+  <h3 className={cn("text-lg font-bold text-[#0A4E94]", className)} {...props}>
     {children}
   </h3>
 );
@@ -36,7 +36,7 @@ type CardSubtitleProps = Omit<React.HTMLAttributes<HTMLParagraphElement>, "child
 }>;
 
 const CardSubtitle = ({ className, children, ...props }: CardSubtitleProps) => (
-  <p className={cn("text-sm text-slate-500", className)} {...props}>
+  <p className={cn("text-sm text-[#587191]", className)} {...props}>
     {children}
   </p>
 );
@@ -50,7 +50,7 @@ const CardBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
 );
 
 const CardFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("mt-5 border-t border-slate-100 pt-4", className)} {...props} />
+  <div className={cn("mt-5 border-t border-[#D8E7F8] pt-4", className)} {...props} />
 );
 
 type CardComponent = ((props: CardProps) => JSX.Element) & {
@@ -91,8 +91,8 @@ export const Card = (({
       className={cn(
         "relative rounded-2xl border p-5 shadow-sm transition",
         variant === "primary"
-          ? "border-slate-200 bg-white/80 shadow-slate-200/60 backdrop-blur hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-300/40"
-          : "border-slate-200 bg-white hover:shadow-md",
+          ? "border-[#D5E6F7] bg-white shadow-[0_12px_26px_rgba(7,82,159,0.12)] backdrop-blur hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(7,82,159,0.18)]"
+          : "border-[#DCE9F8] bg-[#F7FBFF] shadow-[0_8px_20px_rgba(7,82,159,0.09)] hover:shadow-[0_12px_24px_rgba(7,82,159,0.14)]",
         isClickable && "cursor-pointer",
         className
       )}

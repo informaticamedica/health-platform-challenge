@@ -9,7 +9,7 @@ const SelectContainer = ({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 
 const SelectLabel = React.forwardRef<HTMLLabelElement, React.ComponentPropsWithoutRef<"label">>(
   ({ className, htmlFor, ...props }, ref) => {
-    return <label ref={ref} htmlFor={htmlFor} className={cn("block text-sm font-medium", className)} {...props} />;
+    return <label ref={ref} htmlFor={htmlFor} className={cn("block text-sm font-semibold text-[#0A4E94]", className)} {...props} />;
   }
 );
 SelectLabel.displayName = "SelectLabel";
@@ -32,6 +32,7 @@ const SelectTrigger = React.forwardRef<
       id={triggerId}
       className={cn(
         "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+        "border-[#C7DBF1] bg-white text-[#1D4F82] focus:ring-[#1E78CC]/35",
         className
       )}
       {...props}
