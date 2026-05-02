@@ -89,8 +89,16 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
     const saved = response.data;
     setPatients(
       isCreate
-        ? [...patients, saved]
-        : patients.map((item) => (item.id === saved.id ? saved : item)),
+        ? [...patients, { ...saved, observations: saved.observations ?? "0" }]
+        : patients.map((item) =>
+            item.id === saved.id
+              ? {
+                  ...item,
+                  ...saved,
+                  observations: item.observations ?? saved.observations ?? "0",
+                }
+              : item,
+          ),
     );
 
     toast({
