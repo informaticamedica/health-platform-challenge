@@ -1,9 +1,9 @@
 import { cn } from "@/components/ds/utils";
 
-type LoadingSpinnerProps = {
+type LoadingSpinnerProps = Readonly<{
   className?: string;
   color?: string;
-};
+}>;
 
 export function LoadingSpinner({ className, color = "text-white" }: LoadingSpinnerProps) {
   return (

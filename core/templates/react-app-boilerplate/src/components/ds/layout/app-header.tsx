@@ -1,12 +1,12 @@
 import { cn } from "@/components/ds/utils";
 import { ReactNode } from "react";
 
-type AppHeaderProps = {
+type AppHeaderProps = Readonly<{
   brand: ReactNode;
   actions?: ReactNode;
   className?: string;
   contentClassName?: string;
-};
+}>;
 
 export function AppHeader({ brand, actions, className, contentClassName }: AppHeaderProps) {
   return (

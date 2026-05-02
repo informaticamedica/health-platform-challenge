@@ -7,10 +7,10 @@ import { ObservationCategoryType } from "@/types/fhir.type";
 export const CardObservation = ({
   observation,
   categories,
-}: {
+}: Readonly<{
   observation: ObservationType;
   categories: ObservationCategoryType[];
-}) => {
+}>) => {
   const categoryDisplay = observation.category
     ? categories?.find((c) => c.code === observation.category)?.display ??
       observation.category

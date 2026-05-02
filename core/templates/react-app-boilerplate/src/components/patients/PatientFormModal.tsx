@@ -20,11 +20,11 @@ const EMPTY_PATIENT: PatientPayloadType = {
   address: "",
 };
 
-type Props = {
+type Props = Readonly<{
   mode: "create" | "edit";
   patient?: PatientTypeDto;
   trigger?: ReactNode;
-};
+}>;
 
 export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
   const { patients, setPatients } = usePatientStore();

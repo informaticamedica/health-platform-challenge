@@ -8,8 +8,8 @@ const SelectContainer = ({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 };
 
 const SelectLabel = React.forwardRef<HTMLLabelElement, React.ComponentPropsWithoutRef<"label">>(
-  ({ className, ...props }, ref) => {
-    return <label ref={ref} className={cn("block text-sm font-medium", className)} {...props} />;
+  ({ className, htmlFor, ...props }, ref) => {
+    return <label ref={ref} htmlFor={htmlFor} className={cn("block text-sm font-medium", className)} {...props} />;
   }
 );
 SelectLabel.displayName = "SelectLabel";
@@ -130,9 +130,9 @@ const SelectSeparator = React.forwardRef<
 ));
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
-type SelectProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root> & {
+type SelectProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root> & Readonly<{
   label?: React.ReactNode;
-};
+}>;
 
 type SelectComponent = React.FC<SelectProps> & {
   Container: typeof SelectContainer;

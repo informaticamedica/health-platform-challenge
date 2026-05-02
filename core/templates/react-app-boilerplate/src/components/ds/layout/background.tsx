@@ -1,12 +1,12 @@
 import { ReactNode } from "react";
 import { cn } from "@/components/ds/utils";
 
-type BackgroundProps = {
+type BackgroundProps = Readonly<{
   children?: ReactNode;
   imageUrl?: string;
   className?: string;
   overlayClassName?: string;
-};
+}>;
 
 export function Background({ children, imageUrl = "/zentricx-background.jpg", className, overlayClassName }: BackgroundProps) {
   return (

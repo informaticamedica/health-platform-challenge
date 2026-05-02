@@ -10,7 +10,7 @@ import { removeObservation } from "@/services/api";
 import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
-export const DeleteObservationModal = ({ id }: { id: string }) => {
+export const DeleteObservationModal = ({ id }: Readonly<{ id: string }>) => {
   const { patientObservations, setPatientObservations } = usePatientStore();
   const { toast } = useToast();
   const { getSession } = useAuth();

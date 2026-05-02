@@ -69,9 +69,7 @@ export const LoginCard = () => {
   return (
     <div className="w-screen h-screen flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-4">
-          Login to Zentricx
-        </h2>
+        <h2 className="text-2xl font-semibold text-center mb-4">Ingresar</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Input
             label="Email"
@@ -82,7 +80,7 @@ export const LoginCard = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
           <Input
-            label="Password"
+            label="Contraseña"
             id="password"
             type="password"
             className="mt-1 w-full"

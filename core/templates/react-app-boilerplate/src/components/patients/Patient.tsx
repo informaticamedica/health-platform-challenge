@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { DeletePatientModal } from "./DeletePatientModal";
 import { PatientFormModal } from "./PatientFormModal";
 
-export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
+export const PatientCard = ({ patient }: Readonly<{ patient: PatientTypeDto }>) => {
   const navigate = useNavigate();
 
   let observationsLabel = `${patient.observations} observaciones`;

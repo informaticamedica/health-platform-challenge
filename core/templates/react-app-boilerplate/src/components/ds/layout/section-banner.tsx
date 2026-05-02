@@ -3,13 +3,13 @@ import { ReactNode } from "react";
 
 type SectionBannerVariant = "primary" | "secondary";
 
-type SectionBannerProps = {
+type SectionBannerProps = Readonly<{
   variant?: SectionBannerVariant;
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
   className?: string;
-};
+}>;
 
 export function SectionBanner({
   variant = "primary",

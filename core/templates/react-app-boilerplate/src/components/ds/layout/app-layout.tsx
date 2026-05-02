@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
 
-type AppLayoutProps = {
+type AppLayoutProps = Readonly<{
   header?: ReactNode;
   children: ReactNode;
-};
+}>;
 
 export function AppLayout({ header, children }: AppLayoutProps) {
   return (

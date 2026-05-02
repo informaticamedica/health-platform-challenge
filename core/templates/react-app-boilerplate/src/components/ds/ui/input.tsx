@@ -6,15 +6,15 @@ const InputContainer = ({ className, ...props }: React.HTMLAttributes<HTMLDivEle
 };
 
 const InputLabel = React.forwardRef<HTMLLabelElement, React.ComponentPropsWithoutRef<"label">>(
-  ({ className, ...props }, ref) => {
-    return <label ref={ref} className={cn("block text-sm font-medium", className)} {...props} />;
+  ({ className, htmlFor, ...props }, ref) => {
+    return <label ref={ref} htmlFor={htmlFor} className={cn("block text-sm font-medium", className)} {...props} />;
   }
 );
 InputLabel.displayName = "InputLabel";
 
-type InputProps = React.ComponentProps<"input"> & {
+type InputProps = React.ComponentProps<"input"> & Readonly<{
   label?: React.ReactNode;
-};
+}>;
 
 const InputBase = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {

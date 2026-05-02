@@ -3,7 +3,7 @@ import { ReactNode, isValidElement } from "react";
 
 type CardVariant = "primary" | "secondary";
 
-type CardProps = {
+type CardProps = Readonly<{
   variant?: CardVariant;
   title?: ReactNode;
   subtitle?: ReactNode;
@@ -15,15 +15,15 @@ type CardProps = {
   clickable?: boolean;
   clickableLabel?: string;
   onClickablePress?: () => void;
-};
+}>;
 
 const CardHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("mb-4 flex items-start justify-between gap-4", className)} {...props} />
 );
 
-type CardTitleProps = Omit<React.HTMLAttributes<HTMLHeadingElement>, "children"> & {
+type CardTitleProps = Omit<React.HTMLAttributes<HTMLHeadingElement>, "children"> & Readonly<{
   children: ReactNode;
-};
+}>;
 
 const CardTitle = ({ className, children, ...props }: CardTitleProps) => (
   <h3 className={cn("text-lg font-semibold text-slate-900", className)} {...props}>
@@ -31,9 +31,9 @@ const CardTitle = ({ className, children, ...props }: CardTitleProps) => (
   </h3>
 );
 
-type CardSubtitleProps = Omit<React.HTMLAttributes<HTMLParagraphElement>, "children"> & {
+type CardSubtitleProps = Omit<React.HTMLAttributes<HTMLParagraphElement>, "children"> & Readonly<{
   children: ReactNode;
-};
+}>;
 
 const CardSubtitle = ({ className, children, ...props }: CardSubtitleProps) => (
   <p className={cn("text-sm text-slate-500", className)} {...props}>

@@ -76,6 +76,24 @@ export const NewObservationModal = () => {
     });
   };
 
+  const handleCategoryChange = (category: string) => {
+    setNewObservation((prev) => ({ ...prev, category }));
+  };
+
+  const handleAddComponent = () => {
+    setNewObservation((prev) => ({
+      ...prev,
+      components: [...prev.components, { code: "", value: 0, unit: "", id: v4() }],
+    }));
+  };
+
+  const handleRemoveComponent = (index: number) => {
+    setNewObservation((prev) => ({
+      ...prev,
+      components: prev.components.filter((_, ii) => ii !== index),
+    }));
+  };
+
   const handleSubmit = async () => {
     const session = await getSession();
     if (!session?.accessToken) return;
@@ -152,9 +170,7 @@ export const NewObservationModal = () => {
           <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
             <Select
               label="Categoria"
-              onValueChange={(category) =>
-                setNewObservation((prev) => ({ ...prev, category }))
-              }
+              onValueChange={handleCategoryChange}
             >
               <Select.Trigger id="category">
                 <Select.Value placeholder="Selecciona una categoria" />
@@ -212,15 +228,7 @@ export const NewObservationModal = () => {
             <div className="flex justify-end">
               <Button
                 variant="outline"
-                onClick={() =>
-                  setNewObservation((prev) => ({
-                    ...prev,
-                    components: [
-                      ...prev.components,
-                      { code: "", value: 0, unit: "", id: v4() },
-                    ],
-                  }))
-                }
+                onClick={handleAddComponent}
               >
                 <PlusIcon className="mr-2" />
                 Agregar componente
@@ -262,12 +270,7 @@ export const NewObservationModal = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
-                      setNewObservation((prev) => ({
-                        ...prev,
-                        components: prev.components.filter((_, ii) => ii !== i),
-                      }))
-                    }
+                    onClick={() => handleRemoveComponent(i)}
                   >
                     Quitar
                   </Button>

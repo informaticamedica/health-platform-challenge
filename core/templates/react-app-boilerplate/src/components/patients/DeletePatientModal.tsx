@@ -13,10 +13,10 @@ import { useState } from "react";
 export const DeletePatientModal = ({
   patientId,
   patientName,
-}: {
+}: Readonly<{
   patientId: string;
   patientName: string;
-}) => {
+}>) => {
   const { getSession } = useAuth();
   const { patients, setPatients } = usePatientStore();
   const { toast } = useToast();

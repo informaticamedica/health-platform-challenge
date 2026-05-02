@@ -21,9 +21,9 @@ import { v4 } from "uuid";
 
 export const EditObservationModal = ({
   observation,
-}: {
+}: Readonly<{
   observation: ObservationType;
-}) => {
+}>) => {
   const {
     patientObservations,
     setPatientObservations,
@@ -59,6 +59,27 @@ export const EditObservationModal = ({
       newComponents[index] = { ...newComponents[index], [field]: value };
       return { ...prev, components: newComponents };
     });
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setNewObservation((prev) => ({ ...prev, category }));
+  };
+
+  const handleAddComponent = () => {
+    setNewObservation((prev) => ({
+      ...prev,
+      components: [
+        ...(prev?.components ?? []),
+        { code: "", value: 0, unit: "", id: v4() },
+      ],
+    }));
+  };
+
+  const handleRemoveComponent = (index: number) => {
+    setNewObservation((prev) => ({
+      ...prev,
+      components: prev?.components?.filter((_, ii) => ii !== index),
+    }));
   };
 
   const handleSubmit = async () => {
@@ -134,9 +155,7 @@ export const EditObservationModal = ({
           <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
             <Select
               label="Categoria"
-              onValueChange={(category) =>
-                setNewObservation((prev) => ({ ...prev, category }))
-              }
+              onValueChange={handleCategoryChange}
               value={newObservation.category}
             >
               <Select.Trigger>
@@ -185,15 +204,7 @@ export const EditObservationModal = ({
             <div className="flex justify-end">
               <Button
                 variant="outline"
-                onClick={() =>
-                  setNewObservation((prev) => ({
-                    ...prev,
-                    components: [
-                      ...(prev?.components ?? []),
-                      { code: "", value: 0, unit: "", id: v4() },
-                    ],
-                  }))
-                }
+                onClick={handleAddComponent}
               >
                 <PlusIcon className="mr-2" />
                 Agregar componente
@@ -235,14 +246,7 @@ export const EditObservationModal = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
-                      setNewObservation((prev) => ({
-                        ...prev,
-                        components: prev?.components?.filter(
-                          (_, ii) => i !== ii,
-                        ),
-                      }))
-                    }
+                    onClick={() => handleRemoveComponent(i)}
                   >
                     Quitar
                   </Button>
