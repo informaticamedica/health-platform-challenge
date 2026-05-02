@@ -20,19 +20,10 @@ import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";
 import { updateObservation } from "@/services/api";
-import { ComponentObservationTypeDto, ObservationType } from "@/types/dto.type";
+import { ObservationType } from "@/types/dto.type";
 import { PencilIcon, PlusIcon } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { v4 } from "uuid";
-
-export interface EditObservationType {
-  id: string;
-  category: string;
-  code: string;
-  value: string;
-  date: string;
-  components: ComponentObservationTypeDto[];
-}
 
 export const EditObservationModal = ({ observation }: { observation: ObservationType }) => {
   const { patientObservations, setPatientObservations, observationsCategories } =
@@ -41,9 +32,6 @@ export const EditObservationModal = ({ observation }: { observation: Observation
   const { getSession } = useAuth();
 
   const { patient_id, user_id, ...initialObservation } = observation;
-  void patient_id;
-  void user_id;
-
   const [newObservation, setNewObservation] = useState(initialObservation);
   const [cargando, setCargando] = useState(false);
   const [isOpen, setIsOpen] = useState(false);

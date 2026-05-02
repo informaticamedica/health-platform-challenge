@@ -20,18 +20,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";
-import { ComponentObservationTypeDto } from "@/types/dto.type";
+import { NewObservationType } from "@/types/observation-form.type";
 import { FilePlusIcon, PlusIcon } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { v4 } from "uuid";
-
-export interface NewObservationType {
-  category: string;
-  code: string;
-  value: string;
-  date: string;
-  components: ComponentObservationTypeDto[];
-}
 
 export const NewObservationModal = () => {
   const { patientObservations, setPatientObservations, observationsCategories } =

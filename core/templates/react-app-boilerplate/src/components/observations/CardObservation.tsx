@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui";
 import { ScrollArea } from "../ui/scroll-area";
 import { DeleteObservationModal } from "./DeleteObservationModal";
 import { EditObservationModal } from "./EditObservationModal";
@@ -11,7 +12,7 @@ export const CardObservation = ({
   observation: ObservationType;
   categories: ObservationCategoryType[];
 }) => (
-  <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+  <Card variant="secondary">
     <div className="flex justify-between gap-4">
       <div className="flex w-full flex-col gap-4 md:flex-row">
         <div className="md:w-1/2">
@@ -66,5 +67,5 @@ export const CardObservation = ({
         <DeleteObservationModal id={observation.id} />
       </div>
     </div>
-  </article>
+  </Card>
 );

@@ -1,5 +1,4 @@
-import { EditObservationType } from "@/components/observations/EditObservationModal";
-import { NewObservationType } from "@/components/observations/NewObservationModal";
+import { EditObservationType, NewObservationType } from "@/types/observation-form.type";
 import { ObservationType } from "@/types/dto.type";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 

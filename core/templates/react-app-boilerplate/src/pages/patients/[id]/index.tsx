@@ -1,6 +1,6 @@
 import { CardObservation } from "@/components/observations/CardObservation";
 import { NewObservationModal } from "@/components/observations/NewObservationModal";
-import { Button } from "@/components/ui";
+import { Button, SectionBanner } from "@/components/ui";
 import { useAuth } from "@/context/auth";
 // import { PatientCard } from "@/components/patients/Patient";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -79,19 +79,13 @@ export default function ObservationsPage() {
         Volver al listado
       </Button>
 
-      <div className="mb-6 rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-sm backdrop-blur">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-              Observaciones de {patientObservations?.name}
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Total: {patientObservations?.observations?.length ?? 0} registros clinicos
-            </p>
-          </div>
-          <NewObservationModal />
-        </div>
-      </div>
+      <SectionBanner
+        variant="secondary"
+        title={`Observaciones de ${patientObservations?.name ?? ""}`}
+        description={`Total: ${patientObservations?.observations?.length ?? 0} registros clinicos`}
+        action={<NewObservationModal />}
+        className="mb-6"
+      />
 
       <ScrollArea>
         <div className="grid grid-cols-1 gap-5 pb-2 lg:grid-cols-2">
