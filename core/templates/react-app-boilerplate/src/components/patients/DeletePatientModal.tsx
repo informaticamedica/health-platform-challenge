@@ -55,7 +55,7 @@ export const DeletePatientModal = ({
         <button
           type="button"
           onClick={(event) => event.stopPropagation()}
-          className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 p-2 text-red-600 transition hover:bg-red-100"
+          className="inline-flex items-center justify-center rounded-lg border border-error bg-error/10 p-2 text-error transition hover:bg-error/20"
         >
           <Trash2Icon className="size-4" />
         </button>

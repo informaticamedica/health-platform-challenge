@@ -22,14 +22,14 @@ export const PatientCard = ({ patient }: Readonly<{ patient: PatientTypeDto }>) 
       title={
         <Link
           to={`/patients/${patient.id}`}
-          className="relative z-20 text-lg font-semibold text-slate-900"
+          className="relative z-20 text-lg font-bold text-primary"
         >
           {patient.name}
         </Link>
       }
       subtitle={`Genero: ${patient.gender}`}
       meta={
-        <div className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+        <div className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
           {observationsLabel}
         </div>
       }
@@ -42,13 +42,13 @@ export const PatientCard = ({ patient }: Readonly<{ patient: PatientTypeDto }>) 
             mode="edit"
             patient={patient}
             trigger={
-              <button
-                type="button"
-                onClick={(event) => event.stopPropagation()}
-                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-2 text-slate-700 transition hover:bg-slate-100"
-              >
-                <PencilIcon className="size-4" />
-              </button>
+                <button
+                  type="button"
+                  onClick={(event) => event.stopPropagation()}
+                  className="inline-flex items-center justify-center rounded-lg border border-border bg-card p-2 text-primary transition hover:bg-tertiary"
+                >
+                  <PencilIcon className="size-4" />
+                </button>
             }
           />
           <DeletePatientModal
@@ -58,13 +58,13 @@ export const PatientCard = ({ patient }: Readonly<{ patient: PatientTypeDto }>) 
         </div>
       }
     >
-      <div className="space-y-2 text-sm text-slate-600">
+      <div className="space-y-2 text-sm text-muted-foreground">
         <p className="flex items-center gap-2">
-          <CalendarDaysIcon className="size-4 text-slate-400" />
+          <CalendarDaysIcon className="size-4 text-info" />
           {new Date(patient.birth_date).toLocaleDateString()}
         </p>
         <p className="flex items-center gap-2">
-          <MapPinIcon className="size-4 text-slate-400" />
+          <MapPinIcon className="size-4 text-info" />
           {patient.address}
         </p>
       </div>

@@ -41,14 +41,14 @@ const PatientsPage = () => {
         action={<PatientFormModal mode="create" />}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {patients.map((patient) => (
           <PatientCard key={patient.id} patient={patient} />
         ))}
       </div>
 
       {patients.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white/70 p-8 text-center text-slate-500">
+        <div className="mt-8 rounded-2xl border border-dashed border-border bg-card p-8 text-center text-muted-foreground shadow-sm">
           Aun no hay pacientes cargados.
         </div>
       ) : null}

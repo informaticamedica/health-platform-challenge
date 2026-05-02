@@ -115,7 +115,7 @@ export const PatientFormModal = ({ mode, patient, trigger }: Props) => {
     <Modal open={isOpen} onOpenChange={setIsOpen}>
       <Modal.Trigger asChild>
         {trigger ?? (
-          <Button className="bg-teal-700 hover:bg-teal-600">
+          <Button variant="secondary" className="font-bold">
             <PlusIcon /> Nuevo paciente
           </Button>
         )}

@@ -12,7 +12,7 @@ export function AppHeader({ brand, actions, className, contentClassName }: AppHe
   return (
     <header
       className={cn(
-        "fixed left-0 right-0 top-0 z-20 border-b border-[#CCE2F8] bg-white/92 px-4 py-3 text-[#0A4C91] shadow-[0_8px_20px_rgba(7,78,150,0.12)] backdrop-blur-md",
+        "fixed left-0 right-0 top-0 z-20 border-b border-border bg-card/95 px-4 py-3 text-primary shadow-lg shadow-primary/10 backdrop-blur-md",
         className
       )}
     >

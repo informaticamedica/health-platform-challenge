@@ -69,35 +69,35 @@ export const LoginCard = () => {
 
   return (
     <div className="w-full max-w-5xl">
-      <div className="grid overflow-hidden rounded-[2rem] border border-white/30 bg-white shadow-[0_25px_80px_rgba(0,43,95,0.35)] lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="relative hidden bg-gradient-to-b from-[#045AA9] via-[#0465BA] to-[#0B74CD] p-10 text-white lg:flex lg:flex-col lg:justify-between">
+      <div className="grid overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-2xl lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="relative hidden bg-gradient-to-b from-primary via-info to-primary p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-semibold tracking-[0.12em]">
-              <HeartPulseIcon className="size-4 text-[#FF8A1C]" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-4 py-1 text-xs font-semibold tracking-[0.12em]">
+              <HeartPulseIcon className="size-4 text-warning" />
               EMERGENCIAS SALUD
             </div>
             <h1 className="mt-6 text-4xl font-black leading-tight">
-              Tu salud, protegida
-              <span className="mt-3 inline-block rounded-full bg-[#FF7D14] px-5 py-2 text-white">
+              Tu salud, protegida{" "}
+              <span className="mt-3 inline-block rounded-full bg-warning px-5 py-2 text-warning-foreground">
                 en todo momento
               </span>
             </h1>
-            <p className="mt-5 max-w-md text-base text-white/90">
+            <p className="mt-5 max-w-md text-base text-primary-foreground/90">
               Accede a pacientes, observaciones y herramientas clinicas con una experiencia simple y segura.
             </p>
           </div>
-          <div className="flex items-center gap-3 text-sm text-white/90">
-            <ShieldCheckIcon className="size-5 text-[#FFB26B]" />
+          <div className="flex items-center gap-3 text-sm text-primary-foreground/90">
+            <ShieldCheckIcon className="size-5 text-warning" />
             Plataforma con acceso autenticado y trazabilidad clinica.
           </div>
-          <div className="pointer-events-none absolute right-6 top-8 text-5xl font-black text-[#FF8A1C]">+</div>
-          <div className="pointer-events-none absolute bottom-8 left-8 text-6xl font-black text-white/80">+</div>
+          <div className="pointer-events-none absolute right-6 top-8 text-5xl font-black text-warning">+</div>
+          <div className="pointer-events-none absolute bottom-8 left-8 text-6xl font-black text-primary-foreground/80">+</div>
         </section>
 
-        <section className="bg-[#F3F8FE] p-6 sm:p-8 lg:p-10">
+        <section className="bg-tertiary p-6 sm:p-8 lg:p-10">
           <div className="mx-auto w-full max-w-sm">
-            <h2 className="text-3xl font-extrabold text-[#054F97]">Ingresar</h2>
-            <p className="mt-2 text-sm text-[#4D6D8E]">Usa tus credenciales para acceder al panel de emergencias.</p>
+            <h2 className="text-3xl font-extrabold text-primary">Ingresar</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Usa tus credenciales para acceder al panel de emergencias.</p>
             <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
               <Input
                 label="Email"

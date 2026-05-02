@@ -16,14 +16,14 @@ const Header = () => {
       brand={
         <div className="text-xl font-semibold tracking-tight">
           <Link to="/">
-            <span className="bg-gradient-to-r from-teal-700 via-cyan-700 to-sky-700 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary via-info to-secondary bg-clip-text text-transparent">
               Sistema de Gestion de Pacientes
             </span>
           </Link>
         </div>
       }
       actions={
-        <Button onClick={handleLogout} className="bg-slate-900 hover:bg-slate-800">
+        <Button onClick={handleLogout} variant="secondary" className="text-sm font-bold">
           Salir
         </Button>
       }

@@ -23,8 +23,8 @@ export function SectionBanner({
       className={cn(
         "mb-8 rounded-3xl border p-6 shadow-xl",
         variant === "primary"
-          ? "border-[#1F7ACC] bg-gradient-to-r from-[#055CAA] via-[#086BBC] to-[#0E7BD2] text-white shadow-[#003C79]/30"
-          : "border-[#D5E6F7] bg-white text-[#0B4C90] shadow-[#2A73B4]/10 backdrop-blur",
+          ? "border-primary/70 bg-gradient-to-r from-primary via-info to-primary text-primary-foreground shadow-primary/30"
+          : "border-border bg-card text-primary shadow-primary/10 backdrop-blur",
         className
       )}
     >
@@ -32,7 +32,7 @@ export function SectionBanner({
         <div>
           <h1 className="text-3xl font-black tracking-tight">{title}</h1>
           {description ? (
-            <p className={cn("mt-1 text-sm", variant === "primary" ? "text-[#DDEEFF]" : "text-[#5F7E9D]")}>
+            <p className={cn("mt-1 text-sm", variant === "primary" ? "text-primary-foreground/90" : "text-muted-foreground")}>
               {description}
             </p>
           ) : null}
