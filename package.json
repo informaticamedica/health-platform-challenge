@@ -6,12 +6,14 @@
     "core/packages/*",
     "core/templates/*",
     "mvp/producto1/producto1-front",
-    "mvp/producto1/producto1-back"
+    "mvp/producto1/producto1-back",
+    "infra/local/postgres/soc-db-source"
   ],
   "scripts": {
-    "bootstrap": "npm install --workspaces",
-    "lint": "npm run lint --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present"
+    "boilerplate:front": "npm run dev --workspace ./core/templates/react-app-boilerplate",
+    "boilerplate:back": "npm run dev --workspace ./core/templates/node-api-boilerplate",
+    "db:up": "npm run up --workspace ./infra/local/postgres/soc-db-source",
+    "db:down": "npm run down --workspace ./infra/local/postgres/soc-db-source",
+    "db:reset": "npm run reset --workspace ./infra/local/postgres/soc-db-source"
   }
 }
