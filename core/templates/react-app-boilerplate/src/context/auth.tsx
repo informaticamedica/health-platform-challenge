@@ -1,5 +1,5 @@
 import { backend } from "@/services/backend";
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 
 type Session = { accessToken?: string } | null;
 type Status = "loading" | "authenticated" | "unauthenticated";
@@ -19,18 +19,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const TOKEN_KEY = "auth_access_token";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session>(null);
-  const [status, setStatus] = useState<Status>("loading");
-
-  useEffect(() => {
+  const [session, setSession] = useState<Session>(() => {
     const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      setSession({ accessToken: token });
-      setStatus("authenticated");
-    } else {
-      setStatus("unauthenticated");
-    }
-  }, []);
+    return token ? { accessToken: token } : null;
+  });
+  const [status, setStatus] = useState<Status>(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    return token ? "authenticated" : "unauthenticated";
+  });
 
   const value = useMemo<AuthContextType>(
     () => ({

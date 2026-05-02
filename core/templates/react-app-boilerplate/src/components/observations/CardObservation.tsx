@@ -19,19 +19,13 @@ export const CardObservation = ({
   return (
     <Card
       variant="secondary"
-      title={
-        <Card.Title className="text-base">
-          Observacion {observation.id}
-        </Card.Title>
-      }
-      subtitle={<Card.Subtitle>Categoria: {categoryDisplay}</Card.Subtitle>}
+      title={`Observacion ${observation.id}`}
+      subtitle={`Categoria: ${categoryDisplay}`}
       meta={
-        <Card.Meta>
-          <div className="flex items-center gap-2">
-            <EditObservationModal observation={observation} />
-            <DeleteObservationModal id={observation.id} />
-          </div>
-        </Card.Meta>
+        <div className="flex items-center gap-2">
+          <EditObservationModal observation={observation} />
+          <DeleteObservationModal id={observation.id} />
+        </div>
       }
     >
       <Card.Body className="flex w-full flex-col gap-4 md:flex-row">

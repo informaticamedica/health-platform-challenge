@@ -8,38 +8,15 @@ import { PatientFormModal } from "./PatientFormModal";
 export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
   const navigate = useNavigate();
 
-  const isInteractiveTarget = (target: EventTarget | null) => {
-    if (!(target instanceof HTMLElement)) return false;
-    return Boolean(
-      target.closest(
-        "button, a, input, textarea, select, [contenteditable='true'], [data-no-card-nav='true']"
-      )
-    );
-  };
-
   return (
     <Card
       variant="primary"
-      role="button"
-      tabIndex={0}
-      onClick={(event) => {
-        if (isInteractiveTarget(event.target)) return;
-        navigate(`/patients/${patient.id}`);
-      }}
-      onKeyDown={(event) => {
-        if (event.currentTarget !== event.target) return;
-        if (isInteractiveTarget(event.target)) return;
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          navigate(`/patients/${patient.id}`);
-        }
-      }}
-      className="group cursor-pointer"
+      clickable
+      className="group relative"
       title={
         <Link
           to={`/patients/${patient.id}`}
-          onClick={(event) => event.stopPropagation()}
-          className="text-lg font-semibold text-slate-900"
+          className="relative z-20 text-lg font-semibold text-slate-900"
         >
           {patient.name}
         </Link>
@@ -53,8 +30,7 @@ export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
       footer={
         <div
           data-no-card-nav="true"
-          onClick={(event) => event.stopPropagation()}
-          className="flex items-center justify-end gap-2"
+          className="relative z-20 flex items-center justify-end gap-2"
         >
           <PatientFormModal
             mode="edit"
@@ -73,7 +49,13 @@ export const PatientCard = ({ patient }: { patient: PatientTypeDto }) => {
         </div>
       }
     >
-      <div className="space-y-2 text-sm text-slate-600">
+      <button
+        type="button"
+        aria-label={`Ver detalle de ${patient.name}`}
+        className="absolute inset-0 z-0 rounded-2xl"
+        onClick={() => navigate(`/patients/${patient.id}`)}
+      />
+      <div className="relative z-10 space-y-2 text-sm text-slate-600">
         <p className="flex items-center gap-2">
           <CalendarDaysIcon className="size-4 text-slate-400" />
           {new Date(patient.birth_date).toLocaleDateString()}

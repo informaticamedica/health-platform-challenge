@@ -1,5 +1,5 @@
 import { cn } from "@/components/ds/utils";
-import { KeyboardEvent, MouseEvent, ReactNode } from "react";
+import { ReactNode, isValidElement } from "react";
 
 type CardVariant = "primary" | "secondary";
 
@@ -12,22 +12,31 @@ type CardProps = {
   children?: ReactNode;
   className?: string;
   bodyClassName?: string;
-  onClick?: (event: MouseEvent<HTMLElement>) => void;
-  onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
-  tabIndex?: number;
-  role?: string;
+  clickable?: boolean;
 };
 
 const CardHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("mb-4 flex items-start justify-between gap-4", className)} {...props} />
 );
 
-const CardTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-  <h3 className={cn("text-lg font-semibold text-slate-900", className)} {...props} />
+type CardTitleProps = Omit<React.HTMLAttributes<HTMLHeadingElement>, "children"> & {
+  children: ReactNode;
+};
+
+const CardTitle = ({ className, children, ...props }: CardTitleProps) => (
+  <h3 className={cn("text-lg font-semibold text-slate-900", className)} {...props}>
+    {children}
+  </h3>
 );
 
-const CardSubtitle = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
-  <p className={cn("text-sm text-slate-500", className)} {...props} />
+type CardSubtitleProps = Omit<React.HTMLAttributes<HTMLParagraphElement>, "children"> & {
+  children: ReactNode;
+};
+
+const CardSubtitle = ({ className, children, ...props }: CardSubtitleProps) => (
+  <p className={cn("text-sm text-slate-500", className)} {...props}>
+    {children}
+  </p>
 );
 
 const CardMeta = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -60,30 +69,34 @@ export const Card = (({
   children,
   className,
   bodyClassName,
-  onClick,
-  onKeyDown,
-  tabIndex,
-  role,
+  clickable = false,
 }: CardProps) => {
+  const renderTitle = () => {
+    if (title === null || title === undefined) return null;
+    return isValidElement(title) ? title : <CardTitle>{title}</CardTitle>;
+  };
+
+  const renderSubtitle = () => {
+    if (subtitle === null || subtitle === undefined) return null;
+    return isValidElement(subtitle) ? subtitle : <CardSubtitle>{subtitle}</CardSubtitle>;
+  };
+
   return (
     <article
-      role={role}
-      tabIndex={tabIndex}
-      onClick={onClick}
-      onKeyDown={onKeyDown}
       className={cn(
         "rounded-2xl border p-5 shadow-sm transition",
         variant === "primary"
           ? "border-slate-200 bg-white/80 shadow-slate-200/60 backdrop-blur hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-300/40"
           : "border-slate-200 bg-white hover:shadow-md",
+        clickable && "cursor-pointer",
         className
       )}
     >
       {title || subtitle || meta ? (
         <CardHeader>
           <div>
-            {title ? <CardTitle>{title}</CardTitle> : null}
-            {subtitle ? <CardSubtitle>{subtitle}</CardSubtitle> : null}
+            {renderTitle()}
+            {renderSubtitle()}
           </div>
           {meta ? <CardMeta>{meta}</CardMeta> : null}
         </CardHeader>

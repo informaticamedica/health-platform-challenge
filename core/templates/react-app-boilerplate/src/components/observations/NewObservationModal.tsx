@@ -88,9 +88,11 @@ export const NewObservationModal = () => {
         message,
       } = await addObservation(session.accessToken, {
         ...newObservation,
-        components: newObservation.components.map(({ id: _, ...c }) => ({
-          ...c,
-        })),
+        components: newObservation.components.map((component) => {
+          const cleaned = { ...component };
+          delete cleaned.id;
+          return cleaned;
+        }),
         patient_id: patientObservations.id,
       });
 

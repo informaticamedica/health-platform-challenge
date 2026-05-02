@@ -32,7 +32,11 @@ export const EditObservationModal = ({
   const { toast } = useToast();
   const { getSession } = useAuth();
 
-  const { patient_id, user_id, ...initialObservation } = observation;
+  const {
+    patient_id: _patientId,
+    user_id: _userId,
+    ...initialObservation
+  } = observation;
   const [newObservation, setNewObservation] = useState(initialObservation);
   const [cargando, setCargando] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -70,9 +74,7 @@ export const EditObservationModal = ({
       } = await updateObservation(session.accessToken, {
         ...newObservation,
         components:
-          newObservation.components?.map(({ id, observation_id, ...c }) => ({
-            ...c,
-          })) ?? [],
+          newObservation.components?.map(({ id: _id, observation_id: _observationId, ...cleaned }) => cleaned) ?? [],
       });
 
       if (error) {
