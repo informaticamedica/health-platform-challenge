@@ -16,7 +16,7 @@ const Header = () => {
       brand={
         <div className="text-xl font-semibold tracking-tight">
           <Link to="/">
-            <span className="bg-gradient-to-r from-primary via-info to-secondary bg-clip-text text-transparent">
+            <span className="text-primary">
               Sistema de Gestion de Pacientes
             </span>
           </Link>

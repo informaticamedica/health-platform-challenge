@@ -1,5 +1,6 @@
 export { Button, buttonVariants } from "./button";
 export type { ButtonProps } from "./button";
+export { Chip } from "./chip";
 export { Input } from "./input";
 export { Modal } from "./dialog";
 export { ScrollArea, ScrollBar } from "./scroll-area";

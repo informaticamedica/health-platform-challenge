@@ -1,5 +1,5 @@
 import { PatientTypeDto } from "@/types/dto.type";
-import { Card } from "@ds";
+import { Card, Chip } from "@ds";
 import { CalendarDaysIcon, MapPinIcon, PencilIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { DeletePatientModal } from "./DeletePatientModal";
@@ -29,9 +29,9 @@ export const PatientCard = ({ patient }: Readonly<{ patient: PatientTypeDto }>) 
       }
       subtitle={`Genero: ${patient.gender}`}
       meta={
-        <div className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
+        <Chip variant="outline" showClose={false}>
           {observationsLabel}
-        </div>
+        </Chip>
       }
       footer={
         <div
