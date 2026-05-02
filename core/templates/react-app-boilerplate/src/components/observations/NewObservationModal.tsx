@@ -153,10 +153,7 @@ export const NewObservationModal = () => {
   return (
     <Modal open={isOpen} onOpenChange={setIsOpen}>
       <Modal.Trigger asChild className="cursor-pointer">
-        <Button
-          className="bg-slate-900 hover:bg-slate-800"
-          onClick={() => setIsOpen(true)}
-        >
+        <Button variant="secondary" onClick={() => setIsOpen(true)}>
           <FilePlusIcon /> Nueva observacion
         </Button>
       </Modal.Trigger>

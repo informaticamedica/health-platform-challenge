@@ -1,6 +1,6 @@
 import { CardObservation } from "@/components/observations/CardObservation";
 import { NewObservationModal } from "@/components/observations/NewObservationModal";
-import { Button, ScrollArea, SectionBanner } from "@ds";
+import { Button, Chip, ScrollArea, SectionBanner } from "@ds";
 import { useAuth } from "@/context/auth";
 import usePatientStore from "@/hooks/useStore";
 import { getObservationCategories, getObservations } from "@/services/backend";
@@ -89,9 +89,16 @@ export default function ObservationsPage() {
       <SectionBanner
         variant="secondary"
         title={`Observaciones de ${patientObservations?.name ?? ""}`}
-        description={`Total: ${patientObservations?.observations?.length ?? 0} registros clinicos`}
+        description={
+          <span className="inline-flex items-center gap-2">
+            <span>Total de registros clinicos:</span>
+            <Chip variant="outline" showClose={false} className="border-secondary text-secondary">
+              {patientObservations?.observations?.length ?? 0}
+            </Chip>
+          </span>
+        }
         action={<NewObservationModal />}
-        className="mb-6"
+        className="mb-6 border-secondary/40 bg-gradient-to-r from-card via-tertiary to-card text-primary shadow-lg shadow-secondary/20"
       />
 
       <ScrollArea>
@@ -107,7 +114,7 @@ export default function ObservationsPage() {
       </ScrollArea>
 
       {patientObservations?.observations?.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white/70 p-8 text-center text-slate-500">
+        <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-8 text-center text-muted-foreground">
           Este paciente todavia no tiene observaciones.
         </div>
       ) : null}

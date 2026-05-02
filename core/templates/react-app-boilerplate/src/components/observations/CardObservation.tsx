@@ -1,8 +1,9 @@
-import { Card, ScrollArea } from "@ds";
+import { Card, Chip, ScrollArea } from "@ds";
 import { DeleteObservationModal } from "./DeleteObservationModal";
 import { EditObservationModal } from "./EditObservationModal";
 import { ObservationType } from "@/types/dto.type";
 import { ObservationCategoryType } from "@/types/fhir.type";
+import { ActivityIcon, CalendarDaysIcon, UserIcon } from "lucide-react";
 
 export const CardObservation = ({
   observation,
@@ -20,7 +21,13 @@ export const CardObservation = ({
     <Card
       variant="secondary"
       title={`Observacion ${observation.id}`}
-      subtitle={`Categoria: ${categoryDisplay}`}
+      className="border-primary/25 bg-card shadow-md shadow-primary/10"
+      subtitle={
+        <div className="mt-1 flex items-center gap-2">
+          <Chip variant="outline" showClose={false}>{categoryDisplay}</Chip>
+          <Chip variant="muted" showClose={false}>ID #{observation.id}</Chip>
+        </div>
+      }
       meta={
         <div className="flex items-center gap-2">
           <EditObservationModal observation={observation} />
@@ -28,27 +35,41 @@ export const CardObservation = ({
         </div>
       }
     >
-      <Card.Body className="flex w-full flex-col gap-4 md:flex-row">
+      <Card.Body className="flex w-full flex-col gap-3 md:flex-row">
         <div className="md:w-1/2">
-          <p><strong>Codigo:</strong> {observation.code}</p>
-          <p><strong>Valor:</strong> {observation.value}</p>
-          <p><strong>Fecha:</strong> {new Date(observation.date).toLocaleDateString()}</p>
-          <p><strong>ID Paciente:</strong> {observation.patient_id}</p>
-          <p><strong>ID Usuario:</strong> {observation.user_id}</p>
+          <div className="mb-2 flex flex-wrap gap-2">
+            <Chip variant="default" showClose={false}>Codigo: {observation.code}</Chip>
+            <Chip variant="default" showClose={false}>Valor: {observation.value}</Chip>
+          </div>
+
+          <div className="space-y-1.5 text-sm text-foreground">
+            <p className="flex items-center gap-2">
+              <CalendarDaysIcon className="size-4 text-info" />
+              <strong className="text-primary">Fecha:</strong> {new Date(observation.date).toLocaleDateString()}
+            </p>
+            <p className="flex items-center gap-2">
+              <ActivityIcon className="size-4 text-info" />
+              <strong className="text-primary">ID Paciente:</strong> {observation.patient_id}
+            </p>
+            <p className="flex items-center gap-2">
+              <UserIcon className="size-4 text-info" />
+              <strong className="text-primary">ID Usuario:</strong> {observation.user_id}
+            </p>
+          </div>
         </div>
         <div className="md:w-1/2">
-          <strong className="text-slate-800">Componentes</strong>
-          <ScrollArea className="mt-2 h-40 rounded-lg border border-slate-100 bg-slate-50 p-2" type="always">
+          <strong className="text-primary">Componentes</strong>
+          <ScrollArea className="mt-2 h-32 rounded-lg border border-primary/25 bg-card p-2" type="always">
             {observation.components?.map((c) => (
-              <div key={`${observation.id}-${c.code}-${c.unit}`} className="mb-2">
-                <div className="flex flex-col rounded-md border border-slate-200 bg-white p-2">
+              <div key={`${observation.id}-${c.code}-${c.unit}`} className="mb-1.5">
+                <div className="flex flex-col rounded-md border border-primary/20 bg-background p-2">
                   <div className="flex pr-2">
-                    <strong>Codigo:</strong>
-                    <div className="px-2">{c.code}</div>
+                    <strong className="text-primary">Codigo:</strong>
+                    <div className="px-2 text-foreground">{c.code}</div>
                   </div>
                   <div className="flex">
-                    <strong>Valor:</strong>
-                    <div className="flex px-2">
+                    <strong className="text-primary">Valor:</strong>
+                    <div className="flex px-2 text-foreground">
                       {c.value} {c.unit}
                     </div>
                   </div>
