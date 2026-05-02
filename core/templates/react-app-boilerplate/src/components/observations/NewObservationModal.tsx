@@ -1,4 +1,4 @@
-import { addObservation } from "@/services/api";
+import { addObservation, getLoincSuggestions, LoincSuggestion } from "@/services/api";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 import { Button, Input } from "../ui";
 import {
@@ -22,7 +22,7 @@ import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";
 import { NewObservationType } from "@/types/observation-form.type";
 import { FilePlusIcon, PlusIcon } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { v4 } from "uuid";
 
 export const NewObservationModal = () => {
@@ -41,6 +41,7 @@ export const NewObservationModal = () => {
   const [newObservation, setNewObservation] = useState(initObservation);
   const [cargando, setCargando] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [loincSuggestions, setLoincSuggestions] = useState<LoincSuggestion[]>([]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -90,6 +91,26 @@ export const NewObservationModal = () => {
     }
   };
 
+  useEffect(() => {
+    const loadLoinc = async () => {
+      if (!isOpen) return;
+      const session = await getSession();
+      if (!session?.accessToken) return;
+      const response = await getLoincSuggestions(
+        session.accessToken,
+        newObservation.code,
+        25
+      );
+      if (!response.error) {
+        setLoincSuggestions(response.data);
+      }
+    };
+
+    loadLoinc().catch((error: unknown) => {
+      console.error("Error loading LOINC suggestions", error);
+    });
+  }, [getSession, isOpen, newObservation.code]);
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild className="cursor-pointer">
@@ -131,7 +152,23 @@ export const NewObservationModal = () => {
               <label htmlFor="code" className="mb-1 block text-sm font-medium">
                 Codigo
               </label>
-              <Input id="code" name="code" value={newObservation.code} onChange={handleInputChange} />
+              <Input
+                id="code"
+                name="code"
+                list="loinc-suggestions-main"
+                value={newObservation.code}
+                onChange={handleInputChange}
+              />
+              <datalist id="loinc-suggestions-main">
+                {loincSuggestions.map((item) => (
+                  <option key={`main-${item.code}`} value={item.code}>
+                    {item.display}
+                  </option>
+                ))}
+              </datalist>
+              <p className="mt-1 text-xs text-slate-500">
+                Escribe codigo o descripcion para sugerencias LOINC validas.
+              </p>
             </div>
 
             <div>
@@ -180,6 +217,7 @@ export const NewObservationModal = () => {
                   <div>
                     <label className="mb-1 block text-sm font-medium">Codigo</label>
                     <Input
+                      list="loinc-suggestions-components"
                       value={c.code}
                       onChange={(e) => handleInputComponentChange(i, "code", e.target.value)}
                       className="w-24 bg-white"
@@ -216,6 +254,13 @@ export const NewObservationModal = () => {
                   </Button>
                 </div>
               ))}
+              <datalist id="loinc-suggestions-components">
+                {loincSuggestions.map((item) => (
+                  <option key={`component-${item.code}`} value={item.code}>
+                    {item.display}
+                  </option>
+                ))}
+              </datalist>
             </ScrollArea>
 
             <Button disabled={cargando} onClick={handleSubmit} className="mt-4 self-end bg-teal-700 hover:bg-teal-600">

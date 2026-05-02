@@ -2,6 +2,11 @@ import { EditObservationType, NewObservationType } from "@/types/observation-for
 import { ObservationType } from "@/types/dto.type";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 
+export type LoincSuggestion = {
+  code: string;
+  display: string;
+};
+
 const handleErrorApi = <T>(error: unknown) => {
   if (axios.isAxiosError(error)) {
     const tokenExpired = error.response?.data?.error === "TokenExpiredError";
@@ -84,6 +89,24 @@ export async function removeObservation(
     return handleResponseApi<ObservationType>(response);
   } catch (error) {
     return handleErrorApi<ObservationType>(error);
+  }
+}
+
+export async function getLoincSuggestions(
+  accessToken: string,
+  query: string,
+  limit = 20
+) {
+  try {
+    const response = await api.get("/observations/loinc", {
+      params: { query, limit },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return handleResponseApi<LoincSuggestion[]>(response);
+  } catch (error) {
+    return handleErrorApi<LoincSuggestion[]>(error);
   }
 }
 

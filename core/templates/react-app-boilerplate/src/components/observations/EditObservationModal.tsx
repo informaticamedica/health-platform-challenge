@@ -19,10 +19,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";
-import { updateObservation } from "@/services/api";
+import { getLoincSuggestions, LoincSuggestion, updateObservation } from "@/services/api";
 import { ObservationType } from "@/types/dto.type";
 import { PencilIcon, PlusIcon } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { v4 } from "uuid";
 
 export const EditObservationModal = ({ observation }: { observation: ObservationType }) => {
@@ -35,6 +35,7 @@ export const EditObservationModal = ({ observation }: { observation: Observation
   const [newObservation, setNewObservation] = useState(initialObservation);
   const [cargando, setCargando] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [loincSuggestions, setLoincSuggestions] = useState<LoincSuggestion[]>([]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -87,6 +88,26 @@ export const EditObservationModal = ({ observation }: { observation: Observation
     }
   };
 
+  useEffect(() => {
+    const loadLoinc = async () => {
+      if (!isOpen) return;
+      const session = await getSession();
+      if (!session?.accessToken) return;
+      const response = await getLoincSuggestions(
+        session.accessToken,
+        newObservation.code,
+        25
+      );
+      if (!response.error) {
+        setLoincSuggestions(response.data);
+      }
+    };
+
+    loadLoinc().catch((error: unknown) => {
+      console.error("Error loading LOINC suggestions", error);
+    });
+  }, [getSession, isOpen, newObservation.code]);
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild className="cursor-pointer">
@@ -127,7 +148,19 @@ export const EditObservationModal = ({ observation }: { observation: Observation
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Codigo</label>
-              <Input name="code" value={newObservation.code} onChange={handleInputChange} />
+              <Input
+                name="code"
+                list="loinc-suggestions-main-edit"
+                value={newObservation.code}
+                onChange={handleInputChange}
+              />
+              <datalist id="loinc-suggestions-main-edit">
+                {loincSuggestions.map((item) => (
+                  <option key={`edit-main-${item.code}`} value={item.code}>
+                    {item.display}
+                  </option>
+                ))}
+              </datalist>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Valor</label>
@@ -172,6 +205,7 @@ export const EditObservationModal = ({ observation }: { observation: Observation
                   <div>
                     <label className="mb-1 block text-sm font-medium">Codigo</label>
                     <Input
+                      list="loinc-suggestions-components-edit"
                       value={c.code}
                       onChange={(e) => handleInputComponentChange(i, "code", e.target.value)}
                       className="w-24 bg-white"
@@ -208,6 +242,13 @@ export const EditObservationModal = ({ observation }: { observation: Observation
                   </Button>
                 </div>
               ))}
+              <datalist id="loinc-suggestions-components-edit">
+                {loincSuggestions.map((item) => (
+                  <option key={`edit-component-${item.code}`} value={item.code}>
+                    {item.display}
+                  </option>
+                ))}
+              </datalist>
             </ScrollArea>
 
             <Button disabled={cargando} onClick={handleSubmit} className="mt-4 self-end bg-teal-700 hover:bg-teal-600">

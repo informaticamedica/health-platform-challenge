@@ -6,9 +6,11 @@ import { baseObservationSchema } from "../types/observation.schema";
 import { NotFoundError } from "../services/error.service";
 import PatientService from "../services/patient.service";
 import ObservationService from "../services/observation.service";
+import { loadLoincCsvToArray } from "../utils/loincLoader";
 
 const OBSERVATION_CATEGORY_URL =
   "https://terminology.hl7.org/6.1.0/CodeSystem-observation-category.json";
+let loincCache: Array<{ LOINC_NUM: string; COMPONENT: string }> | null = null;
 
 // Lista las observaciones de un paciente
 export const getObservations = async (req: Request, res: Response) => {
@@ -59,6 +61,37 @@ export const getObservationCategories = async (_req: Request, res: Response) => 
       }));
 
     RoutesService.responseSuccess(res, categories);
+  } catch (error) {
+    RoutesService.responseError(res, error as any);
+  }
+};
+
+export const getLoincSuggestions = async (req: Request, res: Response) => {
+  try {
+    const query = String(req.query.query ?? "")
+      .trim()
+      .toLowerCase();
+    const limit = Math.min(Math.max(Number(req.query.limit ?? 20), 1), 50);
+
+    if (!loincCache) {
+      loincCache = await loadLoincCsvToArray("src/db/csv/Loinc.csv");
+    }
+
+    const matches = loincCache
+      .filter((item) => {
+        if (!query) return true;
+        return (
+          item.LOINC_NUM.toLowerCase().includes(query) ||
+          (item.COMPONENT ?? "").toLowerCase().includes(query)
+        );
+      })
+      .slice(0, limit)
+      .map((item) => ({
+        code: item.LOINC_NUM,
+        display: item.COMPONENT ?? item.LOINC_NUM,
+      }));
+
+    RoutesService.responseSuccess(res, matches);
   } catch (error) {
     RoutesService.responseError(res, error as any);
   }
