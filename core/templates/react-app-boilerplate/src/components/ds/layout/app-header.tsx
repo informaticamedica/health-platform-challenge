@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/ds/utils";
 import { ReactNode } from "react";
 
 type AppHeaderProps = {
