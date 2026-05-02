@@ -1,4 +1,3 @@
-import { v4 } from "uuid";
 import pool from "../db/postgres";
 import { DatabaseError } from "../services/error.service";
 
@@ -43,24 +42,12 @@ const PatientModel = {
 
   async create(patient: Omit<Patient, "id">): Promise<Patient> {
     try {
-      console.log({
-        patient,
-        a: [
-          v4(),
-          patient.name,
-          patient.birth_date,
-          patient.gender,
-          patient?.address ?? null,
-        ],
-      });
-
       const query = `
-      INSERT INTO patients (id, name, birth_date, gender, address)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO patients (name, birth_date, gender, address)
+      VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
       const values = [
-        v4(),
         patient.name,
         patient.birth_date,
         patient.gender,
