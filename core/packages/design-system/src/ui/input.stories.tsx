@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { Input } from "./input";
 
 const meta: Meta<typeof Input> = {
@@ -25,6 +26,19 @@ export default meta;
 type Story = StoryObj<typeof Input>;
 
 export const Default: Story = {};
+
+export const TypingInteraction: Story = {
+  args: {
+    label: "Nombre",
+    placeholder: "Escribe aqui",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const textbox = canvas.getByRole("textbox", { name: "Nombre" });
+    await userEvent.type(textbox, "Carlos");
+    await expect(textbox).toHaveValue("Carlos");
+  },
+};
 
 export const WithoutLabel: Story = {
   args: {

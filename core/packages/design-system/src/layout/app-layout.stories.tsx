@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { AppHeader } from "./app-header";
 import { AppLayout } from "./app-layout";
 
@@ -30,4 +31,12 @@ export const Default: Story = {
       </div>
     </AppLayout>
   ),
+};
+
+export const LayoutInteraction: Story = {
+  ...Default,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: "Contenido principal" })).toBeInTheDocument();
+  },
 };

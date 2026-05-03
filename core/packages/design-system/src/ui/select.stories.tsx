@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { Select } from "./select";
 
 const options = [
@@ -57,6 +58,17 @@ export default meta;
 type Story = StoryObj<typeof DemoSelect>;
 
 export const Default: Story = {};
+
+export const SelectInteraction: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    const trigger = canvas.getByRole("combobox");
+    await userEvent.click(trigger);
+    await userEvent.click(await body.findByRole("option", { name: "Media" }));
+    await expect(trigger).toHaveTextContent("Media");
+  },
+};
 
 export const WithoutLabel: Story = {
   args: {

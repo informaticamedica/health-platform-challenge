@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect } from "storybook/test";
 import { RedirectScreen } from "./redirect-screen";
 
 const meta: Meta<typeof RedirectScreen> = {
@@ -12,3 +13,9 @@ export default meta;
 type Story = StoryObj<typeof RedirectScreen>;
 
 export const Default: Story = {};
+
+export const RedirectInteraction: Story = {
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector("svg")).not.toBeNull();
+  },
+};

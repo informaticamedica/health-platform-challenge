@@ -17,5 +17,8 @@
     "db:up": "npm run up --workspace ./infra/local/postgres/soc-db-source",
     "db:down": "npm run down --workspace ./infra/local/postgres/soc-db-source",
     "db:reset": "npm run reset --workspace ./infra/local/postgres/soc-db-source"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.5"
   }
 }

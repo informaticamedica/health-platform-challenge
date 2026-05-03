@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, fn, userEvent, within } from "storybook/test";
 import { Button, buttonSizeOptions, buttonVariantOptions } from "./button";
 
 const meta: Meta<typeof Button> = {
@@ -15,6 +16,7 @@ const meta: Meta<typeof Button> = {
     size: "default",
     asChild: false,
     disabled: false,
+    onClick: fn(),
   },
   argTypes: {
     variant: {
@@ -43,6 +45,18 @@ export default meta;
 type Story = StoryObj<typeof Button>;
 
 export const Default: Story = {};
+
+export const ClickInteraction: Story = {
+  args: {
+    children: "Ejecutar",
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole("button", { name: "Ejecutar" });
+    await userEvent.click(button);
+    await expect(args.onClick).toHaveBeenCalledTimes(1);
+  },
+};
 
 export const Secondary: Story = {
   args: {

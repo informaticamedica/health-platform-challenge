@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { Button } from "./button";
 import { Input } from "./input";
 import { Modal } from "./dialog";
@@ -38,4 +39,16 @@ export const Default: Story = {
       </Modal.Content>
     </Modal>
   ),
+};
+
+export const OpenAndCloseInteraction: Story = {
+  ...Default,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    const openButton = canvas.getByRole("button", { name: "Abrir modal" });
+    await userEvent.click(openButton);
+    await expect(await body.findByRole("dialog")).toBeInTheDocument();
+    await userEvent.click(body.getByRole("button", { name: "Cancelar" }));
+  },
 };

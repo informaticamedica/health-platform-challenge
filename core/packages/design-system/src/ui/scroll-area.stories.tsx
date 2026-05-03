@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { ScrollArea } from "./scroll-area";
 
 const meta: Meta<typeof ScrollArea> = {
@@ -29,4 +30,12 @@ export const Default: Story = {
       </div>
     </ScrollArea>
   ),
+};
+
+export const ContentInteraction: Story = {
+  ...Default,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("Registro 20")).toBeInTheDocument();
+  },
 };

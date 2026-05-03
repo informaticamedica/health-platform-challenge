@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { BellIcon } from "lucide-react";
+import { expect, within } from "storybook/test";
 import { Button } from "../ui";
 import { AppHeader } from "./app-header";
 
@@ -32,4 +33,13 @@ export const Default: Story = {
       <AppHeader {...args} />
     </div>
   ),
+};
+
+export const HeaderInteraction: Story = {
+  ...Default,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("Design System")).toBeInTheDocument();
+    await expect(canvas.getByRole("button", { name: "Nuevo incidente" })).toBeInTheDocument();
+  },
 };

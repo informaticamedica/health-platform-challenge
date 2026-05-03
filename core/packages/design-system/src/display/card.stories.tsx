@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, fn, userEvent, within } from "storybook/test";
 import { Button } from "../ui";
 import { Card, cardVariantOptions } from "./card";
 
@@ -36,5 +37,19 @@ export const Default: Story = {};
 export const Secondary: Story = {
   args: {
     variant: "secondary",
+  },
+};
+
+export const ClickableInteraction: Story = {
+  args: {
+    clickable: true,
+    clickableLabel: "Abrir detalle",
+    onClickablePress: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const hitArea = canvas.getByRole("button", { name: "Abrir detalle" });
+    await userEvent.click(hitArea);
+    await expect(args.onClickablePress).toHaveBeenCalledTimes(1);
   },
 };

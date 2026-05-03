@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Button } from "../ui";
 import { SectionBanner, sectionBannerVariantOptions } from "./section-banner";
 
@@ -25,6 +26,14 @@ export default meta;
 type Story = StoryObj<typeof SectionBanner>;
 
 export const Default: Story = {};
+
+export const BannerInteraction: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: "Estado de emergencias" })).toBeInTheDocument();
+    await expect(canvas.getByRole("button", { name: "Ver detalle" })).toBeInTheDocument();
+  },
+};
 
 export const Secondary: Story = {
   args: {

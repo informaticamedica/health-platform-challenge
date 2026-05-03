@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { Button, ToastAction } from "../ui";
 import { toast } from "../hooks";
 import { Toaster } from "./toaster";
@@ -31,3 +32,12 @@ export default meta;
 type Story = StoryObj<typeof ToasterDemo>;
 
 export const Default: Story = {};
+
+export const ToasterInteraction: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getByRole("button", { name: "Mostrar toast" }));
+    await expect(await body.findByText("Incidente actualizado")).toBeInTheDocument();
+  },
+};

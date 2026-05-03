@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Background } from "./background";
 
 const meta: Meta<typeof Background> = {
@@ -16,3 +17,10 @@ export default meta;
 type Story = StoryObj<typeof Background>;
 
 export const Default: Story = {};
+
+export const BackgroundInteraction: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("Contenido sobre el fondo")).toBeInTheDocument();
+  },
+};

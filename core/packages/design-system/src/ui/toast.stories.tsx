@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { Button } from "./button";
 import {
   Toast,
@@ -57,3 +58,12 @@ export default meta;
 type Story = StoryObj<typeof ToastDemo>;
 
 export const Default: Story = {};
+
+export const ToastInteraction: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getByRole("button", { name: "Mostrar toast" }));
+    await expect(await body.findByText("Actualizacion completada")).toBeInTheDocument();
+  },
+};
