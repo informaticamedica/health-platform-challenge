@@ -10,13 +10,12 @@
 
 ## Vision
 
-Este repositorio busca ser una base defendible para entrevista tecnica (TL/Arquitecto SR) y para evolucion real por fases:
+Este repositorio propone un flujo de trabajo estandar para crear MVPs rapido, con servicios desacoplados y escalables de forma individual, bajo gobierno tecnico por dominio.
 
-- Entregar rapido con **boilerplates reutilizables**.
-- Integrar legacy de forma segura con **adapters y contratos**.
-- Operar con base de **observabilidad, seguridad y calidad** desde el inicio.
-- Escalar a multiples squads sin romper estandares.
-- Generar nuevos MVPs por **skill de orquestacion** en minutos, reutilizando front/back + packages core.
+- Acelerar la creacion de productos con **templates reutilizables** y una estructura repetible.
+- Mantener cada capa (front, back, DS, FHIR, infra) gobernada por **skills especificas** con reglas claras.
+- Coordinar la entrega end-to-end con **skills orquestadoras** que transforman prompts en productos ejecutables.
+- Preservar interoperabilidad, calidad y seguridad desde la fase inicial sin frenar el delivery.
 
 ## Objetivos del proyecto
 
@@ -42,6 +41,7 @@ Este repositorio busca ser una base defendible para entrevista tecnica (TL/Arqui
   - `postgres/soc-db-source`: DB semilla con datos clinicos y auth.
   - `keycloak`: base para fase de autenticacion OIDC/SSO.
   - `sentry`: guia runtime para observabilidad SaaS.
+- `registry/`: base conceptual para levantar Verdaccio y publicar librerias internas del monorepo.
 - `aws-target/`: referencia de aterrizaje cloud objetivo.
 
 ### `mvp/` - Producto demostrativo
@@ -72,6 +72,7 @@ health-platform-challenge/
       postgres/soc-db-source/
       keycloak/
       sentry/
+    registry/
     aws-target/
   mvp/
     .agents/
