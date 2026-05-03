@@ -2,6 +2,11 @@
 
 Guia para agentes que agregan endpoints y validaciones en este backend.
 
+## Skills disponibles
+
+- `skills/node-api-feature-factory/SKILL.md`: implementa endpoints nuevos siguiendo la arquitectura actual (route/controller/service/model/schema), con validaciones Joi y respuesta uniforme.
+- `skills/node-api-feature-factory/SKILL.md` exige que todo cambio de tablas se guarde en `src/db/migrations/*.sql`.
+
 ## Arquitectura rapida
 
 - Entry: `src/index.ts`
@@ -41,4 +46,4 @@ Guia para agentes que agregan endpoints y validaciones en este backend.
 ## Precauciones
 
 - Mantener compatibilidad con esquema operativo actual (`ddl.sql`, IDs enteros).
-- No introducir imports o dependencias de Next.js.
+- No modificar estructura de tablas sin agregar migracion SQL nueva en `src/db/migrations/`.

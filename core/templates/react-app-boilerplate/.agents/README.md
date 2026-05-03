@@ -2,6 +2,10 @@
 
 Guia para agentes que agregan rutas, vistas o integraciones API en este frontend.
 
+## Skills disponibles
+
+- `skills/react-product-scaffold/SKILL.md`: crea o reconstruye rapido un frontend completo con la misma estructura del boilerplate, incluyendo layout minimo (`Header`, `Layout`, `AuthGuard`, `LoginCard`) e integracion con `@platform/design-system`.
+
 ## Arquitectura rapida
 
 - Entry: `src/main.tsx`
@@ -31,3 +35,7 @@ Guia para agentes que agregan rutas, vistas o integraciones API en este frontend
 - No usar Next.js APIs ni imports `next/*`.
 - En observaciones, no cerrar sesion por errores 400/500; solo por 401.
 - Si falla carga externa HL7 por CORS, mantener fallback local de categorias.
+
+## Regla de plantilla
+
+- Si se pide crear un producto nuevo, usar `skills/react-product-scaffold/SKILL.md` como primera fuente de verdad antes de agregar nuevas vistas o rutas.
