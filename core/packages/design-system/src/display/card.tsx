@@ -3,6 +3,8 @@ import { ReactNode, isValidElement } from "react";
 
 type CardVariant = "primary" | "secondary";
 
+export const cardVariantOptions = ["primary", "secondary"] as const;
+
 type CardProps = Readonly<{
   variant?: CardVariant;
   title?: ReactNode;

@@ -3,6 +3,8 @@ import { ReactNode } from "react";
 
 type SectionBannerVariant = "primary" | "secondary";
 
+export const sectionBannerVariantOptions = ["primary", "secondary"] as const;
+
 type SectionBannerProps = Readonly<{
   variant?: SectionBannerVariant;
   title: ReactNode;
