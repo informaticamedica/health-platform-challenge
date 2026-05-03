@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { cn } from "../utils";
 
 const InputContainer = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
@@ -39,18 +40,49 @@ type InputComponent = React.ForwardRefExoticComponent<InputProps & React.RefAttr
   Label: typeof InputLabel;
 };
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, id, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, id, type, className, ...props }, ref) => {
   const inputId = React.useId();
   const resolvedId = id ?? inputId;
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const isPasswordInput = type === "password";
+  const resolvedType = isPasswordInput && showPassword ? "text" : type;
+
+  const inputElement = (
+    <InputBase
+      ref={ref}
+      id={resolvedId}
+      type={resolvedType}
+      className={cn(isPasswordInput && "pr-10", className)}
+      {...props}
+    />
+  );
+
+  const inputWithToggle = isPasswordInput ? (
+    <div className="relative">
+      {inputElement}
+      <button
+        type="button"
+        onClick={() => setShowPassword((prev) => !prev)}
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground"
+        aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+        disabled={props.disabled}
+      >
+        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+    </div>
+  ) : (
+    inputElement
+  );
 
   if (label === undefined) {
-    return <InputBase ref={ref} id={resolvedId} {...props} />;
+    return inputWithToggle;
   }
 
   return (
     <InputContainer>
       <InputLabel htmlFor={resolvedId}>{label}</InputLabel>
-      <InputBase ref={ref} id={resolvedId} {...props} />
+      {inputWithToggle}
     </InputContainer>
   );
 }) as InputComponent;
