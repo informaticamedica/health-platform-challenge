@@ -49,6 +49,7 @@ const meta: Meta<typeof ToastDemo> = {
       control: { type: "select" },
     },
   },
+  tags: ["autodocs"],
 };
 
 export default meta;

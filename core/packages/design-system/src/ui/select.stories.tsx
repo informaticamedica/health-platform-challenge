@@ -49,6 +49,7 @@ const meta: Meta<typeof DemoSelect> = {
     label: { control: { type: "text" } },
     disabled: { control: { type: "boolean" } },
   },
+  tags: ["autodocs"],
 };
 
 export default meta;

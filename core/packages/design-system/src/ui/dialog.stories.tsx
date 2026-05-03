@@ -5,6 +5,7 @@ import { Modal } from "./dialog";
 const meta: Meta<typeof Modal> = {
   title: "UI/Dialog",
   component: Modal,
+  tags: ["autodocs"],
 };
 
 export default meta;

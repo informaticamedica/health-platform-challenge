@@ -17,6 +17,7 @@ const meta: Meta<typeof Chip> = {
     showClose: { control: { type: "boolean" } },
     onClose: { action: "closed" },
   },
+  tags: ["autodocs"],
 };
 
 export default meta;

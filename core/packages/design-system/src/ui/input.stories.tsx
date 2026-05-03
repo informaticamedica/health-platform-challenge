@@ -17,6 +17,7 @@ const meta: Meta<typeof Input> = {
     disabled: { control: { type: "boolean" } },
     label: { control: { type: "text" } },
   },
+  tags: ["autodocs"],
 };
 
 export default meta;

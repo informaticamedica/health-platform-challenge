@@ -35,6 +35,7 @@ const meta: Meta<typeof Button> = {
       control: { type: "text" },
     },
   },
+  tags: ["autodocs"],
 };
 
 export default meta;

@@ -7,6 +7,7 @@ const meta: Meta<typeof ScrollArea> = {
   args: {
     className: "h-56 w-80 rounded-md border border-border bg-card p-3",
   },
+  tags: ["autodocs"],
 };
 
 export default meta;
