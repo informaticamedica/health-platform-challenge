@@ -19,23 +19,25 @@ export function Background({
       <div
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url(${imageUrl})` }}
+        aria-hidden="true"
       />
       <div
         className={cn(
           "absolute inset-0 bg-gradient-to-br from-primary via-info to-primary",
           overlayClassName,
         )}
+        aria-hidden="true"
       />
 
-      <div className="pointer-events-none absolute -left-20 top-12 h-56 w-56 rounded-full border-[28px] border-info/60" />
-      <div className="pointer-events-none absolute -right-14 -top-14 h-72 w-72 rounded-full border-[32px] border-info/45" />
-      <div className="pointer-events-none absolute right-20 top-32 text-5xl font-black text-warning">
+      <div aria-hidden="true" className="pointer-events-none absolute -left-20 top-12 h-56 w-56 rounded-full border-[28px] border-info/60" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-14 -top-14 h-72 w-72 rounded-full border-[32px] border-info/45" />
+      <div aria-hidden="true" className="pointer-events-none absolute right-20 top-32 text-5xl font-black text-warning">
         +
       </div>
-      <div className="pointer-events-none absolute left-16 bottom-24 text-6xl font-black text-white/90">
+      <div aria-hidden="true" className="pointer-events-none absolute left-16 bottom-24 text-6xl font-black text-white/90">
         +
       </div>
-      <div className="pointer-events-none absolute left-48 bottom-16 text-5xl font-black text-info/70">
+      <div aria-hidden="true" className="pointer-events-none absolute left-48 bottom-16 text-5xl font-black text-info/70">
         +
       </div>
 

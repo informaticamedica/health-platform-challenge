@@ -13,6 +13,7 @@ const meta: Meta<typeof AppHeader> = {
     actions: (
       <div className="flex items-center gap-2">
         <Button size="sm" variant="ghost">
+          <span className="sr-only">Notificaciones</span>
           <BellIcon className="size-4" />
         </Button>
         <Button size="sm" variant="secondary">

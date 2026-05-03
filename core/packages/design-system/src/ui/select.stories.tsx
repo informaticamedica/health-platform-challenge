@@ -26,6 +26,7 @@ const DemoSelect = ({
       disabled={disabled}
     >
       <Select.Trigger className="w-64">
+        <span className="sr-only">Selector de prioridad</span>
         <Select.Value placeholder="Selecciona prioridad" />
       </Select.Trigger>
       <Select.Content>

@@ -43,6 +43,7 @@ export const TypingInteraction: Story = {
 export const WithoutLabel: Story = {
   args: {
     label: undefined,
+    "aria-label": "Campo de texto sin etiqueta",
     placeholder: "Sin etiqueta",
   },
 };

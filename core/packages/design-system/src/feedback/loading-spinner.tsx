@@ -3,15 +3,18 @@ import { cn } from "../utils";
 type LoadingSpinnerProps = Readonly<{
   className?: string;
   color?: string;
-}>;
+  label?: string;
+}>; 
 
-export function LoadingSpinner({ className, color = "text-white" }: LoadingSpinnerProps) {
+export function LoadingSpinner({ className, color = "text-white", label = "Cargando" }: LoadingSpinnerProps) {
   return (
     <svg
       className={cn("mx-2 h-10 w-10 animate-spin", color, className)}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
+      role="status"
+      aria-label={label}
     >
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
