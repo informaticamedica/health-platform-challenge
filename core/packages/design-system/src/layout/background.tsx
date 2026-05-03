@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { cn } from "@/components/ds/utils";
+import { cn } from "../utils";
 
 type BackgroundProps = Readonly<{
   children?: ReactNode;

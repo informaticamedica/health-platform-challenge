@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/auth";
-import { AppHeader, Button } from "@ds";
+import { AppHeader, Button } from "@platform/design-system";
 import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {

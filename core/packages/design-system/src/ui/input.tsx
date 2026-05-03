@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/components/ds/utils";
+import { cn } from "../utils";
 
 const InputContainer = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
   return <div className={cn("space-y-1", className)} {...props} />;

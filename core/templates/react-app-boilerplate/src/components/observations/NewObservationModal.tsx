@@ -11,7 +11,7 @@ import {
   Input,
   ScrollArea,
   Select,
-} from "@ds";
+} from "@platform/design-system";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";
 import { NewObservationType } from "@/types/observation-form.type";

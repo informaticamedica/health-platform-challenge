@@ -1,6 +1,6 @@
 // frontend/src/components/LoginCard.tsx
 
-import { LoadingSpinner, useToast, Button, Input } from "@ds";
+import { LoadingSpinner, useToast, Button, Input } from "@platform/design-system";
 import { useAuth } from "@/context/auth";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";

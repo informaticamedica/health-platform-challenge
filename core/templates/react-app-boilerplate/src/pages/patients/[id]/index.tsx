@@ -1,6 +1,6 @@
 import { CardObservation } from "@/components/observations/CardObservation";
 import { NewObservationModal } from "@/components/observations/NewObservationModal";
-import { Button, Chip, ScrollArea, SectionBanner } from "@ds";
+import { Button, Chip, ScrollArea, SectionBanner } from "@platform/design-system";
 import { useAuth } from "@/context/auth";
 import usePatientStore from "@/hooks/useStore";
 import { getObservationCategories, getObservations } from "@/services/backend";

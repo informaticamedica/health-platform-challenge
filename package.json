@@ -10,8 +10,9 @@
     "infra/local/postgres/soc-db-source"
   ],
   "scripts": {
-    "boilerplate:front": "npm run dev --workspace ./core/templates/react-app-boilerplate",
-    "boilerplate:back": "npm run dev --workspace ./core/templates/node-api-boilerplate",
+    "dev:front": "npm run dev --workspace ./core/templates/react-app-boilerplate",
+    "dev:back": "npm run dev --workspace ./core/templates/node-api-boilerplate",
+    "dev:ds": "npm run dev --workspace ./core/packages/design-system",
     "db:up": "npm run up --workspace ./infra/local/postgres/soc-db-source",
     "db:down": "npm run down --workspace ./infra/local/postgres/soc-db-source",
     "db:reset": "npm run reset --workspace ./infra/local/postgres/soc-db-source"

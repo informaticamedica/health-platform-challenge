@@ -1,4 +1,4 @@
-import { LoadingSpinner, RedirectScreen } from "@ds";
+import { LoadingSpinner, RedirectScreen } from "@platform/design-system";
 import { useAuth } from "@/context/auth";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";

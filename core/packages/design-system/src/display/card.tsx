@@ -1,4 +1,4 @@
-import { cn } from "@/components/ds/utils";
+import { cn } from "../utils";
 import { ReactNode, isValidElement } from "react";
 
 type CardVariant = "primary" | "secondary";

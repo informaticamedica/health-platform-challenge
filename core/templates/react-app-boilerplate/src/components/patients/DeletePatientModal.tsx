@@ -3,7 +3,7 @@ import {
   Modal,
   LoadingSpinner,
   useToast,
-} from "@ds";
+} from "@platform/design-system";
 import { useAuth } from "@/context/auth";
 import usePatientStore from "@/hooks/useStore";
 import { deletePatient } from "@/services/backend";

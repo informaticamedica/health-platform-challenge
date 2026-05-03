@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { XIcon } from "lucide-react";
-import { cn } from "@/components/ds/utils";
+import { cn } from "../utils";
 
 const chipVariants = cva(
   "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-1 text-xs font-semibold transition-colors",

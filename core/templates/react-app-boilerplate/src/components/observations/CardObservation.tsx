@@ -1,4 +1,4 @@
-import { Card, Chip, ScrollArea } from "@ds";
+import { Card, Chip, ScrollArea } from "@platform/design-system";
 import { DeleteObservationModal } from "./DeleteObservationModal";
 import { EditObservationModal } from "./EditObservationModal";
 import { ObservationType } from "@/types/dto.type";

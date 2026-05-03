@@ -1,4 +1,4 @@
-import { AppLayout } from "@ds";
+import { AppLayout } from "@platform/design-system";
 import Header from "./Header";
 import React from "react";
 

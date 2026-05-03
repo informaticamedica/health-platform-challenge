@@ -1,4 +1,4 @@
-import { cn } from "@/components/ds/utils";
+import { cn } from "../utils";
 
 type LoadingSpinnerProps = Readonly<{
   className?: string;

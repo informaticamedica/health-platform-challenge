@@ -1,4 +1,4 @@
-import { cn } from "@/components/ds/utils";
+import { cn } from "../utils";
 import { ReactNode } from "react";
 
 type SectionBannerVariant = "primary" | "secondary";

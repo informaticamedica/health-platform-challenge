@@ -3,7 +3,7 @@ import {
   useToast,
   Button,
   Modal,
-} from "@ds";
+} from "@platform/design-system";
 import usePatientStore from "@/hooks/useStore";
 import { useAuth } from "@/context/auth";
 import { removeObservation } from "@/services/api";

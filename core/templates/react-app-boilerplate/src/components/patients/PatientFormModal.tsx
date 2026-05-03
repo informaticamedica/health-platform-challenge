@@ -9,7 +9,7 @@ import {
   Input,
   LoadingSpinner,
   Select,
-} from "@ds";
+} from "@platform/design-system";
 import { PlusIcon } from "lucide-react";
 import { ChangeEvent, ReactNode, useState } from "react";
 

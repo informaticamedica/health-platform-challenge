@@ -1,6 +1,6 @@
 import { PatientCard } from "@/components/patients/Patient";
 import { PatientFormModal } from "@/components/patients/PatientFormModal";
-import { SectionBanner } from "@ds";
+import { SectionBanner } from "@platform/design-system";
 import { useAuth } from "@/context/auth";
 import usePatientStore from "@/hooks/useStore";
 import { getPatients } from "@/services/backend";

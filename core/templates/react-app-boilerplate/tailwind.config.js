@@ -8,6 +8,8 @@ const tailwindConfig = {
     "./src/**/*.{js,ts,jsx,tsx}",
     "./src/pages/**/*.{js,ts,jsx,tsx}",
     "./src/components/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@platform/design-system/dist/**/*.{js,ts,jsx,tsx}",
+    "../../packages/design-system/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {

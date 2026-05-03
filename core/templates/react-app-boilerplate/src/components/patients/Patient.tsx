@@ -1,5 +1,5 @@
 import { PatientTypeDto } from "@/types/dto.type";
-import { Card, Chip } from "@ds";
+import { Card, Chip } from "@platform/design-system";
 import { CalendarDaysIcon, MapPinIcon, PencilIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { DeletePatientModal } from "./DeletePatientModal";
