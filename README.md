@@ -16,6 +16,7 @@ Este repositorio busca ser una base defendible para entrevista tecnica (TL/Arqui
 - Integrar legacy de forma segura con **adapters y contratos**.
 - Operar con base de **observabilidad, seguridad y calidad** desde el inicio.
 - Escalar a multiples squads sin romper estandares.
+- Generar nuevos MVPs por **skill de orquestacion** en minutos, reutilizando front/back + packages core.
 
 ## Objetivos del proyecto
 
@@ -47,6 +48,8 @@ Este repositorio busca ser una base defendible para entrevista tecnica (TL/Arqui
 
 - `producto1/producto1-front`: interfaz para login, pacientes y observaciones.
 - `producto1/producto1-back`: API de negocio consumiendo los packages core.
+- `.agents/skills/mvp-product-orchestrator`: skill para crear productos MVP independientes por recurso FHIR.
+- `condition-mvp/`: ejemplo generado con la skill (2 prompts, menos de 15 minutos).
 
 ## Estructura prevista (alto nivel)
 
@@ -71,6 +74,12 @@ health-platform-challenge/
       sentry/
     aws-target/
   mvp/
+    .agents/
+      skills/
+        mvp-product-orchestrator/
+    condition-mvp/
+      condition-mvp-front/
+      condition-mvp-back/
     producto1/
       producto1-front/
       producto1-back/
@@ -82,12 +91,67 @@ health-platform-challenge/
 Estos scripts viven en `package.json` del root y coordinan workspaces:
 
 ```bash
-npm run boilerplate:front   # Levanta core/templates/react-app-boilerplate
-npm run boilerplate:back    # Levanta core/templates/node-api-boilerplate
+npm run dev:front           # Levanta core/templates/react-app-boilerplate
+npm run dev:back            # Levanta core/templates/node-api-boilerplate
 npm run db:up               # Inicia PostgreSQL local (workspace soc-db-source)
 npm run db:down             # Detiene PostgreSQL local
 npm run db:reset            # Reinicia DB en limpio (drop volumen + seed)
 ```
+
+## Generacion de MVP por skill
+
+Skill disponible: `mvp/.agents/skills/mvp-product-orchestrator/SKILL.md`.
+
+Capacidades principales:
+
+- Crea un producto aislado en `mvp/<productName>/` con `*-front` y `*-back`.
+- Copia templates base y configura scripts de orquestacion (`install`, `build`, `dev`, `db:migrate`).
+- Aplica reglas de puertos y convenciones de integracion con `@platform/design-system` y `@platform/fhir`.
+- Deja skill local de evolucion en `mvp/<productName>/.agents/skills/` para iterar fases siguientes.
+
+Ejemplo validado: `mvp/condition-mvp/` (recurso FHIR `Condition`), generado con 2 prompts en menos de 15 minutos.
+
+### Como se crea un MVP con esta skill
+
+La skill opera en 2 momentos:
+
+1. `Preflight`: pide una ficha de configuracion, analiza alcance y confirma plan.
+2. `Ejecucion`: crea estructura, copia templates, ajusta puertos y deja el MVP listo para evolucionar.
+
+Formulario inicial que la skill te va a pedir (copiar/pegar):
+
+```txt
+nombre: condition-mvp
+recurso-fhir: Condition
+alcance-fase-1: CRUD-minimo
+puerto-back: 3003
+puerto-front: 5173
+usar-core-design-system: si
+usar-core-fhir: si
+permitir-cambios-cross-project: no
+db-migrate-comando: npm run db:migrate
+```
+
+Notas de comportamiento:
+
+- Si no cambias un campo, toma ese valor por defecto.
+- Si `permitir-cambios-cross-project: no`, evita tocar `core/*` y resuelve dentro de `mvp/<productName>/`.
+- Si detecta faltantes en Design System o FHIR compartido, frena y pide confirmacion explicita antes de modificar otros proyectos.
+
+### Archivos y carpetas que genera
+
+Salida esperada para `mvp/<productName>/`:
+
+- `mvp/<productName>/<productName>-front/` (app React/Vite basada en template)
+- `mvp/<productName>/<productName>-back/` (API Node/Express basada en template)
+- `mvp/<productName>/package.json` con scripts:
+  - `install:front`, `install:back`, `install:all`
+  - `build:front`, `build:back`, `build:all`
+  - `dev:front`, `dev:back`, `db:migrate`
+- `mvp/<productName>/README.md` con arranque rapido del producto
+- `mvp/<productName>/.agents/skills/<productName>-evolution/SKILL.md` para continuar fase 2+
+
+Adicionalmente, en front/back ajusta configuraciones base (`name`, `.env`, puertos, integracion con DS/FHIR, `.gitignore`) y crea los archivos funcionales del recurso solicitado (por ejemplo rutas/controladores/mapeos/vistas para `Condition`).
 
 ## Inicio rapido
 
@@ -102,9 +166,19 @@ npm run db:reset            # Reinicia DB en limpio (drop volumen + seed)
    ```
 4. Levantar boilerplates base (en terminales separadas):
    ```bash
-   npm run boilerplate:back
-   npm run boilerplate:front
+   npm run dev:back
+   npm run dev:front
    ```
+
+### Levantar el ejemplo `condition-mvp`
+
+```bash
+cd mvp/condition-mvp
+npm run install:all
+npm run db:migrate
+npm run dev:back
+npm run dev:front
+```
 
 ## Roadmap por fases
 
