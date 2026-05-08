@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { AppHeader } from "./app-header";
-import { AppLayout } from "./app-layout";
+import { AppHeader } from "./app-header.js";
+import { AppLayout } from "./app-layout.js";
 
 const meta: Meta<typeof AppLayout> = {
   title: "Layout/AppLayout",

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { BellIcon } from "lucide-react";
 import { expect, within } from "storybook/test";
-import { Button } from "../ui";
-import { AppHeader } from "./app-header";
+import { Button } from "../ui/index.js";
+import { AppHeader } from "./app-header.js";
 
 const meta: Meta<typeof AppHeader> = {
   title: "Layout/AppHeader",

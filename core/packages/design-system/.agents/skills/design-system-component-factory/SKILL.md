@@ -47,8 +47,8 @@ Tomar `src/ui/select.tsx` como referencia:
    - Interaccion de Storybook (`play`) como baseline.
    - Unit test adicional si el componente agrega logica no trivial.
 6. Ejecutar:
-   - `npm run test`
-   - `npm run build`
+   - `pnpm run test`
+   - `pnpm run build`
 7. Actualizar `references/component-catalog.md` con nombre, ubicacion y uso.
 8. Actualizar esta skill si cambia la convencion de autoria.
 

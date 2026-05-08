@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Background } from "./background";
+import { Background } from "./background.js";
 
 const meta: Meta<typeof Background> = {
   title: "Layout/Background",

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
-import { Button } from "../ui";
-import { Card, cardVariantOptions } from "./card";
+import { Button } from "../ui/index.js";
+import { Card, cardVariantOptions } from "./card.js";
 
 const meta: Meta<typeof Card> = {
   title: "Display/Card",

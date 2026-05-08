@@ -21,9 +21,9 @@ VITE_API_URL=http://localhost:3000
 ## Scripts
 
 ```bash
-npm run dev
-npm run build
-npm run preview
+pnpm run dev
+pnpm run build
+pnpm run preview
 ```
 
 ## Flujo funcional

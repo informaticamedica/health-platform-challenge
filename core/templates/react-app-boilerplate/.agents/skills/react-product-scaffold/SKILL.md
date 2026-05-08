@@ -96,7 +96,7 @@ sin romper las existentes:
 
 ## Definition of Done
 
-1. Compila con `npm run build`.
+1. Compila con `pnpm run build`.
 2. Navegacion de login y rutas protegidas funcional.
 3. UI base renderiza solo con componentes DS para shell y auth.
 4. Variables de entorno documentadas en `.env` (`VITE_API_URL`).

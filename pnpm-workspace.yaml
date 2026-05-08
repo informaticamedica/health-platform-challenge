@@ -1,0 +1,6 @@
+packages:
+  - "core/packages/*"
+  - "core/templates/*"
+  - "mvp/*/*-front"
+  - "mvp/*/*-back"
+  - "infra/local/postgres/soc-db-source"

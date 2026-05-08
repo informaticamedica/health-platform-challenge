@@ -1,5 +1,5 @@
-import { Background } from "../layout";
-import { LoadingSpinner } from "./loading-spinner";
+import { Background } from "../layout/index.js";
+import { LoadingSpinner } from "./loading-spinner.js";
 
 export function RedirectScreen() {
   return (

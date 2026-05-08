@@ -1,4 +1,4 @@
-export { AppHeader } from "./app-header";
-export { AppLayout } from "./app-layout";
-export { SectionBanner } from "./section-banner";
-export { Background } from "./background";
+export { AppHeader } from "./app-header.js";
+export { AppLayout } from "./app-layout.js";
+export { SectionBanner } from "./section-banner.js";
+export { Background } from "./background.js";

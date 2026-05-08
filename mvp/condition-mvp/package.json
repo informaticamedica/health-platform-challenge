@@ -2,14 +2,14 @@
   "name": "@platform/condition-mvp",
   "private": true,
   "scripts": {
-    "install:front": "npm install --prefix ./condition-mvp-front",
-    "install:back": "npm install --prefix ./condition-mvp-back",
-    "install:all": "npm run install:front && npm run install:back",
-    "build:front": "npm run build --prefix ./condition-mvp-front",
-    "build:back": "npm run build --prefix ./condition-mvp-back",
-    "build:all": "npm run build:front && npm run build:back",
-    "dev:front": "npm run dev --prefix ./condition-mvp-front",
-    "dev:back": "npm run dev --prefix ./condition-mvp-back",
+    "install:front": "pnpm -C ./condition-mvp-front install",
+    "install:back": "pnpm -C ./condition-mvp-back install",
+    "install:all": "pnpm run install:front && pnpm run install:back",
+    "build:front": "pnpm -C ./condition-mvp-front run build",
+    "build:back": "pnpm -C ./condition-mvp-back run build",
+    "build:all": "pnpm run build:front && pnpm run build:back",
+    "dev:front": "pnpm -C ./condition-mvp-front run dev",
+    "dev:back": "pnpm -C ./condition-mvp-back run dev",
     "db:migrate": "node ./condition-mvp-back/scripts/run-migrations.mjs"
   }
 }

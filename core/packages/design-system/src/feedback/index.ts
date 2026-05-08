@@ -1,3 +1,3 @@
-export { Toaster } from "./toaster";
-export { LoadingSpinner } from "./loading-spinner";
-export { RedirectScreen } from "./redirect-screen";
+export { Toaster } from "./toaster.js";
+export { LoadingSpinner } from "./loading-spinner.js";
+export { RedirectScreen } from "./redirect-screen.js";

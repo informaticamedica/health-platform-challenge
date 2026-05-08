@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
-import { Select } from "./select";
+import { Select } from "./select.js";
 
 const options = [
   { label: "Alta", value: "alta" },

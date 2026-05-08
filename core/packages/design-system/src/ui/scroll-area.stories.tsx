@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { ScrollArea } from "./scroll-area";
+import { ScrollArea } from "./scroll-area.js";
 
 const meta: Meta<typeof ScrollArea> = {
   title: "UI/ScrollArea",

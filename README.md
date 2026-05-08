@@ -92,11 +92,11 @@ health-platform-challenge/
 Estos scripts viven en `package.json` del root y coordinan workspaces:
 
 ```bash
-npm run dev:front           # Levanta core/templates/react-app-boilerplate
-npm run dev:back            # Levanta core/templates/node-api-boilerplate
-npm run db:up               # Inicia PostgreSQL local (workspace soc-db-source)
-npm run db:down             # Detiene PostgreSQL local
-npm run db:reset            # Reinicia DB en limpio (drop volumen + seed)
+pnpm run dev:front          # Levanta core/templates/react-app-boilerplate
+pnpm run dev:back           # Levanta core/templates/node-api-boilerplate
+pnpm run db:up              # Inicia PostgreSQL local (workspace soc-db-source)
+pnpm run db:down            # Detiene PostgreSQL local
+pnpm run db:reset           # Reinicia DB en limpio (drop volumen + seed)
 ```
 
 ## Generacion de MVP por skill
@@ -130,7 +130,7 @@ puerto-front: 5173
 usar-core-design-system: si
 usar-core-fhir: si
 permitir-cambios-cross-project: no
-db-migrate-comando: npm run db:migrate
+db-migrate-comando: pnpm run db:migrate
 ```
 
 Notas de comportamiento:
@@ -159,26 +159,26 @@ Adicionalmente, en front/back ajusta configuraciones base (`name`, `.env`, puert
 1. Revisar `PLAN.md` para contexto, decisiones y orden de ejecucion.
 2. Instalar dependencias en raiz:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Levantar base de datos local:
    ```bash
-   npm run db:up
+   pnpm run db:up
    ```
 4. Levantar boilerplates base (en terminales separadas):
    ```bash
-   npm run dev:back
-   npm run dev:front
+   pnpm run dev:back
+   pnpm run dev:front
    ```
 
 ### Levantar el ejemplo `condition-mvp`
 
 ```bash
 cd mvp/condition-mvp
-npm run install:all
-npm run db:migrate
-npm run dev:back
-npm run dev:front
+pnpm run install:all
+pnpm run db:migrate
+pnpm run dev:back
+pnpm run dev:front
 ```
 
 ## Roadmap por fases

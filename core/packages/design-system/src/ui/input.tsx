@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { cn } from "../utils";
+import { cn } from "../utils.js";
 
 const InputContainer = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
   return <div className={cn("space-y-1", className)} {...props} />;

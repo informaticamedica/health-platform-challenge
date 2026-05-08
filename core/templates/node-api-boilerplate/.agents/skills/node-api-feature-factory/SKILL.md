@@ -53,8 +53,8 @@ Para `Condition` o `Medication`:
 
 ## Definition of Done
 
-1. `npm run build` exitoso.
-2. `npm test` sin fallas en controladores/rutas afectadas.
+1. `pnpm run build` exitoso.
+2. `pnpm test` sin fallas en controladores/rutas afectadas.
 3. Rutas nuevas registradas y protegidas correctamente.
 4. Migraciones SQL creadas para cambios de esquema.
 5. No se rompieron endpoints existentes (`auth`, `patients`, `observations`).

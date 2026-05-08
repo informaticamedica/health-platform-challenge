@@ -29,9 +29,9 @@ JWT_SECRET=secret
 ## Scripts
 
 ```bash
-npm run dev
-npm run build
-npm run start
+pnpm run dev
+pnpm run build
+pnpm run start
 ```
 
 ## Endpoints principales

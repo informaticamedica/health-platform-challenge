@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
-import { Button, ToastAction } from "../ui";
-import { toast } from "../hooks";
-import { Toaster } from "./toaster";
+import { Button, ToastAction } from "../ui/index.js";
+import { toast } from "../hooks/index.js";
+import { Toaster } from "./toaster.js";
 
 const ToasterDemo = () => {
   const showToast = () => {

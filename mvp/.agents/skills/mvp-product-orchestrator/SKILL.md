@@ -56,7 +56,7 @@ puerto-front: 5173
 usar-core-design-system: si
 usar-core-fhir: si
 permitir-cambios-cross-project: no
-db-migrate-comando: npm run db:migrate
+db-migrate-comando: pnpm run db:migrate
 ```
 
 Reglas:
@@ -197,14 +197,14 @@ Debe crear scripts para ejecutar por separado y combinados:
   "name": "@platform/<productName>",
   "private": true,
   "scripts": {
-    "install:front": "npm install --prefix ./<productName>-front",
-    "install:back": "npm install --prefix ./<productName>-back",
-    "install:all": "npm run install:front && npm run install:back",
-    "build:front": "npm run build --prefix ./<productName>-front",
-    "build:back": "npm run build --prefix ./<productName>-back",
-    "build:all": "npm run build:front && npm run build:back",
-    "dev:front": "npm run dev --prefix ./<productName>-front",
-    "dev:back": "npm run dev --prefix ./<productName>-back",
+    "install:front": "pnpm -C ./<productName>-front install",
+    "install:back": "pnpm -C ./<productName>-back install",
+    "install:all": "pnpm run install:front && pnpm run install:back",
+    "build:front": "pnpm -C ./<productName>-front run build",
+    "build:back": "pnpm -C ./<productName>-back run build",
+    "build:all": "pnpm run build:front && pnpm run build:back",
+    "dev:front": "pnpm -C ./<productName>-front run dev",
+    "dev:back": "pnpm -C ./<productName>-back run dev",
     "db:migrate": "node ./<productName>-back/scripts/run-migrations.mjs"
   }
 }
@@ -255,9 +255,9 @@ Si `tailwind.config.js` y `tailwind.config.ts` difieren, normalizar ambos.
 
 ## Smoke checks minimos
 
-1. `*-back`: `npm run build` y `npm test`.
-2. `*-front`: `npm run build`.
-3. Paquetes compartidos afectados (`design-system`, `fhir`): `npm run build`.
+1. `*-back`: `pnpm run build` y `pnpm test`.
+2. `*-front`: `pnpm run build`.
+3. Paquetes compartidos afectados (`design-system`, `fhir`): `pnpm run build`.
 
 ## Flujo post Fase 1 (obligatorio)
 

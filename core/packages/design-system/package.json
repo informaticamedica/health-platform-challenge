@@ -2,6 +2,7 @@
   "name": "@platform/design-system",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -10,13 +11,14 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./styles/theme.css": "./dist/styles/theme.css"
   },
   "scripts": {
     "dev": "storybook dev -p 6006",
-    "build": "npm run clean && tsc -p tsconfig.json && node scripts/postbuild.mjs",
+    "build": "pnpm run clean && tsc -p tsconfig.json && node scripts/postbuild.mjs",
     "build-storybook": "storybook build",
     "test": "vitest run --config vitest.config.ts --project=unit",
     "test:watch": "vitest",
@@ -40,6 +42,8 @@
     "tailwind-merge": "^2.5.5"
   },
   "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "@storybook/addon-a11y": "^10.3.6",
     "@storybook/addon-docs": "^10.3.6",
     "@storybook/addon-vitest": "^10.3.6",

@@ -1,4 +1,4 @@
-import { cn } from "../utils";
+import { cn } from "../utils.js";
 import { ReactNode, isValidElement } from "react";
 
 type CardVariant = "primary" | "secondary";

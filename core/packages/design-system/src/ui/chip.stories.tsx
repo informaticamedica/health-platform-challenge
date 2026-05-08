@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
-import { Chip, chipVariantOptions } from "./chip";
+import { Chip, chipVariantOptions } from "./chip.js";
 
 const meta: Meta<typeof Chip> = {
   title: "UI/Chip",

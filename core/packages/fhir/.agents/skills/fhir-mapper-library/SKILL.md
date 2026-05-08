@@ -41,7 +41,7 @@ con funciones de transformacion y tipos seguros.
 2. Agregar mapper dedicado en `src/`.
 3. Exportar en `src/index.ts`.
 4. Actualizar README/skill con el nuevo mapper.
-5. Ejecutar `npm run build`.
+5. Ejecutar `pnpm run build`.
 
 ## Consumption contract
 

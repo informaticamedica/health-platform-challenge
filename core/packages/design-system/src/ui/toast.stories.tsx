@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
-import { Button } from "./button";
+import { Button } from "./button.js";
 import {
   Toast,
   ToastAction,
@@ -11,7 +11,7 @@ import {
   ToastTitle,
   ToastViewport,
   toastVariantOptions,
-} from "./toast";
+} from "./toast.js";
 
 const ToastDemo = ({
   variant,

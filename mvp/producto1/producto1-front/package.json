@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@platform/contracts": "file:../../../core/packages/contracts",
-    "@platform/design-system": "file:../../../core/packages/design-system"
+    "@platform/contracts": "workspace:*",
+    "@platform/design-system": "workspace:*"
   }
 }

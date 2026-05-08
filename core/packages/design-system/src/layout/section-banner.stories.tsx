@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Button } from "../ui";
-import { SectionBanner, sectionBannerVariantOptions } from "./section-banner";
+import { Button } from "../ui/index.js";
+import { SectionBanner, sectionBannerVariantOptions } from "./section-banner.js";
 
 const meta: Meta<typeof SectionBanner> = {
   title: "Layout/SectionBanner",

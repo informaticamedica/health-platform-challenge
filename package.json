@@ -2,21 +2,22 @@
   "name": "platform-challenge",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@9.15.9",
   "workspaces": [
     "core/packages/*",
     "core/templates/*",
-    "mvp/producto1/producto1-front",
-    "mvp/producto1/producto1-back",
+    "mvp/*/*-front",
+    "mvp/*/*-back",
     "infra/local/postgres/soc-db-source"
   ],
   "scripts": {
-    "dev:front": "npm run dev --workspace ./core/templates/react-app-boilerplate",
-    "dev:back": "npm run dev --workspace ./core/templates/node-api-boilerplate",
-    "dev:ds": "npm run dev --workspace ./core/packages/design-system",
-    "build:ds": "npm run build --workspace ./core/packages/design-system",
-    "db:up": "npm run up --workspace ./infra/local/postgres/soc-db-source",
-    "db:down": "npm run down --workspace ./infra/local/postgres/soc-db-source",
-    "db:reset": "npm run reset --workspace ./infra/local/postgres/soc-db-source"
+    "dev:front": "pnpm --filter ./core/templates/react-app-boilerplate run dev",
+    "dev:back": "pnpm --filter ./core/templates/node-api-boilerplate run dev",
+    "dev:ds": "pnpm --filter ./core/packages/design-system run dev",
+    "build:ds": "pnpm --filter ./core/packages/design-system run build",
+    "db:up": "pnpm --filter ./infra/local/postgres/soc-db-source run up",
+    "db:down": "pnpm --filter ./infra/local/postgres/soc-db-source run down",
+    "db:reset": "pnpm --filter ./infra/local/postgres/soc-db-source run reset"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.5"

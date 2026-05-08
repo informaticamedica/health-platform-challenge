@@ -15,13 +15,13 @@ Producto MVP para gestionar el recurso FHIR `Condition` sobre la base del boiler
 ## Arranque rapido
 
 1. Instalar dependencias:
-   - `npm run install:all`
+   - `pnpm run install:all`
 2. Ejecutar migraciones:
-   - `npm run db:migrate`
+   - `pnpm run db:migrate`
 3. Levantar backend:
-   - `npm run dev:back`
+   - `pnpm run dev:back`
 4. Levantar frontend:
-   - `npm run dev:front`
+   - `pnpm run dev:front`
 
 ## Endpoints Condition
 
