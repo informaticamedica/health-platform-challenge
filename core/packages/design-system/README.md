@@ -20,7 +20,7 @@ Sistema de diseno compartido del monorepo para aplicaciones React. Este paquete 
 
 ```mermaid
 flowchart LR
-  A[Apps consumidoras] --> B[@platform/design-system]
+  A[Apps consumidoras] --> B[design-system package]
   B --> C[src/ui]
   B --> D[src/layout]
   B --> E[src/display]
@@ -30,6 +30,7 @@ flowchart LR
   C --> I[Radix + CVA + Tailwind]
   F --> G
 ```
+
 
 ## Estructura principal
 
