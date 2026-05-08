@@ -4,3 +4,4 @@ packages:
   - "mvp/*/*-front"
   - "mvp/*/*-back"
   - "infra/local/postgres/soc-db-source"
+  - "infra/local/postgres/modular-api-db"

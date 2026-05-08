@@ -1,0 +1,13 @@
+{
+  "name": "modular-api-db",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "up": "docker compose up -d --build modular-postgres-dev",
+    "down": "docker compose stop modular-postgres-dev",
+    "reset": "docker compose stop modular-postgres-dev && docker compose rm -f modular-postgres-dev && docker volume rm modular_pg_data_dev && docker compose up -d --build modular-postgres-dev",
+    "test:up": "docker compose up -d --build modular-postgres-test",
+    "test:down": "docker compose stop modular-postgres-test",
+    "test:reset": "docker compose stop modular-postgres-test && docker compose rm -f modular-postgres-test && docker volume rm modular_pg_data_test && docker compose up -d --build modular-postgres-test"
+  }
+}

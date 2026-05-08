@@ -8,16 +8,24 @@
     "core/templates/*",
     "mvp/*/*-front",
     "mvp/*/*-back",
-    "infra/local/postgres/soc-db-source"
+    "infra/local/postgres/soc-db-source",
+    "infra/local/postgres/modular-api-db"
   ],
   "scripts": {
     "dev:front": "pnpm --filter ./core/templates/react-app-boilerplate run dev",
     "dev:back": "pnpm --filter ./core/templates/node-api-boilerplate run dev",
+    "dev:back:modular": "pnpm --filter ./core/templates/modular-api-boilerplate run dev",
     "dev:ds": "pnpm --filter ./core/packages/design-system run dev",
     "build:ds": "pnpm --filter ./core/packages/design-system run build",
     "db:up": "pnpm --filter ./infra/local/postgres/soc-db-source run up",
     "db:down": "pnpm --filter ./infra/local/postgres/soc-db-source run down",
-    "db:reset": "pnpm --filter ./infra/local/postgres/soc-db-source run reset"
+    "db:reset": "pnpm --filter ./infra/local/postgres/soc-db-source run reset",
+    "db:modular:up": "pnpm --filter ./infra/local/postgres/modular-api-db run up",
+    "db:modular:down": "pnpm --filter ./infra/local/postgres/modular-api-db run down",
+    "db:modular:reset": "pnpm --filter ./infra/local/postgres/modular-api-db run reset",
+    "db:modular:test:up": "pnpm --filter ./infra/local/postgres/modular-api-db run test:up",
+    "db:modular:test:down": "pnpm --filter ./infra/local/postgres/modular-api-db run test:down",
+    "db:modular:test:reset": "pnpm --filter ./infra/local/postgres/modular-api-db run test:reset"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.5"

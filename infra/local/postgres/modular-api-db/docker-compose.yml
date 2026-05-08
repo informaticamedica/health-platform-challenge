@@ -1,0 +1,34 @@
+services:
+  modular-postgres-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: modular-postgres-dev
+    environment:
+      POSTGRES_DB: modular_dev
+      POSTGRES_USER: modular
+      POSTGRES_PASSWORD: modular
+    ports:
+      - '55434:5432'
+    volumes:
+      - modular_pg_data_dev:/var/lib/postgresql/data
+
+  modular-postgres-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: modular-postgres-test
+    environment:
+      POSTGRES_DB: modular_test
+      POSTGRES_USER: modular
+      POSTGRES_PASSWORD: modular
+    ports:
+      - '55435:5432'
+    volumes:
+      - modular_pg_data_test:/var/lib/postgresql/data
+
+volumes:
+  modular_pg_data_dev:
+    name: modular_pg_data_dev
+  modular_pg_data_test:
+    name: modular_pg_data_test

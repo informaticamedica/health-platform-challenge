@@ -1,3 +1,8 @@
 # templates
 
-Plantillas para acelerar entrega de nuevos servicios y aplicaciones.
+Reusable templates for backend and frontend project bootstrapping.
+
+- `react-app-boilerplate`
+- `node-api-boilerplate`
+- `modular-api-boilerplate`
+- `legacy-adapter-boilerplate`
