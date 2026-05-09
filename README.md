@@ -104,6 +104,7 @@ pnpm run db:reset           # Reinicia DB en limpio (drop volumen + seed)
 Comandos canonicos `new:*`:
 
 ```bash
+npm run new
 npm run new:mvp
 npm run new:db
 npm run new:package
@@ -132,6 +133,9 @@ Salida determinista en `ops/plans/`.
 Los comandos `new:*` ejecutan creacion real de artefactos y dejan trazabilidad en `ops/plans/`.
 
 `new:memory:refresh` actualiza la memoria de componentes en `ops/component-catalog.json` y `ops/memory.lock.json`.
+
+`npm run new` abre el wizard interactivo (incluye opcion de texto libre) y luego ejecuta el mismo motor headless.
+El wizard usa una TUI con Ink (colores, tabs y navegacion con flechas). Si Ink no esta disponible, cae al wizard clasico.
 
 ## Generacion de MVP por skill
 
