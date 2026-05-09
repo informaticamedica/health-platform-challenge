@@ -18,6 +18,7 @@ description: >
 - `templateFront`, `templateBack`
 - `packagesFront`, `packagesBack`
 - `db.provider`, `db.name`, `db.migrateCommand`
+- `db.mode` (`existing`|`new`), `db.existingStack`, `db.createNow`, `db.startNow`
 - `testing` (`unit`, `integration`, `ambos`)
 
 ## Preflight obligatorio
@@ -34,7 +35,9 @@ description: >
 2. Copiar templates segun `scope`.
 3. Ajustar nombres, env y puertos.
 4. Configurar dependencies `@platform/*`.
-5. Crear scripts minimos (`npm install`, `build:*`, `dev:*`, `dev` concurrente si scope=ambos, `db:migrate`).
+5. Crear scripts minimos (`install`, `build`, `dev:*`, `dev` concurrente si scope=ambos, `db:migrate`).
+6. Generar `.env` y `.env.example` del backend con DB resuelta.
+7. Si se eligio DB nueva, crearla; si se pidio, levantar DB verificando Docker.
 6. Generar README del MVP y skill local de evolucion.
 
 ## Delegacion permitida
@@ -55,3 +58,4 @@ description: >
 2. Scripts del MVP ejecutables.
 3. README del MVP documentado.
 4. Names de package unicos (`@platform/<name>-front|back`) sin conflicto de workspaces.
+5. `npm run install` y `npm run dev` desde root del MVP no deben romper.

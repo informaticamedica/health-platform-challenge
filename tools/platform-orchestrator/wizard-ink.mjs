@@ -49,6 +49,10 @@ function previewStructure(action, config) {
     if (config.scope !== "front") lines.push(`mvp/${config.name}/${config.name}-back/`);
     lines.push(`mvp/${config.name}/package.json`);
     lines.push(`mvp/${config.name}/README.md`);
+    if (config.dbMode === "new") {
+      const dbName = String(config.db?.name || `platform_${config.name}`).replace(/_/g, "-");
+      lines.push(`infra/local/postgres/${dbName}/`);
+    }
     return lines;
   }
   if (action === "new:db") {
@@ -90,6 +94,9 @@ function App() {
         { key: "scope", type: "select", label: "Scope", options: ["ambos", "front", "back"] },
         ...(templates.front.length ? [{ key: "templateFront", type: "select", label: "Template front", options: templates.front }] : []),
         ...(templates.back.length ? [{ key: "templateBack", type: "select", label: "Template back", options: templates.back }] : []),
+        { key: "dbMode", type: "select", label: "DB mode", options: ["existing", "new"] },
+        ...(config.dbMode === "existing" ? [{ key: "existingStack", type: "select", label: "DB existente", options: ["soc-db-source", "modular-api-db"] }] : []),
+        { key: "startNow", type: "select", label: "Levantar DB ahora", options: ["yes", "no"] },
         { key: "dbName", type: "input", label: "DB name", defaultValue: `platform_${(config.name || "example").replace(/-/g, "_")}` }
       ];
     }
@@ -120,7 +127,7 @@ function App() {
       ];
     }
     return [];
-  }, [action, config.layer, config.name, config.scope, config.sourceType]);
+  }, [action, config.layer, config.name, config.scope, config.sourceType, config.dbMode]);
 
   const activeOptions = useMemo(() => {
     if (step === 0) return ACTIONS.map((x) => x.label);
@@ -181,7 +188,15 @@ function App() {
           if (action === "new:mvp" && currentQuestion.key === "dbName") {
             setConfig((prev) => ({
               ...prev,
-              db: { provider: "postgres", name: val, migrateCommand: "pnpm run db:migrate" },
+              db: {
+                provider: "postgres",
+                name: val,
+                migrateCommand: "pnpm run db:migrate",
+                mode: prev.dbMode || "existing",
+                existingStack: prev.existingStack || "soc-db-source",
+                createNow: (prev.dbMode || "existing") === "new",
+                startNow: (prev.startNow || "no") === "yes"
+              },
               testing: "ambos",
               packagesFront: ["@platform/design-system", "@platform/contracts"],
               packagesBack: ["@platform/fhir", "@platform/contracts", "@platform/middleware", "@platform/config", "@platform/logger"]

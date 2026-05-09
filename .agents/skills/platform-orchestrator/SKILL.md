@@ -38,6 +38,7 @@ Reglas de enrutamiento obligatorias:
 2. No explorar el repo antes de intentar orquestacion, salvo error de ejecucion.
 3. Si el texto incluye `implementar`, `fhir`, `ips` o `pacientes`, ejecutar `implement:mvp` despues de `new:mvp`.
 4. Si el entorno esta en modo read-only/plan, informar bloqueo y pedir salir de ese modo antes de ejecutar.
+5. Para `new:mvp` + `implement:mvp` Fase 1, la validacion de cierre debe ejecutarse solo con `pnpm`.
 
 ## Protocolo conversacional obligatorio
 
@@ -103,6 +104,11 @@ Regla dura: nunca crear archivos sin confirmacion explicita del usuario.
 2. Prohibido aplicar cambios si preflight falla.
 3. Prohibido inventar rutas de destino fuera del monorepo.
 4. Prohibido saltar validaciones de contratos de skills.
+5. Fase 1 de `implement:mvp` solo puede marcarse OK si se cumplieron ambos:
+   - `pnpm install` ejecutado efectivamente en `mvp/<name>` (o via script `install` equivalente con pnpm).
+   - `pnpm run dev` ejecutado en `mvp/<name>` y con evidencia de front y back levantados.
+6. Si `pnpm --filter` no matchea proyectos, aplicar fallback automatico a `pnpm -C ../.. install` y reportarlo.
+7. En Windows, no usar validacion de `dev` basada solo en timeout de `execSync`; usar ejecucion que capture logs de ambos procesos.
 
 ## Definition of Done
 

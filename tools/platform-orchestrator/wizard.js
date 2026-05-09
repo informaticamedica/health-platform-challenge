@@ -58,6 +58,10 @@ function previewStructure(action, config) {
     if (config.scope !== "front") lines.push(`mvp/${config.name}/${config.name}-back/`);
     lines.push(`mvp/${config.name}/package.json`);
     lines.push(`mvp/${config.name}/README.md`);
+    if (config.db?.mode === "new" && config.db?.createNow) {
+      const dbName = String(config.db?.name || `${config.name}-db`).replace(/_/g, "-");
+      lines.push(`infra/local/postgres/${dbName}/`);
+    }
     return lines;
   }
   if (action === "new:db") {
@@ -128,12 +132,34 @@ async function gatherByAction(rl, action, config) {
     config.packagesBack = ["@platform/fhir", "@platform/contracts", "@platform/middleware", "@platform/config", "@platform/logger"];
 
     const dbProvider = await askMenu(rl, "DB provider", [{ label: "postgres", value: "postgres" }]);
+    const dbMode = await askMenu(rl, "DB mode", [
+      { label: "Usar DB existente (recomendado)", value: "existing" },
+      { label: "Crear DB nueva", value: "new" }
+    ]);
+    let existingStack = "soc-db-source";
+    let createNow = false;
+    if (dbMode === "existing") {
+      existingStack = await askMenu(rl, "DB existente sugerida", [
+        { label: "soc-db-source (55433)", value: "soc-db-source" },
+        { label: "modular-api-db (55434)", value: "modular-api-db" }
+      ]);
+    } else {
+      createNow = true;
+    }
+    const startNow = (await askMenu(rl, "Levantar DB ahora", [
+      { label: "Si", value: "yes" },
+      { label: "No", value: "no" }
+    ])) === "yes";
     const dbDefaultName = `platform_${config.name.replace(/-/g, "_")}`;
     const dbName = await ask(rl, `${color("DB name", ANSI.blue)} [${dbDefaultName}]: `);
     config.db = {
       provider: dbProvider,
       name: dbName || dbDefaultName,
-      migrateCommand: "pnpm run db:migrate"
+      migrateCommand: "pnpm run db:migrate",
+      mode: dbMode,
+      existingStack,
+      createNow,
+      startNow
     };
     config.testing = "ambos";
   }

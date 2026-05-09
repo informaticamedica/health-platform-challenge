@@ -15,7 +15,7 @@ const ALLOWED_ACTIONS = new Set([
 ]);
 
 function parseArgs(argv) {
-  const args = { action: "", config: "", name: "", projectPath: "", repoUrl: "", mode: "headless", confirm: false };
+  const args = { action: "", config: "", name: "", projectPath: "", repoUrl: "", mode: "headless", confirm: false, approvePhase: 0, phase: 0, phases: 0, requirement: "" };
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (!args.action && (token.startsWith("new:") || token.startsWith("implement:"))) {
@@ -56,6 +56,26 @@ function parseArgs(argv) {
       args.confirm = true;
       continue;
     }
+    if (token === "--approve-phase") {
+      args.approvePhase = Number(argv[i + 1] || 0);
+      i += 1;
+      continue;
+    }
+    if (token === "--phase") {
+      args.phase = Number(argv[i + 1] || 0);
+      i += 1;
+      continue;
+    }
+    if (token === "--phases") {
+      args.phases = Number(argv[i + 1] || 0);
+      i += 1;
+      continue;
+    }
+    if (token === "--requirement") {
+      args.requirement = argv[i + 1] || "";
+      i += 1;
+      continue;
+    }
     if (!token.startsWith("-") && !args.config && i > 0) {
       args.config = token;
     }
@@ -79,6 +99,45 @@ function ensureDir(p) {
 function writeFile(p, content) {
   ensureDir(path.dirname(p));
   fs.writeFileSync(p, `${content.endsWith("\n") ? content : `${content}\n`}`, "utf8");
+}
+
+function readFileSafe(filePath) {
+  return fs.readFileSync(filePath, "utf8");
+}
+
+function hashText(text) {
+  let hash = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    hash = ((hash << 5) - hash) + text.charCodeAt(i);
+    hash |= 0;
+  }
+  return String(hash);
+}
+
+function listFilesRecursive(rootDir, relativeBase = "") {
+  const base = path.resolve(rootDir, relativeBase);
+  if (!fileExists(base)) return [];
+  const results = [];
+  function walk(current) {
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name === "node_modules" || entry.name === "dist" || entry.name === ".git") continue;
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else results.push(path.relative(rootDir, full).replace(/\\/g, "/"));
+    }
+  }
+  walk(base);
+  return results.sort();
+}
+
+function readJsonIfExists(filePath, fallback) {
+  if (!fileExists(filePath)) return fallback;
+  try {
+    return readJsonSafe(filePath);
+  } catch (_error) {
+    return fallback;
+  }
 }
 
 function copyDir(source, target, options = {}) {
@@ -123,7 +182,11 @@ function normalizeInput(action, input) {
     normalized.db = {
       provider: String(input.db?.provider || "postgres").trim(),
       name: String(input.db?.name || "").trim(),
-      migrateCommand: String(input.db?.migrateCommand || "pnpm run db:migrate").trim()
+      migrateCommand: String(input.db?.migrateCommand || "pnpm run db:migrate").trim(),
+      mode: String(input.db?.mode || "existing").trim(),
+      existingStack: String(input.db?.existingStack || "soc-db-source").trim(),
+      createNow: Boolean(input.db?.createNow || false),
+      startNow: Boolean(input.db?.startNow || false)
     };
     normalized.testing = String(input.testing || "ambos").trim();
   }
@@ -154,8 +217,16 @@ function normalizeInput(action, input) {
     normalized.requirement = String(input.requirement || "").trim();
     normalized.phases = Number(input.phases || 3);
     normalized.phase = Number(input.phase || 0);
+    normalized.approvePhase = Number(input.approvePhase || 0);
   }
   return normalized;
+}
+
+function getExistingDbPreset(name) {
+  if (name === "modular-api-db") {
+    return { host: "localhost", port: "55434", user: "modular", password: "modular", dbName: "modular_dev", ssl: "false", sslRejectUnauthorized: "false" };
+  }
+  return { host: "localhost", port: "55433", user: "soc", password: "soc", dbName: "soc", ssl: "true", sslRejectUnauthorized: "false" };
 }
 
 function preflight(rootDir, normalized) {
@@ -179,6 +250,15 @@ function preflight(rootDir, normalized) {
       if (normalized.scope !== "front" && existingNames.has(candidateBack)) {
         errors.push(`Conflicto de package name: ${candidateBack}`);
       }
+    }
+    if (normalized.db.mode !== "existing" && normalized.db.mode !== "new") {
+      errors.push("db.mode debe ser 'existing' o 'new'");
+    }
+    if (normalized.db.mode === "existing" && !normalized.db.existingStack) {
+      errors.push("db.existingStack es obligatorio cuando db.mode=existing");
+    }
+    if ((normalized.db.createNow || normalized.db.startNow) && normalized.db.provider !== "postgres") {
+      errors.push("createNow/startNow solo soportado para postgres");
     }
   }
   if (normalized.action === "new:db") {
@@ -216,6 +296,7 @@ function preflight(rootDir, normalized) {
     if (!fileExists(mvpPath)) errors.push(`No existe MVP: mvp/${normalized.name}`);
     if (!normalized.requirement) warnings.push("requirement vacio: se creara plan generico");
     if (normalized.phases < 2 || normalized.phases > 3) warnings.push("phases recomendado entre 2 y 3");
+    if (normalized.approvePhase < 0 || normalized.approvePhase > 3) errors.push("approvePhase invalida");
   }
   return { ok: errors.length === 0, errors, warnings };
 }
@@ -316,6 +397,9 @@ function buildStructurePreview(normalized) {
     if (normalized.scope !== "front") lines.push(`mvp/${normalized.name}/${normalized.name}-back/`);
     lines.push(`mvp/${normalized.name}/package.json`);
     lines.push(`mvp/${normalized.name}/README.md`);
+    if (normalized.db.mode === "new" && normalized.db.createNow) {
+      lines.push(`infra/local/postgres/${(normalized.db.name || `${normalized.name}-db`).replace(/_/g, "-")}/`);
+    }
     return lines;
   }
   if (normalized.action === "new:db") {
@@ -350,7 +434,11 @@ function buildStructurePreview(normalized) {
     ];
   }
   if (normalized.action === "implement:mvp") {
-    return [`mvp/${normalized.name}/IMPLEMENTATION_PLAN.md`];
+    return [
+      `mvp/${normalized.name}/IMPLEMENTATION_PLAN.md`,
+      `mvp/${normalized.name}/.orchestrator/state.json`,
+      `mvp/${normalized.name}/.orchestrator/reports/phase-*.json`
+    ];
   }
   return [];
 }
@@ -375,6 +463,113 @@ function computeMvpStructure(input) {
   lines.push(`mvp/${input.name}/package.json`);
   lines.push(`mvp/${input.name}/README.md`);
   return lines;
+}
+
+function buildMvpStateRoot(rootDir, name) {
+  return path.resolve(rootDir, "mvp", name, ".orchestrator");
+}
+
+function buildMvpStatePath(rootDir, name) {
+  return path.join(buildMvpStateRoot(rootDir, name), "state.json");
+}
+
+function writeMvpState(rootDir, name, state) {
+  const statePath = buildMvpStatePath(rootDir, name);
+  writeFile(statePath, JSON.stringify(state, null, 2));
+  return statePath;
+}
+
+function readMvpState(rootDir, name) {
+  const statePath = buildMvpStatePath(rootDir, name);
+  return readJsonIfExists(statePath, null);
+}
+
+function getMvpTemplateRequiredFiles(rootDir, templatePath) {
+  const files = listFilesRecursive(rootDir, templatePath);
+  return files
+    .filter((x) => !x.endsWith("README.md"))
+    .map((x) => x.replace(`${templatePath.replace(/\\/g, "/")}/`, ""));
+}
+
+function verifyMvpScaffold(rootDir, name, state) {
+  const mvpRoot = path.resolve(rootDir, "mvp", name);
+  const failures = [];
+  const checks = [];
+
+  function verifySide(sideKey, sideFolder) {
+    const side = state.scaffold[sideKey];
+    if (!side || !side.enabled) return;
+    const sideRoot = path.join(mvpRoot, sideFolder);
+    if (!fileExists(sideRoot)) {
+      failures.push(`${sideFolder} no existe`);
+      return;
+    }
+    const required = side.requiredFiles || [];
+    let present = 0;
+    required.forEach((rel) => {
+      const full = path.join(sideRoot, rel);
+      if (fileExists(full)) present += 1;
+      else failures.push(`Falta ${sideFolder}/${rel}`);
+    });
+    checks.push({ side: sideKey, required: required.length, present });
+    const pkgPath = path.join(sideRoot, "package.json");
+    if (!fileExists(pkgPath)) failures.push(`Falta ${sideFolder}/package.json`);
+    else {
+      const pkg = readJsonSafe(pkgPath);
+      if (!String(pkg.name || "").startsWith("@platform/")) {
+        failures.push(`package name invalido en ${sideFolder}: ${pkg.name || ""}`);
+      }
+    }
+  }
+
+  verifySide("front", `${name}-front`);
+  verifySide("back", `${name}-back`);
+
+  const rootPkgPath = path.join(mvpRoot, "package.json");
+  if (!fileExists(rootPkgPath)) {
+    failures.push("Falta mvp/<name>/package.json");
+  } else {
+    const pkg = readJsonSafe(rootPkgPath);
+    const scripts = pkg.scripts || {};
+    if (state.scope === "ambos" && !scripts.dev) failures.push("Falta script dev conjunto en package root");
+    if (state.scope !== "back" && !scripts["dev:front"]) failures.push("Falta script dev:front");
+    if (state.scope !== "front" && !scripts["dev:back"]) failures.push("Falta script dev:back");
+  }
+
+  return {
+    ok: failures.length === 0,
+    checks,
+    failures
+  };
+}
+
+function createBaselineSnapshot(rootDir, name) {
+  const mvpRoot = path.resolve(rootDir, "mvp", name);
+  const files = listFilesRecursive(rootDir, path.relative(rootDir, mvpRoot));
+  const snapshot = {};
+  files.forEach((fileRel) => {
+    const abs = path.resolve(rootDir, fileRel);
+    try {
+      const content = readFileSafe(abs);
+      snapshot[fileRel] = hashText(content);
+    } catch (_error) {
+      snapshot[fileRel] = "binary-or-unreadable";
+    }
+  });
+  return snapshot;
+}
+
+function diffFromBaseline(rootDir, baseline) {
+  const changed = [];
+  Object.keys(baseline).forEach((fileRel) => {
+    if (!fileExists(path.resolve(rootDir, fileRel))) {
+      changed.push({ file: fileRel, kind: "deleted" });
+      return;
+    }
+    const nowHash = hashText(readFileSafe(path.resolve(rootDir, fileRel)));
+    if (nowHash !== baseline[fileRel]) changed.push({ file: fileRel, kind: "modified" });
+  });
+  return changed;
 }
 
 function executeNewDb(rootDir, input) {
@@ -471,6 +666,166 @@ function executeNewDb(rootDir, input) {
   };
 }
 
+function isDockerAvailable() {
+  try {
+    childProcess.execSync("docker info", { stdio: "pipe" });
+    return true;
+  } catch (_error) {
+    return false;
+  }
+}
+
+function startExistingDbStack(rootDir, stackName) {
+  const stackDir = path.resolve(rootDir, "infra", "local", "postgres", stackName);
+  if (!fileExists(stackDir)) {
+    throw new Error(`Stack DB inexistente: infra/local/postgres/${stackName}`);
+  }
+  childProcess.execSync("docker compose up -d --build", { cwd: stackDir, stdio: "pipe" });
+  return path.relative(rootDir, stackDir);
+}
+
+function writeBackendEnvFiles(mvpRoot, mvpName, dbConfig) {
+  const backDir = path.join(mvpRoot, `${mvpName}-back`);
+  const envContent = [
+    `DB_USER=${dbConfig.user}`,
+    `DB_HOST=${dbConfig.host}`,
+    `DB_NAME=${dbConfig.dbName}`,
+    `DB_PASSWORD=${dbConfig.password}`,
+    `DB_PORT=${dbConfig.port}`,
+    `DB_SSL=${dbConfig.ssl}`,
+    `DB_SSL_REJECT_UNAUTHORIZED=${dbConfig.sslRejectUnauthorized}`,
+    "PORT=3000",
+    "JWT_SECRET=secret"
+  ].join("\n");
+  writeFile(path.join(backDir, ".env"), envContent);
+  writeFile(path.join(backDir, ".env.example"), envContent);
+}
+
+function runScopedPnpmInstall(rootDir, mvpName, scope) {
+  const filters = [];
+  if (scope !== "back") filters.push(`--filter @platform/${safePackageName(mvpName)}-front`);
+  if (scope !== "front") filters.push(`--filter @platform/${safePackageName(mvpName)}-back`);
+  const command = `pnpm -C ../.. install ${filters.join(" ")}`.trim();
+  const mvpRoot = path.resolve(rootDir, "mvp", mvpName);
+  try {
+    childProcess.execSync(command, { cwd: mvpRoot, stdio: "pipe" });
+    return { ok: true, command, fallbackUsed: false };
+  } catch (error) {
+    const stdout = error.stdout ? String(error.stdout) : "";
+    const stderr = error.stderr ? String(error.stderr) : "";
+    const output = `${stdout}\n${stderr}`;
+    if (output.includes("No projects matched the filters")) {
+      const fallbackCommand = "pnpm -C ../.. install";
+      childProcess.execSync(fallbackCommand, { cwd: mvpRoot, stdio: "pipe" });
+      return { ok: true, command: fallbackCommand, fallbackUsed: true };
+    }
+    throw error;
+  }
+}
+
+function collectWorkspaceDepsToBuild(rootDir, mvpRoot, mvpName, scope) {
+  const depNames = new Set();
+  const packageFiles = [];
+  if (scope !== "back") packageFiles.push(path.join(mvpRoot, `${mvpName}-front`, "package.json"));
+  if (scope !== "front") packageFiles.push(path.join(mvpRoot, `${mvpName}-back`, "package.json"));
+  for (const pkgPath of packageFiles) {
+    const pkg = readJsonIfExists(pkgPath, {});
+    const sections = [pkg.dependencies || {}, pkg.devDependencies || {}];
+    for (const section of sections) {
+      for (const [dep, version] of Object.entries(section)) {
+        if (dep.startsWith("@platform/") && String(version).startsWith("workspace:")) depNames.add(dep);
+      }
+    }
+  }
+
+  const packageRoots = path.resolve(rootDir, "core", "packages");
+  const buildTargets = [];
+  if (!fileExists(packageRoots)) return buildTargets;
+  const entries = fs.readdirSync(packageRoots, { withFileTypes: true }).filter((x) => x.isDirectory());
+  for (const entry of entries) {
+    const pkgPath = path.join(packageRoots, entry.name, "package.json");
+    const pkg = readJsonIfExists(pkgPath, null);
+    if (!pkg || !pkg.name || !depNames.has(pkg.name)) continue;
+    if (!pkg.scripts || !pkg.scripts.build) continue;
+    const mainField = String(pkg.main || "");
+    if (mainField && !fileExists(path.join(packageRoots, entry.name, mainField))) {
+      buildTargets.push(pkg.name);
+    }
+  }
+  return buildTargets.sort();
+}
+
+function ensureWorkspaceDepsBuilt(rootDir, mvpRoot, mvpName, scope) {
+  const toBuild = collectWorkspaceDepsToBuild(rootDir, mvpRoot, mvpName, scope);
+  const built = [];
+  for (const depName of toBuild) {
+    childProcess.execSync(`pnpm --filter ${depName} run build`, { cwd: rootDir, stdio: "pipe" });
+    built.push(depName);
+  }
+  return built;
+}
+
+function verifyConcurrentDev(mvpRoot) {
+  return new Promise((resolve) => {
+    const child = childProcess.spawn("pnpm", ["run", "dev"], {
+      cwd: mvpRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: true
+    });
+    let output = "";
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      try {
+        child.kill();
+      } catch (_error) {
+        // noop
+      }
+      resolve(result);
+    };
+    const append = (chunk) => {
+      output += String(chunk || "");
+      if (output.length > 12000) output = output.slice(-12000);
+    };
+    child.stdout.on("data", append);
+    child.stderr.on("data", append);
+
+    const timer = setTimeout(() => {
+      const lower = output.toLowerCase();
+      const frontStarted = lower.includes("vite") || lower.includes("local:");
+      const backStarted = lower.includes("nodemon") || lower.includes("servidor ejecut") || lower.includes("listening");
+      const hasFatal = lower.includes("eaddrinuse") || lower.includes("app crashed") || lower.includes("exited with code 1") || lower.includes("no se reconoce como un comando") || lower.includes("error:");
+      finish({
+        ok: frontStarted && backStarted && !hasFatal,
+        outputSnippet: output.slice(-1200),
+        timeoutHit: true,
+        frontStarted,
+        backStarted,
+        hasFatal,
+        command: "pnpm run dev"
+      });
+    }, 16000);
+
+    child.on("exit", (code, _signal) => {
+      clearTimeout(timer);
+      const lower = output.toLowerCase();
+      const frontStarted = lower.includes("vite") || lower.includes("local:");
+      const backStarted = lower.includes("nodemon") || lower.includes("servidor ejecut") || lower.includes("listening");
+      const hasFatal = lower.includes("eaddrinuse") || lower.includes("app crashed") || lower.includes("exited with code 1") || lower.includes("no se reconoce como un comando") || lower.includes("error:") || Number(code || 0) !== 0;
+      finish({
+        ok: frontStarted && backStarted && !hasFatal,
+        outputSnippet: output.slice(-1200),
+        timeoutHit: false,
+        frontStarted,
+        backStarted,
+        hasFatal,
+        command: "pnpm run dev"
+      });
+    });
+  });
+}
+
 function executeNewPackage(rootDir, input) {
   const target = path.resolve(rootDir, "core", "packages", input.name);
   ensureDir(path.join(target, "src"));
@@ -554,17 +909,26 @@ function executeNewMvp(rootDir, input) {
     created.push(path.relative(rootDir, backTarget));
   }
   const scripts = { "db:migrate": input.db.migrateCommand };
+  if (input.scope === "ambos") {
+    scripts.install = `pnpm -C ../.. install --filter @platform/${safePackageName(input.name)}-front --filter @platform/${safePackageName(input.name)}-back`;
+    scripts.build = "pnpm run build:front && pnpm run build:back";
+  } else if (input.scope === "front") {
+    scripts.install = `pnpm -C ../.. install --filter @platform/${safePackageName(input.name)}-front`;
+    scripts.build = "pnpm run build:front";
+  } else {
+    scripts.install = `pnpm -C ../.. install --filter @platform/${safePackageName(input.name)}-back`;
+    scripts.build = "pnpm run build:back";
+  }
   if (input.scope !== "back") {
-    scripts["dev:front"] = `npm --prefix ./${input.name}-front run dev`;
-    scripts["build:front"] = `npm --prefix ./${input.name}-front run build`;
+    scripts["dev:front"] = `pnpm --dir ./${input.name}-front run dev`;
+    scripts["build:front"] = `pnpm --dir ./${input.name}-front run build`;
   }
   if (input.scope !== "front") {
-    scripts["dev:back"] = `npm --prefix ./${input.name}-back run dev`;
-    scripts["build:back"] = `npm --prefix ./${input.name}-back run build`;
+    scripts["dev:back"] = `pnpm --dir ./${input.name}-back run dev`;
+    scripts["build:back"] = `pnpm --dir ./${input.name}-back run build`;
   }
   if (input.scope === "ambos") {
-    scripts.dev = "concurrently \"npm run dev:front\" \"npm run dev:back\"";
-    scripts["build:all"] = "npm run build:front && npm run build:back";
+    scripts.dev = "pnpm exec concurrently \"pnpm run dev:front\" \"pnpm run dev:back\"";
   }
 
   writeFile(
@@ -590,18 +954,113 @@ function executeNewMvp(rootDir, input) {
     rewritePackageNameIfExists(path.join(mvpRoot, `${input.name}-back`), `@platform/${safePackageName(input.name)}-back`);
   }
 
+  let dbSelection = { mode: input.db.mode, stack: input.db.existingStack || "", created: null, started: null };
+  let dbRuntime = null;
+  if (input.db.mode === "new" && input.db.createNow) {
+    const newDbName = (input.db.name || `${input.name}-db`).replace(/_/g, "-");
+    const dbResult = executeNewDb(rootDir, { name: newDbName, provider: "postgres", schema: "public", seed: "default" });
+    dbSelection.created = dbResult.target;
+    dbRuntime = {
+      host: "localhost",
+      port: String(dbResult.dbPort),
+      user: "soc",
+      password: "soc",
+      dbName: (input.db.name || `${input.name}_db`).replace(/-/g, "_"),
+      ssl: "false",
+      sslRejectUnauthorized: "false"
+    };
+    if (input.db.startNow) {
+      if (!isDockerAvailable()) throw new Error("Docker no disponible para levantar DB nueva");
+      const dbDir = path.resolve(rootDir, dbResult.target);
+      childProcess.execSync("docker compose up -d --build", { cwd: dbDir, stdio: "pipe" });
+      dbSelection.started = dbResult.target;
+    }
+  } else {
+    dbRuntime = getExistingDbPreset(input.db.existingStack || "soc-db-source");
+    dbSelection.stack = input.db.existingStack || "soc-db-source";
+    if (input.db.startNow) {
+      if (!isDockerAvailable()) throw new Error("Docker no disponible para levantar DB existente");
+      dbSelection.started = startExistingDbStack(rootDir, dbSelection.stack);
+    }
+  }
+
+  if (dbRuntime) {
+    writeBackendEnvFiles(mvpRoot, input.name, dbRuntime);
+  }
+
   writeFile(
     path.join(mvpRoot, "README.md"),
-    `# ${input.name}\n\nMVP generado por new:mvp.\n\n## Install\n\n- npm install\n\n## Dev\n\n- npm run dev (front+back)\n- npm run dev:front\n- npm run dev:back\n`
+    `# ${input.name}\n\nMVP generado por new:mvp.\n\n## Install\n\n- npm run install\n\n## Build\n\n- npm run build\n\n## Dev\n\n- npm run dev (front+back)\n- npm run dev:front\n- npm run dev:back\n`
   );
-  return { target: path.relative(rootDir, mvpRoot), created, structure: computeMvpStructure(input) };
+
+  const frontRequired = input.scope !== "back"
+    ? getMvpTemplateRequiredFiles(rootDir, input.templateFront)
+    : [];
+  const backRequired = input.scope !== "front"
+    ? getMvpTemplateRequiredFiles(rootDir, input.templateBack)
+    : [];
+
+  const initialState = {
+    version: 1,
+    name: input.name,
+    scope: input.scope,
+    createdAt: new Date().toISOString(),
+    scaffold: {
+      front: { enabled: input.scope !== "back", template: input.templateFront, requiredFiles: frontRequired },
+      back: { enabled: input.scope !== "front", template: input.templateBack, requiredFiles: backRequired }
+    },
+    phases: {
+      "1": { status: "pending", approved: false },
+      "2": { status: "pending", approved: false },
+      "3": { status: "pending", approved: false }
+    },
+    baseline: createBaselineSnapshot(rootDir, input.name),
+    reports: []
+  };
+  const statePath = writeMvpState(rootDir, input.name, initialState);
+
+  const scaffoldCheck = verifyMvpScaffold(rootDir, input.name, initialState);
+
+  return {
+    target: path.relative(rootDir, mvpRoot),
+    created,
+    structure: computeMvpStructure(input),
+    statePath: path.relative(rootDir, statePath),
+    scaffoldCheck,
+    dbSelection,
+    dbRuntime
+  };
 }
 
-function executeImplementMvp(rootDir, input) {
+async function executeImplementMvp(rootDir, input) {
   const mvpRoot = path.resolve(rootDir, "mvp", input.name);
   const planPath = path.join(mvpRoot, "IMPLEMENTATION_PLAN.md");
+  const reportsDir = path.join(buildMvpStateRoot(rootDir, input.name), "reports");
+  ensureDir(reportsDir);
   const phases = Math.min(3, Math.max(2, input.phases || 3));
-  const req = input.requirement || "Implementar capacidades de negocio de forma incremental y agnostica al dominio.";
+
+  let state = readMvpState(rootDir, input.name);
+  if (!state) {
+    state = {
+      version: 1,
+      name: input.name,
+      scope: "ambos",
+      createdAt: new Date().toISOString(),
+      scaffold: { front: { enabled: true, template: "" }, back: { enabled: true, template: "" } },
+      phases: { "1": { status: "pending", approved: false }, "2": { status: "pending", approved: false }, "3": { status: "pending", approved: false } },
+      baseline: createBaselineSnapshot(rootDir, input.name),
+      reports: [],
+      requirementOriginal: ""
+    };
+  }
+
+  const req = input.requirement || state.requirementOriginal || "Implementar capacidades de negocio de forma incremental y agnostica al dominio.";
+  if (!state.requirementOriginal) {
+    state.requirementOriginal = req;
+  }
+
+  const phase = input.phase || 0;
+  const approvePhase = input.approvePhase || 0;
   const plan = [
     `# Implementation Plan - ${input.name}`,
     "",
@@ -619,10 +1078,202 @@ function executeImplementMvp(rootDir, input) {
     "",
     "- Ejecutar una fase por iteracion.",
     "- Validar con usuario antes de avanzar.",
-    "- No avanzar de fase sin feedback explicito."
+    "- No avanzar de fase sin feedback explicito.",
+    "",
+    "## Verification Gates",
+    "",
+    "- Fase 1: scaffold integrity + scripts + package names.",
+    "- Fase 2: progreso funcional detectable en front/back vs baseline.",
+    "- Fase 3: hardening checks (tests/docs) y cierre con reporte."
   ].filter(Boolean).join("\n");
   writeFile(planPath, plan);
-  return { planPath: path.relative(rootDir, planPath), phases };
+
+  if (approvePhase > 0) {
+    const slot = state.phases[String(approvePhase)] || { status: "pending", approved: false };
+    if (slot.status !== "executed") {
+      throw new Error(`No se puede aprobar fase ${approvePhase} porque no esta ejecutada`);
+    }
+    slot.approved = true;
+    slot.approvedAt = new Date().toISOString();
+    state.phases[String(approvePhase)] = slot;
+    const statePath = writeMvpState(rootDir, input.name, state);
+    return {
+      planPath: path.relative(rootDir, planPath),
+      statePath: path.relative(rootDir, statePath),
+      phase: approvePhase,
+      approved: true
+    };
+  }
+
+  if (phase === 0) {
+    const statePath = writeMvpState(rootDir, input.name, state);
+    return { planPath: path.relative(rootDir, planPath), phases, statePath: path.relative(rootDir, statePath), mode: "plan-only" };
+  }
+
+  if (phase < 1 || phase > phases) {
+    throw new Error(`phase invalida: ${phase}. Debe estar entre 1 y ${phases}`);
+  }
+
+  if (phase > 1) {
+    const prev = state.phases[String(phase - 1)];
+    if (!prev || !prev.approved) {
+      throw new Error(`No se puede ejecutar fase ${phase} sin aprobar fase ${phase - 1}`);
+    }
+  }
+
+  let report = { phase, ok: true, checks: [], failures: [] };
+  if (phase === 1) {
+    const scaffold = verifyMvpScaffold(rootDir, input.name, state);
+    let installOk = true;
+    let installError = "";
+    let depsBuildOk = true;
+    let depsBuildError = "";
+    let depsBuilt = [];
+    try {
+      const installResult = runScopedPnpmInstall(rootDir, input.name, state.scope || "ambos");
+      state.phase1 = { ...(state.phase1 || {}), install: installResult };
+      depsBuilt = ensureWorkspaceDepsBuilt(rootDir, mvpRoot, input.name, state.scope || "ambos");
+    } catch (error) {
+      const detail = String(error.stderr || error.message || error);
+      if (!state.phase1 || !state.phase1.install) {
+        installOk = false;
+        installError = detail;
+      } else {
+        depsBuildOk = false;
+        depsBuildError = detail;
+      }
+    }
+
+    const devCheck = (installOk && depsBuildOk)
+      ? await verifyConcurrentDev(mvpRoot)
+      : { ok: false, outputSnippet: "install/build deps failed", command: "pnpm run dev" };
+    const failures = [...scaffold.failures];
+    if (!installOk) failures.push("Fase 1 install fallo (pnpm install requerido)");
+    if (!depsBuildOk) failures.push("Fase 1 build de dependencias workspace fallo");
+    if (!devCheck.ok) failures.push("Fase 1 dev check fallo (pnpm run dev no detecto front/back estables)");
+    if (installOk && devCheck.ok) {
+      state.phase1 = {
+        ...(state.phase1 || {}),
+        installVerified: true,
+        depsBuildVerified: true,
+        depsBuilt,
+        devVerified: true,
+        verifiedAt: new Date().toISOString()
+      };
+    }
+
+    const lessonsPath = path.join(buildMvpStateRoot(rootDir, input.name), "lessons.md");
+    if (failures.length > 0) {
+      const lesson = [
+        `## ${new Date().toISOString()} - Fase 1`,
+        "",
+        ...failures.map((f) => `- ${f}`),
+        "",
+        "### Detalle dev/install",
+        "```txt",
+        installError || "install ok",
+        depsBuildError || `workspace deps built: ${depsBuilt.join(", ") || "none"}`,
+        devCheck.outputSnippet || "",
+        "```",
+        ""
+      ].join("\n");
+      const prev = fileExists(lessonsPath) ? readFileSafe(lessonsPath) : "# Lessons\n\n";
+      writeFile(lessonsPath, `${prev}\n${lesson}`);
+    }
+
+    report = {
+      phase,
+      ok: scaffold.ok && installOk && devCheck.ok,
+      checks: [
+        ...scaffold.checks,
+        { name: "install (pnpm)", ok: installOk },
+        { name: "workspace deps build", ok: depsBuildOk, built: depsBuilt },
+        { name: "dev smoke (pnpm run dev)", ok: devCheck.ok }
+      ],
+      failures,
+      devCheck
+    };
+  }
+
+  if (phase === 2) {
+    const changes = diffFromBaseline(rootDir, state.baseline || {});
+    const frontChanges = changes.filter((x) => x.file.includes(`/mvp/${input.name}/${input.name}-front/`) || x.file.includes(`mvp/${input.name}/${input.name}-front/`));
+    const backChanges = changes.filter((x) => x.file.includes(`/mvp/${input.name}/${input.name}-back/`) || x.file.includes(`mvp/${input.name}/${input.name}-back/`));
+    const failures = [];
+    if ((state.scope || "ambos") !== "back" && frontChanges.length === 0) failures.push("No se detectaron cambios funcionales en front respecto al baseline");
+    if ((state.scope || "ambos") !== "front" && backChanges.length === 0) failures.push("No se detectaron cambios funcionales en back respecto al baseline");
+    const mvpPkg = readJsonIfExists(path.join(mvpRoot, "package.json"), { scripts: {} });
+    let buildOk = true;
+    let buildOutput = "";
+    let devOk = true;
+    let devOut = "";
+    try {
+      childProcess.execSync("npm run build", { cwd: mvpRoot, stdio: "pipe" });
+    } catch (error) {
+      buildOk = false;
+      buildOutput = String(error.stderr || error.stdout || error.message || error);
+    }
+    if (mvpPkg.scripts && mvpPkg.scripts.dev) {
+      const smoke = verifyConcurrentDev(mvpRoot);
+      devOk = smoke.ok;
+      devOut = smoke.outputSnippet || "";
+    }
+    if (!buildOk) failures.push("Fase 2 build fallo");
+    if (!devOk) failures.push("Fase 2 dev smoke fallo");
+
+    report = {
+      phase,
+      ok: failures.length === 0,
+      checks: [
+        { name: "front changes", count: frontChanges.length },
+        { name: "back changes", count: backChanges.length },
+        { name: "build", ok: buildOk },
+        { name: "dev smoke", ok: devOk }
+      ],
+      failures,
+      sampleChanges: changes.slice(0, 30),
+      buildOutput: buildOutput.slice(-700),
+      devOutput: devOut.slice(-700)
+    };
+  }
+
+  if (phase === 3) {
+    const rootPkg = readJsonIfExists(path.join(mvpRoot, "package.json"), { scripts: {} });
+    const scripts = rootPkg.scripts || {};
+    const failures = [];
+    if (!scripts.dev) failures.push("Falta script dev en root mvp");
+    if (state.scope !== "back" && !scripts["build:front"]) failures.push("Falta build:front");
+    if (state.scope !== "front" && !scripts["build:back"]) failures.push("Falta build:back");
+    const docsOk = fileExists(path.join(mvpRoot, "README.md")) && fileExists(planPath);
+    if (!docsOk) failures.push("Falta documentacion minima (README o IMPLEMENTATION_PLAN)");
+    report = {
+      phase,
+      ok: failures.length === 0,
+      checks: [{ name: "scripts+docs", ok: failures.length === 0 }],
+      failures
+    };
+  }
+
+  const reportPath = path.join(reportsDir, `phase-${phase}.${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
+  writeFile(reportPath, JSON.stringify(report, null, 2));
+
+  state.phases[String(phase)] = {
+    status: report.ok ? "executed" : "failed",
+    approved: false,
+    report: path.relative(rootDir, reportPath),
+    executedAt: new Date().toISOString()
+  };
+  state.reports = [...(state.reports || []), path.relative(rootDir, reportPath)];
+  const statePath = writeMvpState(rootDir, input.name, state);
+
+  return {
+    planPath: path.relative(rootDir, planPath),
+    statePath: path.relative(rootDir, statePath),
+    phases,
+    phase,
+    reportPath: path.relative(rootDir, reportPath),
+    report
+  };
 }
 
 function executeNewP2T(rootDir, input) {
@@ -667,7 +1318,7 @@ function executeAction(rootDir, normalized) {
   return null;
 }
 
-function main() {
+async function main() {
   const rootDir = process.cwd();
   const parsed = parseArgs(process.argv.slice(2));
   if (!parsed.action) {
@@ -678,8 +1329,12 @@ function main() {
   const mergedInput = {
     ...inputFileConfig,
     name: parsed.name || inputFileConfig.name,
+    requirement: parsed.requirement || inputFileConfig.requirement,
+    phases: parsed.phases || inputFileConfig.phases,
+    phase: parsed.phase || inputFileConfig.phase,
     projectPath: parsed.projectPath || inputFileConfig.projectPath,
-    repoUrl: parsed.repoUrl || inputFileConfig.repoUrl
+    repoUrl: parsed.repoUrl || inputFileConfig.repoUrl,
+    approvePhase: parsed.approvePhase || inputFileConfig.approvePhase
   };
 
   const normalized = normalizeInput(parsed.action, mergedInput);
@@ -696,7 +1351,7 @@ function main() {
 
   const structurePreview = buildStructurePreview(normalized);
   const shouldExecute = pf.ok && parsed.confirm;
-  const executionResult = shouldExecute ? executeAction(rootDir, normalized) : null;
+  const executionResult = shouldExecute ? await executeAction(rootDir, normalized) : null;
 
   const report = {
     version: 1,
@@ -727,9 +1382,7 @@ function main() {
   if (!pf.ok) process.exitCode = 2;
 }
 
-try {
-  main();
-} catch (error) {
+main().catch((error) => {
   process.stderr.write(`Error: ${error.message}\n`);
   process.exit(1);
-}
+});

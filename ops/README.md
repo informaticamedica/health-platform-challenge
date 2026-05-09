@@ -25,6 +25,7 @@ npm run new:memory:refresh
 ```
 
 Nota: `cli.js` requiere `--confirm` para ejecutar creacion real. Sin `--confirm` solo hace preflight + preview.
+Nota: la sesion operativa de cada MVP debe guardarse en `mvp/<name>/.orchestrator/` (no en `ops/examples`).
 
 Los comandos crean artefactos reales y registran el reporte en `ops/plans/`.
 
@@ -35,3 +36,16 @@ La interfaz principal usa TUI con Ink (flechas + enter); si no carga Ink, usa mo
 Con prompt simple como `crear un mvp que implemente ips de pacientes en fhir`, el wizard crea MVP y luego dispara `implement:mvp`.
 
 `implement:mvp` trabaja en modo plan-first: genera fases y ejecuta una fase por iteracion con validacion del usuario.
+
+Flujo recomendado para implementacion por fases:
+
+```bash
+# 1) Generar plan y estado inicial
+node tools/platform-orchestrator/cli.js implement:mvp --name <mvp-name> --phase 0 --confirm
+
+# 2) Ejecutar fase
+node tools/platform-orchestrator/cli.js implement:mvp --name <mvp-name> --phase 1 --confirm
+
+# 3) Aprobar fase (gate humano)
+node tools/platform-orchestrator/cli.js implement:mvp --name <mvp-name> --approve-phase 1 --confirm
+```

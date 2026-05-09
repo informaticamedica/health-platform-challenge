@@ -148,6 +148,7 @@ Si el texto libre incluye implementar/IPS/FHIR/pacientes, al confirmar `new:mvp`
 La skill `platform-orchestrator` prioriza automaticamente este flujo para prompts tipo `crear un mvp...`.
 
 `implement:mvp` crea `IMPLEMENTATION_PLAN.md` por fases (2-3) dentro del MVP y separa provision (`new:mvp`) de implementacion funcional.
+Incluye estado y reportes por fase en `mvp/<name>/.orchestrator/` con gates de aprobacion (`--approve-phase`).
 
 ## Generacion de MVP por skill
 
