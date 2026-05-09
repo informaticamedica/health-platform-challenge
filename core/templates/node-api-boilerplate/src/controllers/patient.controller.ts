@@ -69,7 +69,7 @@ export const updatePatient = async (req: Request, res: Response) => {
       birth_date,
       gender,
       address,
-      id: +id,
+      id,
     });
 
     RoutesService.responseSuccess(res, updatedPatient);
@@ -84,7 +84,7 @@ export const deletePatient = async (req: Request, res: Response) => {
     RoutesService.validationParams(req.params, idSchema);
     const id = RoutesService.getParamAsString(req.params.id);
 
-    const deletedPatient = await PatientModel.delete(+id);
+    const deletedPatient = await PatientModel.delete(id);
     if (!deletedPatient)
       throw new NotFoundError("Paciente no encontrado con id = " + id);
 

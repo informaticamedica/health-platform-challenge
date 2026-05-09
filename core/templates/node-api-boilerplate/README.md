@@ -32,6 +32,7 @@ JWT_SECRET=secret
 pnpm run dev
 pnpm run build
 pnpm run start
+pnpm run test:integration
 ```
 
 ## Endpoints principales
@@ -52,3 +53,4 @@ pnpm run start
   - `DB_SSL=true` habilita SSL
   - `DB_SSL_REJECT_UNAUTHORIZED=false` para cert autofirmado local
 - Build de TypeScript compila a `dist`.
+- Los tests de integracion validan login, lectura de pacientes y lectura/edicion de observaciones.

@@ -1,6 +1,7 @@
 import pool from "../db/postgres";
 import { ObservationComponents, Observations } from "../types/dao.type";
 import { Observation } from "./observation.fhir.model";
+import { v4 as uuidv4 } from "uuid";
 
 const ObservationModel = {
   async findAllByPatient(patientId: string): Promise<Observations[]> {
@@ -38,10 +39,11 @@ const ObservationModel = {
 
       // Inserta la observación principal
       const queryObservation = `
-        INSERT INTO observations (patient_id, user_id, code, value, date, status, category) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7) 
+        INSERT INTO observations (id, patient_id, user_id, code, value, date, status, category) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
         RETURNING *`;
       const { rows: observationRows } = await client.query(queryObservation, [
+        uuidv4(),
         patient_id,
         user_id,
         code,
@@ -56,10 +58,11 @@ const ObservationModel = {
       // Inserta los componentes si los hay
       if (components && components.length > 0) {
         const queryComponent = `
-          INSERT INTO observation_components (observation_id, code, value, unit) 
-          VALUES ($1, $2, $3, $4)`;
+          INSERT INTO observation_components (id, observation_id, code, value, unit) 
+          VALUES ($1, $2, $3, $4, $5)`;
         for (const component of components) {
           await client.query(queryComponent, [
+            uuidv4(),
             observation.id,
             component.code,
             component.value,
@@ -128,14 +131,16 @@ const ObservationModel = {
       if (components && components.length > 0) {
         const queryComponent = `
         INSERT INTO observation_components (
+          id,
           observation_id,
           code,
           value,
           unit
         ) 
-        VALUES ($1, $2, $3, $4)`;
+        VALUES ($1, $2, $3, $4, $5)`;
         for (const component of components) {
           await client.query(queryComponent, [
+            uuidv4(),
             id,
             component.code,
             component.value,

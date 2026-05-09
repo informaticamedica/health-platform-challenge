@@ -774,15 +774,26 @@ function verifyConcurrentDev(mvpRoot) {
     });
     let output = "";
     let settled = false;
+    const cleanup = { attempted: false, pid: child.pid || null, killed: false, error: "" };
+    const killTree = () => {
+      cleanup.attempted = true;
+      if (!child.pid) return;
+      try {
+        if (process.platform === "win32") {
+          childProcess.execSync(`taskkill /PID ${child.pid} /T /F`, { stdio: "pipe" });
+        } else {
+          process.kill(-child.pid, "SIGTERM");
+        }
+        cleanup.killed = true;
+      } catch (error) {
+        cleanup.error = String(error.stderr || error.message || error);
+      }
+    };
     const finish = (result) => {
       if (settled) return;
       settled = true;
-      try {
-        child.kill();
-      } catch (_error) {
-        // noop
-      }
-      resolve(result);
+      killTree();
+      resolve({ ...result, cleanup });
     };
     const append = (chunk) => {
       output += String(chunk || "");
@@ -790,6 +801,18 @@ function verifyConcurrentDev(mvpRoot) {
     };
     child.stdout.on("data", append);
     child.stderr.on("data", append);
+
+    child.on("error", (error) => {
+      finish({
+        ok: false,
+        outputSnippet: `${output.slice(-1000)}\n${String(error.message || error)}`,
+        timeoutHit: false,
+        frontStarted: false,
+        backStarted: false,
+        hasFatal: true,
+        command: "pnpm run dev"
+      });
+    });
 
     const timer = setTimeout(() => {
       const lower = output.toLowerCase();
@@ -824,6 +847,30 @@ function verifyConcurrentDev(mvpRoot) {
       });
     });
   });
+}
+
+function runBackendIntegrationTests(mvpRoot, mvpName, scope) {
+  if (scope === "front") {
+    return { ok: true, skipped: true, command: "pnpm --dir ./${mvpName}-back run test:integration", outputSnippet: "scope=front" };
+  }
+
+  const command = `pnpm --dir ./${mvpName}-back run test:integration`;
+  try {
+    const output = childProcess.execSync(command, { cwd: mvpRoot, stdio: "pipe" });
+    return {
+      ok: true,
+      skipped: false,
+      command,
+      outputSnippet: String(output || "").slice(-1200)
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      skipped: false,
+      command,
+      outputSnippet: String(error.stderr || error.stdout || error.message || error).slice(-2000)
+    };
+  }
 }
 
 function executeNewPackage(rootDir, input) {
@@ -1147,17 +1194,22 @@ async function executeImplementMvp(rootDir, input) {
     const devCheck = (installOk && depsBuildOk)
       ? await verifyConcurrentDev(mvpRoot)
       : { ok: false, outputSnippet: "install/build deps failed", command: "pnpm run dev" };
+    const integrationCheck = (installOk && depsBuildOk)
+      ? runBackendIntegrationTests(mvpRoot, input.name, state.scope || "ambos")
+      : { ok: false, outputSnippet: "install/build deps failed", command: "pnpm --dir ./<mvp-back> run test:integration", skipped: false };
     const failures = [...scaffold.failures];
     if (!installOk) failures.push("Fase 1 install fallo (pnpm install requerido)");
     if (!depsBuildOk) failures.push("Fase 1 build de dependencias workspace fallo");
     if (!devCheck.ok) failures.push("Fase 1 dev check fallo (pnpm run dev no detecto front/back estables)");
-    if (installOk && devCheck.ok) {
+    if (!integrationCheck.ok) failures.push("Fase 1 tests de integracion backend fallaron");
+    if (installOk && devCheck.ok && integrationCheck.ok) {
       state.phase1 = {
         ...(state.phase1 || {}),
         installVerified: true,
         depsBuildVerified: true,
         depsBuilt,
         devVerified: true,
+        integrationVerified: true,
         verifiedAt: new Date().toISOString()
       };
     }
@@ -1174,6 +1226,7 @@ async function executeImplementMvp(rootDir, input) {
         installError || "install ok",
         depsBuildError || `workspace deps built: ${depsBuilt.join(", ") || "none"}`,
         devCheck.outputSnippet || "",
+        integrationCheck.outputSnippet || "",
         "```",
         ""
       ].join("\n");
@@ -1183,15 +1236,17 @@ async function executeImplementMvp(rootDir, input) {
 
     report = {
       phase,
-      ok: scaffold.ok && installOk && devCheck.ok,
+      ok: scaffold.ok && installOk && depsBuildOk && devCheck.ok && integrationCheck.ok,
       checks: [
         ...scaffold.checks,
         { name: "install (pnpm)", ok: installOk },
         { name: "workspace deps build", ok: depsBuildOk, built: depsBuilt },
-        { name: "dev smoke (pnpm run dev)", ok: devCheck.ok }
+        { name: "dev smoke (pnpm run dev)", ok: devCheck.ok, cleanup: devCheck.cleanup || null },
+        { name: "integration tests backend", ok: integrationCheck.ok, command: integrationCheck.command, skipped: Boolean(integrationCheck.skipped) }
       ],
       failures,
-      devCheck
+      devCheck,
+      integrationCheck
     };
   }
 
@@ -1214,7 +1269,7 @@ async function executeImplementMvp(rootDir, input) {
       buildOutput = String(error.stderr || error.stdout || error.message || error);
     }
     if (mvpPkg.scripts && mvpPkg.scripts.dev) {
-      const smoke = verifyConcurrentDev(mvpRoot);
+      const smoke = await verifyConcurrentDev(mvpRoot);
       devOk = smoke.ok;
       devOut = smoke.outputSnippet || "";
     }

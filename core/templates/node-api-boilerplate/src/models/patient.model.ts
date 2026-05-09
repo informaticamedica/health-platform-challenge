@@ -1,10 +1,11 @@
 import pool from "../db/postgres";
 import { DatabaseError } from "../services/error.service";
+import { v4 as uuidv4 } from "uuid";
 
 export interface Patient {
-  id: number;
+  id: string;
   name: string;
-  birth_date: number;
+  birth_date: string;
   gender: string;
   address?: string;
 }
@@ -43,11 +44,12 @@ const PatientModel = {
   async create(patient: Omit<Patient, "id">): Promise<Patient> {
     try {
       const query = `
-      INSERT INTO patients (name, birth_date, gender, address)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO patients (id, name, birth_date, gender, address)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
       const values = [
+        uuidv4(),
         patient.name,
         patient.birth_date,
         patient.gender,
@@ -61,7 +63,7 @@ const PatientModel = {
     }
   },
 
-  async delete(id: number): Promise<boolean> {
+  async delete(id: string): Promise<boolean> {
     try {
       const query = "DELETE FROM patients WHERE id = $1";
       const { rowCount } = await pool.query(query, [id]);

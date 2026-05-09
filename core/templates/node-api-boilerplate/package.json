@@ -6,7 +6,8 @@
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "start": "node dist/index.js",
-    "test": "jest"
+    "test": "jest",
+    "test:integration": "jest --runInBand src/controllers/integration.*.test.ts"
   },
   "keywords": [],
   "author": "",
