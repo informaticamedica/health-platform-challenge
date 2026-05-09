@@ -1,0 +1,6 @@
+{
+  "name": "alerts-db",
+  "provider": "postgres",
+  "schema": "public",
+  "seed": "default"
+}

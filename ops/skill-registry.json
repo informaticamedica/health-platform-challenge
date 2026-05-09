@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "entrypoint": "platform-orchestrator",
+  "commands": {
+    "new:mvp": {
+      "skill": "mvp-product-orchestrator",
+      "worker": "mvp-product-orchestrator",
+      "inputSchema": "ops/schemas/new-mvp.request.schema.json",
+      "outputSchema": "ops/schemas/orchestrator.response.schema.json"
+    },
+    "new:db": {
+      "skill": "infra-local-bootstrapper",
+      "worker": "infra-local-bootstrapper",
+      "inputSchema": "ops/schemas/new-db.request.schema.json",
+      "outputSchema": "ops/schemas/orchestrator.response.schema.json"
+    },
+    "new:package": {
+      "skill": "packages-integration-bridge",
+      "worker": "packages-integration-bridge",
+      "inputSchema": "ops/schemas/new-package.request.schema.json",
+      "outputSchema": "ops/schemas/orchestrator.response.schema.json"
+    },
+    "new:template": {
+      "skill": "react-product-scaffold|node-api-feature-factory",
+      "worker": "template-factory",
+      "inputSchema": "ops/schemas/new-template.request.schema.json",
+      "outputSchema": "ops/schemas/orchestrator.response.schema.json"
+    },
+    "new:p2t": {
+      "skill": "template-promoter",
+      "worker": "template-promoter",
+      "inputSchema": "ops/schemas/new-p2t.request.schema.json",
+      "outputSchema": "ops/schemas/orchestrator.response.schema.json"
+    }
+  },
+  "policy": {
+    "mode": "headless",
+    "temperature": 0,
+    "top_p": 1,
+    "retries": 1,
+    "responseFormat": "json"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "condition-mvp-v2",
+  "scope": "ambos",
+  "templateFront": "core/templates/react-app-boilerplate",
+  "templateBack": "core/templates/node-api-boilerplate",
+  "packagesFront": ["@platform/design-system", "@platform/contracts"],
+  "packagesBack": ["@platform/fhir", "@platform/contracts", "@platform/middleware", "@platform/config", "@platform/logger"],
+  "db": {
+    "provider": "postgres",
+    "name": "platform_condition_mvp_v2",
+    "migrateCommand": "pnpm run db:migrate"
+  },
+  "testing": "ambos"
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "orchestrator.response.schema.json",
+  "type": "object",
+  "required": ["version", "mode", "action", "normalizedInput", "preflight", "execution", "next"],
+  "properties": {
+    "version": { "type": "integer" },
+    "mode": { "type": "string", "enum": ["headless"] },
+    "action": { "type": "string", "pattern": "^new:[a-z0-9-]+$" },
+    "normalizedInput": { "type": "object" },
+    "preflight": {
+      "type": "object",
+      "required": ["ok", "errors", "warnings"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "errors": { "type": "array", "items": { "type": "string" } },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": ["steps", "outDir", "preflight"],
+      "properties": {
+        "steps": { "type": "array", "items": { "type": "string" } },
+        "outDir": { "type": "string" },
+        "preflight": { "type": "object" }
+      }
+    },
+    "analysis": { "type": ["object", "null"] },
+    "next": { "type": "string" }
+  }
+}

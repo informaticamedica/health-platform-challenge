@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "mode": "headless",
+  "action": "new:mvp",
+  "normalizedInput": {
+    "action": "new:mvp",
+    "name": "",
+    "scope": "ambos",
+    "templateFront": "core/templates/react-app-boilerplate",
+    "templateBack": "core/templates/node-api-boilerplate",
+    "packagesFront": [
+      "@platform/contracts",
+      "@platform/design-system"
+    ],
+    "packagesBack": [
+      "@platform/config",
+      "@platform/contracts",
+      "@platform/fhir",
+      "@platform/logger",
+      "@platform/middleware"
+    ],
+    "db": {
+      "provider": "postgres",
+      "name": "",
+      "migrateCommand": "pnpm run db:migrate"
+    },
+    "testing": "ambos"
+  },
+  "preflight": {
+    "ok": false,
+    "errors": [
+      "name debe estar en kebab-case",
+      "Ya existe: mvp/"
+    ],
+    "warnings": []
+  },
+  "execution": {
+    "steps": [
+      "Resolver skill por accion new:*",
+      "Validar input contra contrato canonico",
+      "Ejecutar preflight estricto",
+      "Persistir plan determinista para auditoria"
+    ],
+    "outDir": "C:\\Users\\Juan\\Documents\\git\\health-platform-challenge\\ops\\plans",
+    "preflight": {
+      "ok": false,
+      "errors": [
+        "name debe estar en kebab-case",
+        "Ya existe: mvp/"
+      ],
+      "warnings": []
+    }
+  },
+  "analysis": null,
+  "next": "Corregi errores de preflight y reintenta."
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "new-p2t.request.schema.json",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "repoUrl": { "type": "string" },
+    "projectPath": { "type": "string" },
+    "target": { "type": "string" }
+  },
+  "anyOf": [
+    { "required": ["repoUrl"] },
+    { "required": ["projectPath"] }
+  ]
+}

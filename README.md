@@ -99,6 +99,37 @@ pnpm run db:down            # Detiene PostgreSQL local
 pnpm run db:reset           # Reinicia DB en limpio (drop volumen + seed)
 ```
 
+## Orquestador general (headless)
+
+Comandos canonicos `new:*`:
+
+```bash
+npm run new:mvp
+npm run new:db
+npm run new:package
+npm run new:template
+npm run new:p2t
+```
+
+Uso reproducible con config:
+
+```bash
+npm run new:mvp -- ops/examples/new-mvp.json
+npm run new:db -- ops/examples/new-db.json
+npm run new:package -- ops/examples/new-package.json
+npm run new:template -- ops/examples/new-template.json
+npm run new:p2t -- ops/examples/new-p2t.local.json
+```
+
+`new:p2t` admite:
+
+- `--repo-url <git-url>`
+- `--project-path <ruta-local>`
+
+Salida determinista en `ops/plans/`.
+
+Los comandos `new:*` ejecutan creacion real de artefactos y dejan trazabilidad en `ops/plans/`.
+
 ## Generacion de MVP por skill
 
 Skill disponible: `mvp/.agents/skills/mvp-product-orchestrator/SKILL.md`.

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "new-db.request.schema.json",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "provider": { "type": "string", "enum": ["postgres"] },
+    "schema": { "type": "string" },
+    "seed": { "type": "string" }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "mode": "headless",
+  "action": "new:mvp",
+  "normalizedInput": {
+    "action": "new:mvp",
+    "name": "condition-mvp-v2",
+    "scope": "ambos",
+    "templateFront": "core/templates/react-app-boilerplate",
+    "templateBack": "core/templates/node-api-boilerplate",
+    "packagesFront": [
+      "@platform/contracts",
+      "@platform/design-system"
+    ],
+    "packagesBack": [
+      "@platform/config",
+      "@platform/contracts",
+      "@platform/fhir",
+      "@platform/logger",
+      "@platform/middleware"
+    ],
+    "db": {
+      "provider": "postgres",
+      "name": "platform_condition_mvp_v2",
+      "migrateCommand": "pnpm run db:migrate"
+    },
+    "testing": "ambos"
+  },
+  "preflight": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "execution": {
+    "steps": [
+      "Resolver skill por accion new:*",
+      "Validar input contra contrato canonico",
+      "Ejecutar preflight estricto",
+      "Persistir plan determinista para auditoria"
+    ],
+    "outDir": "C:\\Users\\Juan\\Documents\\git\\health-platform-challenge\\ops\\plans",
+    "preflight": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  "analysis": null,
+  "next": "Input valido. Ejecutar worker correspondiente segun skill contract."
+}

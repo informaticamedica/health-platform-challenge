@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "mode": "headless",
+  "action": "new:template",
+  "normalizedInput": {
+    "action": "new:template",
+    "name": "react-app-template-v2",
+    "layer": "front",
+    "base": "core/templates/react-app-boilerplate"
+  },
+  "preflight": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "execution": {
+    "steps": [
+      "Resolver skill por accion new:*",
+      "Validar input contra contrato canonico",
+      "Ejecutar preflight estricto",
+      "Persistir plan determinista para auditoria"
+    ],
+    "outDir": "C:\\Users\\Juan\\Documents\\git\\health-platform-challenge\\ops\\plans",
+    "preflight": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    }
+  },
+  "analysis": null,
+  "executionResult": {
+    "target": "core\\templates\\react-app-template-v2",
+    "fromBase": true
+  },
+  "next": "Ejecucion completada. Revisar artefactos y validar build/tests."
+}

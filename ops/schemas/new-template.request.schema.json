@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "new-template.request.schema.json",
+  "type": "object",
+  "required": ["name", "layer"],
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "layer": { "type": "string", "enum": ["front", "back", "legacy"] },
+    "base": { "type": "string" }
+  }
+}
