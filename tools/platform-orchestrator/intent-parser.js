@@ -32,7 +32,7 @@ function inferBackTemplate(text) {
   if (includesAny(text, ["modular", "modular api", "arquitectura modular"])) {
     return "core/templates/modular-api-boilerplate";
   }
-  return "core/templates/node-api-boilerplate";
+  return "core/templates/modular-api-boilerplate";
 }
 
 function inferFrontTemplate(_text) {
@@ -83,6 +83,10 @@ function parseTextToProposal(text) {
     },
     suggestions: {
       names: getNameSuggestions(pickedAction, name)
+    },
+    meta: {
+      autoImplement: false,
+      requirement: ""
     }
   };
 
@@ -98,6 +102,10 @@ function parseTextToProposal(text) {
       migrateCommand: "pnpm run db:migrate"
     };
     proposal.config.testing = "ambos";
+    if (includesAny(normalized, ["implementar", "implemente", "implement", "fhir", "ips", "paciente", "patients"])) {
+      proposal.meta.autoImplement = true;
+      proposal.meta.requirement = String(text || "").trim();
+    }
   } else if (pickedAction === "new:db") {
     proposal.config.provider = inferProvider(normalized);
     proposal.config.schema = "public";

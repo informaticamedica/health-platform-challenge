@@ -110,6 +110,7 @@ npm run new:db
 npm run new:package
 npm run new:template
 npm run new:p2t
+npm run implement:mvp -- ops/examples/implement-mvp.json
 npm run new:memory:refresh
 ```
 
@@ -121,6 +122,13 @@ npm run new:db -- ops/examples/new-db.json
 npm run new:package -- ops/examples/new-package.json
 npm run new:template -- ops/examples/new-template.json
 npm run new:p2t -- ops/examples/new-p2t.local.json
+npm run implement:mvp -- ops/examples/implement-mvp.json
+```
+
+Para ejecutar creacion real en modo headless, agregar `--confirm`:
+
+```bash
+node tools/platform-orchestrator/cli.js new:mvp ops/examples/new-mvp.json --confirm
 ```
 
 `new:p2t` admite:
@@ -136,6 +144,10 @@ Los comandos `new:*` ejecutan creacion real de artefactos y dejan trazabilidad e
 
 `npm run new` abre el wizard interactivo (incluye opcion de texto libre) y luego ejecuta el mismo motor headless.
 El wizard usa una TUI con Ink (colores, tabs y navegacion con flechas). Si Ink no esta disponible, cae al wizard clasico.
+Si el texto libre incluye implementar/IPS/FHIR/pacientes, al confirmar `new:mvp` tambien dispara `implement:mvp` para crear el plan por fases.
+La skill `platform-orchestrator` prioriza automaticamente este flujo para prompts tipo `crear un mvp...`.
+
+`implement:mvp` crea `IMPLEMENTATION_PLAN.md` por fases (2-3) dentro del MVP y separa provision (`new:mvp`) de implementacion funcional.
 
 ## Generacion de MVP por skill
 

@@ -1,0 +1,6 @@
+{
+  "name": "example-mvp",
+  "requirement": "Crear plan incremental para implementar requerimiento de negocio en front y back de manera agnostica al dominio.",
+  "phases": 3,
+  "phase": 0
+}

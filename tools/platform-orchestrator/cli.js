@@ -10,24 +10,52 @@ const ALLOWED_ACTIONS = new Set([
   "new:db",
   "new:package",
   "new:template",
-  "new:p2t"
+  "new:p2t",
+  "implement:mvp"
 ]);
 
 function parseArgs(argv) {
-  const args = { action: "", config: "", name: "", projectPath: "", repoUrl: "", mode: "headless" };
+  const args = { action: "", config: "", name: "", projectPath: "", repoUrl: "", mode: "headless", confirm: false };
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
-    if (!args.action && token.startsWith("new:")) {
+    if (!args.action && (token.startsWith("new:") || token.startsWith("implement:"))) {
       args.action = token;
       continue;
     }
-    if (token === "--action") args.action = argv[i + 1] || "";
-    if (token === "--name") args.name = argv[i + 1] || "";
-    if (token === "--config") args.config = argv[i + 1] || "";
-    if (token === "--input") args.config = argv[i + 1] || "";
-    if (token === "--project-path") args.projectPath = argv[i + 1] || "";
-    if (token === "--repo-url") args.repoUrl = argv[i + 1] || "";
-    if (token === "--mode") args.mode = argv[i + 1] || "headless";
+    if (token === "--action") {
+      args.action = argv[i + 1] || "";
+      i += 1;
+      continue;
+    }
+    if (token === "--name") {
+      args.name = argv[i + 1] || "";
+      i += 1;
+      continue;
+    }
+    if (token === "--config" || token === "--input") {
+      args.config = argv[i + 1] || "";
+      i += 1;
+      continue;
+    }
+    if (token === "--project-path") {
+      args.projectPath = argv[i + 1] || "";
+      i += 1;
+      continue;
+    }
+    if (token === "--repo-url") {
+      args.repoUrl = argv[i + 1] || "";
+      i += 1;
+      continue;
+    }
+    if (token === "--mode") {
+      args.mode = argv[i + 1] || "headless";
+      i += 1;
+      continue;
+    }
+    if (token === "--confirm") {
+      args.confirm = true;
+      continue;
+    }
     if (!token.startsWith("-") && !args.config && i > 0) {
       args.config = token;
     }
@@ -121,6 +149,12 @@ function normalizeInput(action, input) {
     normalized.projectPath = String(input.projectPath || "").trim();
     normalized.target = String(input.target || "core/templates").trim();
   }
+  if (action === "implement:mvp") {
+    normalized.name = String(input.name || "").trim();
+    normalized.requirement = String(input.requirement || "").trim();
+    normalized.phases = Number(input.phases || 3);
+    normalized.phase = Number(input.phase || 0);
+  }
   return normalized;
 }
 
@@ -136,6 +170,15 @@ function preflight(rootDir, normalized) {
     if (normalized.name) {
       const target = path.resolve(rootDir, "mvp", normalized.name);
       if (fileExists(target)) errors.push(`Ya existe: mvp/${normalized.name}`);
+      const existingNames = collectPackageNames(rootDir);
+      const candidateFront = `@platform/${safePackageName(normalized.name)}-front`;
+      const candidateBack = `@platform/${safePackageName(normalized.name)}-back`;
+      if (normalized.scope !== "back" && existingNames.has(candidateFront)) {
+        errors.push(`Conflicto de package name: ${candidateFront}`);
+      }
+      if (normalized.scope !== "front" && existingNames.has(candidateBack)) {
+        errors.push(`Conflicto de package name: ${candidateBack}`);
+      }
     }
   }
   if (normalized.action === "new:db") {
@@ -166,6 +209,13 @@ function preflight(rootDir, normalized) {
         : path.resolve(rootDir, normalized.projectPath);
       if (!fileExists(absolute)) errors.push(`projectPath no existe: ${normalized.projectPath}`);
     }
+  }
+  if (normalized.action === "implement:mvp") {
+    if (!normalized.name) errors.push("name es obligatorio");
+    const mvpPath = path.resolve(rootDir, "mvp", normalized.name);
+    if (!fileExists(mvpPath)) errors.push(`No existe MVP: mvp/${normalized.name}`);
+    if (!normalized.requirement) warnings.push("requirement vacio: se creara plan generico");
+    if (normalized.phases < 2 || normalized.phases > 3) warnings.push("phases recomendado entre 2 y 3");
   }
   return { ok: errors.length === 0, errors, warnings };
 }
@@ -209,6 +259,37 @@ function scanProject(projectPath) {
   return findings;
 }
 
+function collectPackageNames(rootDir) {
+  const roots = [
+    path.resolve(rootDir, "core", "templates"),
+    path.resolve(rootDir, "core", "packages"),
+    path.resolve(rootDir, "mvp")
+  ];
+  const names = new Set();
+
+  function walk(dirPath, depth) {
+    if (!fileExists(dirPath) || depth > 5) return;
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (const entry of entries) {
+      const full = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === "node_modules" || entry.name === ".git") continue;
+        walk(full, depth + 1);
+      } else if (entry.name === "package.json") {
+        try {
+          const pkg = readJsonSafe(full);
+          if (pkg && pkg.name) names.add(String(pkg.name));
+        } catch (_error) {
+          // ignore invalid package json
+        }
+      }
+    }
+  }
+
+  roots.forEach((root) => walk(root, 0));
+  return names;
+}
+
 function buildExecutionPlan(rootDir, normalized, pf) {
   const plan = [];
   const outDir = path.resolve(rootDir, "ops", "plans");
@@ -219,8 +300,81 @@ function buildExecutionPlan(rootDir, normalized, pf) {
     plan.push("Analizar proyecto origen y mapear artefactos reutilizables");
     plan.push("Proponer estructura de template y reglas de parametrizacion");
   }
+  if (normalized.action === "implement:mvp") {
+    plan.push("Analizar requerimiento funcional en modo plan-first");
+    plan.push("Generar IMPLEMENTATION_PLAN.md en 2-3 fases");
+    plan.push("Ejecutar solo una fase por iteracion y esperar feedback");
+  }
   plan.push("Persistir plan determinista para auditoria");
   return { steps: plan, outDir, preflight: pf };
+}
+
+function buildStructurePreview(normalized) {
+  if (normalized.action === "new:mvp") {
+    const lines = [`mvp/${normalized.name}/`];
+    if (normalized.scope !== "back") lines.push(`mvp/${normalized.name}/${normalized.name}-front/`);
+    if (normalized.scope !== "front") lines.push(`mvp/${normalized.name}/${normalized.name}-back/`);
+    lines.push(`mvp/${normalized.name}/package.json`);
+    lines.push(`mvp/${normalized.name}/README.md`);
+    return lines;
+  }
+  if (normalized.action === "new:db") {
+    return [
+      `infra/local/postgres/${normalized.name}/docker-compose.yml`,
+      `infra/local/postgres/${normalized.name}/sql/01_schema.sql`,
+      `infra/local/postgres/${normalized.name}/seed/${normalized.seed}/zz_seed_health_check.sql`,
+      `infra/local/postgres/${normalized.name}/package.json`,
+      `infra/local/postgres/${normalized.name}/README.md`
+    ];
+  }
+  if (normalized.action === "new:package") {
+    return [
+      `core/packages/${normalized.name}/src/index.ts`,
+      `core/packages/${normalized.name}/package.json`,
+      `core/packages/${normalized.name}/tsconfig.json`,
+      `core/packages/${normalized.name}/README.md`,
+      `core/packages/${normalized.name}/.agents/README.md`
+    ];
+  }
+  if (normalized.action === "new:template") {
+    return [
+      `core/templates/${normalized.name}/`,
+      `core/templates/${normalized.name}/README.md`,
+      `core/templates/${normalized.name}/.agents/README.md`
+    ];
+  }
+  if (normalized.action === "new:p2t") {
+    return [
+      `core/templates/${normalized.name}/PROMOTION_PLAN.json`,
+      `core/templates/${normalized.name}/README.md`
+    ];
+  }
+  if (normalized.action === "implement:mvp") {
+    return [`mvp/${normalized.name}/IMPLEMENTATION_PLAN.md`];
+  }
+  return [];
+}
+
+function safePackageName(name) {
+  return String(name || "").toLowerCase().replace(/[^a-z0-9-]/g, "-");
+}
+
+function rewritePackageNameIfExists(dirPath, packageName) {
+  const pkgPath = path.join(dirPath, "package.json");
+  if (!fileExists(pkgPath)) return false;
+  const pkg = readJsonSafe(pkgPath);
+  pkg.name = packageName;
+  writeFile(pkgPath, JSON.stringify(pkg, null, 2));
+  return true;
+}
+
+function computeMvpStructure(input) {
+  const lines = [`mvp/${input.name}/`];
+  if (input.scope !== "back") lines.push(`mvp/${input.name}/${input.name}-front/`);
+  if (input.scope !== "front") lines.push(`mvp/${input.name}/${input.name}-back/`);
+  lines.push(`mvp/${input.name}/package.json`);
+  lines.push(`mvp/${input.name}/README.md`);
+  return lines;
 }
 
 function executeNewDb(rootDir, input) {
@@ -306,7 +460,15 @@ function executeNewDb(rootDir, input) {
     ].join("\n")
   );
 
-  return { target: path.relative(rootDir, target), dbPort };
+  return {
+    target: path.relative(rootDir, target),
+    dbPort,
+    commands: {
+      up: `npm --prefix ${path.relative(rootDir, target)} run up`,
+      down: `npm --prefix ${path.relative(rootDir, target)} run down`,
+      reset: `npm --prefix ${path.relative(rootDir, target)} run reset`
+    }
+  };
 }
 
 function executeNewPackage(rootDir, input) {
@@ -391,26 +553,76 @@ function executeNewMvp(rootDir, input) {
     copyDir(backBase, backTarget, { ignore: ["node_modules", "dist"] });
     created.push(path.relative(rootDir, backTarget));
   }
+  const scripts = { "db:migrate": input.db.migrateCommand };
+  if (input.scope !== "back") {
+    scripts["dev:front"] = `npm --prefix ./${input.name}-front run dev`;
+    scripts["build:front"] = `npm --prefix ./${input.name}-front run build`;
+  }
+  if (input.scope !== "front") {
+    scripts["dev:back"] = `npm --prefix ./${input.name}-back run dev`;
+    scripts["build:back"] = `npm --prefix ./${input.name}-back run build`;
+  }
+  if (input.scope === "ambos") {
+    scripts.dev = "concurrently \"npm run dev:front\" \"npm run dev:back\"";
+    scripts["build:all"] = "npm run build:front && npm run build:back";
+  }
+
   writeFile(
     path.join(mvpRoot, "package.json"),
     JSON.stringify(
       {
         name: input.name,
         private: true,
-        scripts: {
-          "install:all": "pnpm -r install",
-          "build:all": "pnpm -r run build",
-          "dev:front": `pnpm --filter ./${input.name}-front run dev`,
-          "dev:back": `pnpm --filter ./${input.name}-back run dev`,
-          "db:migrate": input.db.migrateCommand
+        scripts,
+        devDependencies: {
+          concurrently: "^9.0.1"
         }
       },
       null,
       2
     )
   );
-  writeFile(path.join(mvpRoot, "README.md"), `# ${input.name}\n\nMVP generado por new:mvp.`);
-  return { target: path.relative(rootDir, mvpRoot), created };
+
+  if (input.scope !== "back") {
+    rewritePackageNameIfExists(path.join(mvpRoot, `${input.name}-front`), `@platform/${safePackageName(input.name)}-front`);
+  }
+  if (input.scope !== "front") {
+    rewritePackageNameIfExists(path.join(mvpRoot, `${input.name}-back`), `@platform/${safePackageName(input.name)}-back`);
+  }
+
+  writeFile(
+    path.join(mvpRoot, "README.md"),
+    `# ${input.name}\n\nMVP generado por new:mvp.\n\n## Install\n\n- npm install\n\n## Dev\n\n- npm run dev (front+back)\n- npm run dev:front\n- npm run dev:back\n`
+  );
+  return { target: path.relative(rootDir, mvpRoot), created, structure: computeMvpStructure(input) };
+}
+
+function executeImplementMvp(rootDir, input) {
+  const mvpRoot = path.resolve(rootDir, "mvp", input.name);
+  const planPath = path.join(mvpRoot, "IMPLEMENTATION_PLAN.md");
+  const phases = Math.min(3, Math.max(2, input.phases || 3));
+  const req = input.requirement || "Implementar capacidades de negocio de forma incremental y agnostica al dominio.";
+  const plan = [
+    `# Implementation Plan - ${input.name}`,
+    "",
+    "## Requirement",
+    "",
+    req,
+    "",
+    "## Phases",
+    "",
+    "1. Fase 1 - Foundation: contratos, rutas base, wiring y pruebas iniciales.",
+    "2. Fase 2 - Features: endpoints/UI principales y validaciones.",
+    phases === 3 ? "3. Fase 3 - Hardening: tests integracion, docs, observabilidad y cierre." : "",
+    "",
+    "## Flow",
+    "",
+    "- Ejecutar una fase por iteracion.",
+    "- Validar con usuario antes de avanzar.",
+    "- No avanzar de fase sin feedback explicito."
+  ].filter(Boolean).join("\n");
+  writeFile(planPath, plan);
+  return { planPath: path.relative(rootDir, planPath), phases };
 }
 
 function executeNewP2T(rootDir, input) {
@@ -451,6 +663,7 @@ function executeAction(rootDir, normalized) {
   if (normalized.action === "new:template") return executeNewTemplate(rootDir, normalized);
   if (normalized.action === "new:mvp") return executeNewMvp(rootDir, normalized);
   if (normalized.action === "new:p2t") return executeNewP2T(rootDir, normalized);
+  if (normalized.action === "implement:mvp") return executeImplementMvp(rootDir, normalized);
   return null;
 }
 
@@ -481,7 +694,9 @@ function main() {
     analysis = scanProject(absolute);
   }
 
-  const executionResult = pf.ok ? executeAction(rootDir, normalized) : null;
+  const structurePreview = buildStructurePreview(normalized);
+  const shouldExecute = pf.ok && parsed.confirm;
+  const executionResult = shouldExecute ? executeAction(rootDir, normalized) : null;
 
   const report = {
     version: 1,
@@ -490,10 +705,14 @@ function main() {
     normalizedInput: normalized,
     preflight: pf,
     execution: plan,
+    structurePreview,
+    requiresConfirmation: !parsed.confirm,
     analysis,
     executionResult,
     next: pf.ok
-      ? "Ejecucion completada. Revisar artefactos y validar build/tests."
+      ? (parsed.confirm
+        ? "Ejecucion completada. Revisar artefactos y validar build/tests."
+        : "Preflight OK. Confirma ejecucion reintentando con --confirm para crear artefactos.")
       : "Corregi errores de preflight y reintenta."
   };
 

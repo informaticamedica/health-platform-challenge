@@ -9,4 +9,5 @@ Este directorio define skills internas para acelerar tareas repetibles.
 
 - Skill de entrada: `skills/platform-orchestrator/SKILL.md`.
 - Comandos canonicos: `new:mvp`, `new:db`, `new:package`, `new:template`, `new:p2t`.
+- Implementacion incremental: `implement:mvp` via `skills/mvp-delivery-orchestrator/SKILL.md`.
 - Contratos y mapeo: `ops/skill-registry.json` y `ops/schemas/*`.

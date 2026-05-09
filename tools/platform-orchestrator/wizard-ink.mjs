@@ -24,7 +24,7 @@ const TABS = ["Crear", "Nombre", "Config", "Confirmar"];
 function runCli(action, config) {
   const tempFile = path.join(os.tmpdir(), `platform-orchestrator-${Date.now()}.json`);
   fs.writeFileSync(tempFile, `${JSON.stringify(config, null, 2)}\n`, "utf8");
-  childProcess.execSync(`node "tools/platform-orchestrator/cli.js" ${action} "${tempFile}"`, { stdio: "inherit" });
+  childProcess.execSync(`node "tools/platform-orchestrator/cli.js" ${action} "${tempFile}" --confirm`, { stdio: "inherit" });
   fs.unlinkSync(tempFile);
 }
 
@@ -42,6 +42,26 @@ function progress(step) {
   return `${"#".repeat(fill)}${"-".repeat(len - fill)} ${pct}%`;
 }
 
+function previewStructure(action, config) {
+  if (action === "new:mvp") {
+    const lines = [`mvp/${config.name}/`];
+    if (config.scope !== "back") lines.push(`mvp/${config.name}/${config.name}-front/`);
+    if (config.scope !== "front") lines.push(`mvp/${config.name}/${config.name}-back/`);
+    lines.push(`mvp/${config.name}/package.json`);
+    lines.push(`mvp/${config.name}/README.md`);
+    return lines;
+  }
+  if (action === "new:db") {
+    return [
+      `infra/local/postgres/${config.name}/docker-compose.yml`,
+      `infra/local/postgres/${config.name}/sql/01_schema.sql`,
+      `infra/local/postgres/${config.name}/seed/default/*.sql`,
+      `infra/local/postgres/${config.name}/package.json`
+    ];
+  }
+  return ["Estructura especifica disponible en executionResult."];
+}
+
 function App() {
   const { exit } = useApp();
   const [step, setStep] = useState(0);
@@ -54,6 +74,8 @@ function App() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [editingFinal, setEditingFinal] = useState(false);
   const [editCursor, setEditCursor] = useState(0);
+  const [autoImplement, setAutoImplement] = useState(false);
+  const [implementRequirement, setImplementRequirement] = useState("");
 
   const nameSuggestions = useMemo(
     () => (action ? getNameSuggestions(action, config.name || "example-item") : []),
@@ -133,6 +155,7 @@ function App() {
 
   useInput((input, key) => {
     if (key.ctrl && input === "c") return exit();
+    if (input === "q") return exit();
 
     if (mode === "input") {
       if (key.return) {
@@ -140,6 +163,8 @@ function App() {
           const proposal = parseTextToProposal(textBuffer);
           setAction(proposal.action);
           setConfig(proposal.config);
+          setAutoImplement(Boolean(proposal.meta?.autoImplement));
+          setImplementRequirement(proposal.meta?.requirement || "");
           setStep(1);
           setCursor(0);
           setLog(`Interpretado como ${proposal.action}`);
@@ -199,6 +224,30 @@ function App() {
 
     if (key.upArrow) return editingFinal ? setEditCursor((v) => Math.max(0, v - 1)) : setCursor((v) => Math.max(0, v - 1));
     if (key.downArrow) return editingFinal ? setEditCursor((v) => Math.min(flatEntries.length - 1, v + 1)) : setCursor((v) => Math.min(activeOptions.length - 1, v + 1));
+    if (input === "b") {
+      if (step > 0) {
+        setStep(step - 1);
+        setCursor(0);
+        setEditingFinal(false);
+      }
+      return;
+    }
+    if (input === "e" && step === 3) {
+      setEditingFinal(true);
+      setEditCursor(0);
+      setLog("Edit mode activo: Enter para editar campo");
+      return;
+    }
+    if (input === "r" && step === 3) {
+      const finalConfig = { ...config };
+      if (action === "new:p2t") {
+        delete finalConfig.sourceType;
+        delete finalConfig.sourceValue;
+      }
+      runCli(action, finalConfig);
+      exit();
+      return;
+    }
 
     if (key.return) {
       if (step === 0) {
@@ -261,6 +310,14 @@ function App() {
             delete finalConfig.sourceValue;
           }
           runCli(action, finalConfig);
+          if (action === "new:mvp" && autoImplement) {
+            runCli("implement:mvp", {
+              name: finalConfig.name,
+              requirement: implementRequirement || `Implementar requerimiento funcional para ${finalConfig.name}`,
+              phases: 3,
+              phase: 0
+            });
+          }
           exit();
           return;
         }
@@ -311,11 +368,16 @@ function App() {
             Box,
             { marginTop: 1, flexDirection: "column" },
             React.createElement(Text, { color: "yellow" }, "Resumen"),
-            React.createElement(Text, { color: "gray" }, JSON.stringify({ action, ...config }, null, 2))
+            React.createElement(Text, { color: "gray" }, JSON.stringify({ action, ...config }, null, 2)),
+            action === "new:mvp" && autoImplement
+              ? React.createElement(Text, { color: "green" }, "Post-step: implement:mvp se ejecutara al confirmar")
+              : null,
+            React.createElement(Text, { color: "yellow" }, "Estructura a crear"),
+            previewStructure(action, config).map((line, index) => React.createElement(Text, { key: `p-${index}`, color: "gray" }, `- ${line}`))
           )
         : null,
       log ? React.createElement(Text, { color: "blue" }, log) : null,
-      React.createElement(Text, { dimColor: true }, "Ctrl+C para salir")
+      React.createElement(Text, { dimColor: true }, "Atajos: ↑/↓ mover | Enter seleccionar | e editar | b volver | r ejecutar | q salir")
     )
   );
 }

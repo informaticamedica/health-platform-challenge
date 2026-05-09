@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "implement-mvp.request.schema.json",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "requirement": { "type": "string" },
+    "phases": { "type": "integer", "minimum": 2, "maximum": 3 },
+    "phase": { "type": "integer", "minimum": 0, "maximum": 3 }
+  }
+}

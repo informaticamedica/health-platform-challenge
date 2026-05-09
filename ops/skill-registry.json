@@ -31,6 +31,12 @@
       "worker": "template-promoter",
       "inputSchema": "ops/schemas/new-p2t.request.schema.json",
       "outputSchema": "ops/schemas/orchestrator.response.schema.json"
+    },
+    "implement:mvp": {
+      "skill": "mvp-delivery-orchestrator",
+      "worker": "mvp-delivery-orchestrator",
+      "inputSchema": "ops/schemas/implement-mvp.request.schema.json",
+      "outputSchema": "ops/schemas/orchestrator.response.schema.json"
     }
   },
   "policy": {

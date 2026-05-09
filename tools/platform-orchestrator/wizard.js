@@ -51,6 +51,26 @@ function createRl() {
   });
 }
 
+function previewStructure(action, config) {
+  if (action === "new:mvp") {
+    const lines = [`mvp/${config.name}/`];
+    if (config.scope !== "back") lines.push(`mvp/${config.name}/${config.name}-front/`);
+    if (config.scope !== "front") lines.push(`mvp/${config.name}/${config.name}-back/`);
+    lines.push(`mvp/${config.name}/package.json`);
+    lines.push(`mvp/${config.name}/README.md`);
+    return lines;
+  }
+  if (action === "new:db") {
+    return [
+      `infra/local/postgres/${config.name}/docker-compose.yml`,
+      `infra/local/postgres/${config.name}/sql/01_schema.sql`,
+      `infra/local/postgres/${config.name}/seed/default/*.sql`,
+      `infra/local/postgres/${config.name}/package.json`
+    ];
+  }
+  return ["Estructura especifica disponible en executionResult."];
+}
+
 function ask(rl, question) {
   return new Promise((resolve) => rl.question(question, (answer) => resolve(String(answer || "").trim())));
 }
@@ -164,7 +184,7 @@ async function gatherByAction(rl, action, config) {
 function runCli(action, config) {
   const tempFile = path.join(os.tmpdir(), `platform-orchestrator-${Date.now()}.json`);
   fs.writeFileSync(tempFile, `${JSON.stringify(config, null, 2)}\n`, "utf8");
-  const command = `node "tools/platform-orchestrator/cli.js" ${action} "${tempFile}"`;
+  const command = `node "tools/platform-orchestrator/cli.js" ${action} "${tempFile}" --confirm`;
   childProcess.execSync(command, { stdio: "inherit" });
   fs.unlinkSync(tempFile);
 }
@@ -172,6 +192,7 @@ function runCli(action, config) {
 async function main() {
   const rl = createRl();
   try {
+    process.stdout.write(`${color("Atajos", ANSI.dim)}: Enter para confirmar opciones numericas.\n\n`);
     renderTabs(0, "Selecciona el tipo de creacion o usa texto libre.");
     const first = await askMenu(rl, "Que quieres crear", [
       { label: "MVP", value: "new:mvp" },
@@ -184,6 +205,8 @@ async function main() {
 
     let action = first;
     let baseConfig = {};
+    let autoImplement = false;
+    let implementRequirement = "";
 
     if (first === "__text__") {
       renderTabs(0, "Modo texto libre: describe objetivo, stack y alcance.");
@@ -191,6 +214,8 @@ async function main() {
       const proposal = parseTextToProposal(text);
       action = proposal.action;
       baseConfig = { ...proposal.config };
+      autoImplement = Boolean(proposal.meta?.autoImplement);
+      implementRequirement = proposal.meta?.requirement || "";
       process.stdout.write(`\n${color("Interpretacion", ANSI.bold)}: ${color(action, ANSI.cyan)}\n`);
       process.stdout.write(`${color("Confianza action", ANSI.dim)}: ${proposal.confidence.action}\n`);
     }
@@ -206,6 +231,13 @@ async function main() {
     renderTabs(5, "Revisar resumen final y confirmar.");
     process.stdout.write(`${color("Resumen final", ANSI.bold)}\n`);
     process.stdout.write(`${color(JSON.stringify({ action, ...config }, null, 2), ANSI.yellow)}\n`);
+    if (action === "new:mvp" && autoImplement) {
+      process.stdout.write(`${color("Post-step", ANSI.bold)} ${color("implement:mvp habilitado por texto libre", ANSI.green)}\n`);
+    }
+    process.stdout.write(`${color("Estructura a crear", ANSI.bold)}\n`);
+    previewStructure(action, config).forEach((line) => {
+      process.stdout.write(`${color(`- ${line}`, ANSI.gray)}\n`);
+    });
     const confirm = await askMenu(rl, "Confirma accion", [
       { label: "Ejecutar", value: "run" },
       { label: "Cancelar", value: "cancel" }
@@ -214,6 +246,15 @@ async function main() {
     if (confirm === "run") {
       process.stdout.write(`\n${color("Ejecutando...", ANSI.green)}\n`);
       runCli(action, config);
+      if (action === "new:mvp" && autoImplement) {
+        process.stdout.write(`${color("\nGenerando plan de implementacion (implement:mvp)...", ANSI.cyan)}\n`);
+        runCli("implement:mvp", {
+          name: config.name,
+          requirement: implementRequirement || `Implementar requerimiento funcional para ${config.name}`,
+          phases: 3,
+          phase: 0
+        });
+      }
     } else {
       process.stdout.write(`${color("Cancelado por usuario.", ANSI.red)}\n`);
     }
