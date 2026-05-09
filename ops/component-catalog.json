@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-09T14:13:38.617Z",
+  "packages": [
+    "config",
+    "contracts",
+    "design-system",
+    "fhir",
+    "logger",
+    "middleware"
+  ],
+  "templates": [
+    "legacy-adapter-boilerplate",
+    "modular-api-boilerplate",
+    "node-api-boilerplate",
+    "react-app-boilerplate"
+  ],
+  "dbStacks": [
+    {
+      "name": "init"
+    },
+    {
+      "name": "modular-api-db"
+    },
+    {
+      "name": "soc-db-source"
+    }
+  ],
+  "mvps": [
+    {
+      "name": "condition-mvp",
+      "hasFront": true,
+      "hasBack": true
+    },
+    {
+      "name": "ips-fhir-mvp",
+      "hasFront": true,
+      "hasBack": true
+    },
+    {
+      "name": "producto1",
+      "hasFront": true,
+      "hasBack": true
+    }
+  ]
+}

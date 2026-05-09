@@ -1,5 +1,5 @@
 {
-  "name": "source-project-template",
-  "projectPath": "C:/Users/Juan/Documents/git/some-local-project",
+  "name": "example-template-from-project",
+  "projectPath": "C:/path/to/local-project",
   "target": "core/templates"
 }

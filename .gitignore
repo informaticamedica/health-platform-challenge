@@ -4,3 +4,5 @@ dist/
 .DS_Store
 coverage/
 storybook-static/
+ops/plans/*.json
+!ops/plans/.gitkeep

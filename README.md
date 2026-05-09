@@ -109,6 +109,7 @@ npm run new:db
 npm run new:package
 npm run new:template
 npm run new:p2t
+npm run new:memory:refresh
 ```
 
 Uso reproducible con config:
@@ -129,6 +130,8 @@ npm run new:p2t -- ops/examples/new-p2t.local.json
 Salida determinista en `ops/plans/`.
 
 Los comandos `new:*` ejecutan creacion real de artefactos y dejan trazabilidad en `ops/plans/`.
+
+`new:memory:refresh` actualiza la memoria de componentes en `ops/component-catalog.json` y `ops/memory.lock.json`.
 
 ## Generacion de MVP por skill
 

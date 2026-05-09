@@ -1,5 +1,5 @@
 {
-  "name": "react-app-template-v2",
+  "name": "example-front-template",
   "layer": "front",
   "base": "core/templates/react-app-boilerplate"
 }

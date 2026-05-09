@@ -17,6 +17,7 @@
     "new:package": "node tools/platform-orchestrator/cli.js new:package",
     "new:template": "node tools/platform-orchestrator/cli.js new:template",
     "new:p2t": "node tools/platform-orchestrator/cli.js new:p2t",
+    "new:memory:refresh": "node tools/platform-orchestrator/memory-refresh.js",
     "dev:front": "pnpm --filter ./core/templates/react-app-boilerplate run dev",
     "dev:back": "pnpm --filter ./core/templates/node-api-boilerplate run dev",
     "dev:back:modular": "pnpm --filter ./core/templates/modular-api-boilerplate run dev",
