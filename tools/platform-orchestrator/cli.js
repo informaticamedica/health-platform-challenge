@@ -157,6 +157,15 @@ function copyDir(source, target, options = {}) {
   }
 }
 
+function scaffoldIgnoreList() {
+  return ["node_modules", "dist", "build", "coverage", ".turbo", ".next", ".cache", "tsconfig.tsbuildinfo", "pnpm-lock.yaml", "package-lock.json", "yarn.lock", "bun.lockb"];
+}
+
+function isIgnoredScaffoldFile(relativePath) {
+  const ignored = new Set(scaffoldIgnoreList());
+  return relativePath.split(/[\\/]/).some((part) => ignored.has(part));
+}
+
 function resolveConfig(rootDir, configPath) {
   if (!configPath) return {};
   const absolute = path.isAbsolute(configPath) ? configPath : path.resolve(rootDir, configPath);
@@ -185,6 +194,7 @@ function normalizeInput(action, input) {
       migrateCommand: String(input.db?.migrateCommand || "pnpm run db:migrate").trim(),
       mode: String(input.db?.mode || "existing").trim(),
       existingStack: String(input.db?.existingStack || "soc-db-source").trim(),
+      templatePath: String(input.db?.templatePath || "").trim(),
       createNow: Boolean(input.db?.createNow || false),
       startNow: Boolean(input.db?.startNow || false)
     };
@@ -224,9 +234,9 @@ function normalizeInput(action, input) {
 
 function getExistingDbPreset(name) {
   if (name === "modular-api-db") {
-    return { host: "localhost", port: "55434", user: "modular", password: "modular", dbName: "modular_dev", ssl: "false", sslRejectUnauthorized: "false" };
+    return { host: "localhost", port: "55434", testPort: "55435", user: "modular", password: "modular", dbName: "modular_dev", testDbName: "modular_test", ssl: "false", sslRejectUnauthorized: "false" };
   }
-  return { host: "localhost", port: "55433", user: "soc", password: "soc", dbName: "soc", ssl: "true", sslRejectUnauthorized: "false" };
+  return { host: "localhost", port: "55433", testPort: "55433", user: "soc", password: "soc", dbName: "soc", testDbName: "soc", ssl: "true", sslRejectUnauthorized: "false" };
 }
 
 function preflight(rootDir, normalized) {
@@ -259,6 +269,15 @@ function preflight(rootDir, normalized) {
     }
     if ((normalized.db.createNow || normalized.db.startNow) && normalized.db.provider !== "postgres") {
       errors.push("createNow/startNow solo soportado para postgres");
+    }
+    if (normalized.scope !== "back" && !fileExists(path.resolve(rootDir, normalized.templateFront))) {
+      errors.push(`Template front inexistente: ${normalized.templateFront}`);
+    }
+    if (normalized.scope !== "front" && !fileExists(path.resolve(rootDir, normalized.templateBack))) {
+      errors.push(`Template back inexistente: ${normalized.templateBack}`);
+    }
+    if (normalized.db.templatePath && !fileExists(path.resolve(rootDir, normalized.db.templatePath))) {
+      errors.push(`Template DB inexistente: ${normalized.db.templatePath}`);
     }
   }
   if (normalized.action === "new:db") {
@@ -395,6 +414,7 @@ function buildStructurePreview(normalized) {
     const lines = [`mvp/${normalized.name}/`];
     if (normalized.scope !== "back") lines.push(`mvp/${normalized.name}/${normalized.name}-front/`);
     if (normalized.scope !== "front") lines.push(`mvp/${normalized.name}/${normalized.name}-back/`);
+    lines.push(`mvp/${normalized.name}/${normalized.name}-db/`);
     lines.push(`mvp/${normalized.name}/package.json`);
     lines.push(`mvp/${normalized.name}/README.md`);
     if (normalized.db.mode === "new" && normalized.db.createNow) {
@@ -460,6 +480,7 @@ function computeMvpStructure(input) {
   const lines = [`mvp/${input.name}/`];
   if (input.scope !== "back") lines.push(`mvp/${input.name}/${input.name}-front/`);
   if (input.scope !== "front") lines.push(`mvp/${input.name}/${input.name}-back/`);
+  lines.push(`mvp/${input.name}/${input.name}-db/`);
   lines.push(`mvp/${input.name}/package.json`);
   lines.push(`mvp/${input.name}/README.md`);
   return lines;
@@ -488,7 +509,8 @@ function getMvpTemplateRequiredFiles(rootDir, templatePath) {
   const files = listFilesRecursive(rootDir, templatePath);
   return files
     .filter((x) => !x.endsWith("README.md"))
-    .map((x) => x.replace(`${templatePath.replace(/\\/g, "/")}/`, ""));
+    .map((x) => x.replace(`${templatePath.replace(/\\/g, "/")}/`, ""))
+    .filter((x) => !isIgnoredScaffoldFile(x));
 }
 
 function verifyMvpScaffold(rootDir, name, state) {
@@ -686,7 +708,12 @@ function startExistingDbStack(rootDir, stackName) {
 
 function writeBackendEnvFiles(mvpRoot, mvpName, dbConfig) {
   const backDir = path.join(mvpRoot, `${mvpName}-back`);
+  if (!fileExists(backDir)) return;
+  const databaseUrl = `postgresql://${dbConfig.user}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.dbName}`;
+  const testDatabaseUrl = `postgresql://${dbConfig.user}:${dbConfig.password}@${dbConfig.host}:${dbConfig.testPort || dbConfig.port}/${dbConfig.testDbName || dbConfig.dbName}`;
   const envContent = [
+    "PORT=3001",
+    `DATABASE_URL=${databaseUrl}`,
     `DB_USER=${dbConfig.user}`,
     `DB_HOST=${dbConfig.host}`,
     `DB_NAME=${dbConfig.dbName}`,
@@ -694,11 +721,157 @@ function writeBackendEnvFiles(mvpRoot, mvpName, dbConfig) {
     `DB_PORT=${dbConfig.port}`,
     `DB_SSL=${dbConfig.ssl}`,
     `DB_SSL_REJECT_UNAUTHORIZED=${dbConfig.sslRejectUnauthorized}`,
-    "PORT=3000",
     "JWT_SECRET=secret"
+  ].join("\n");
+  const testEnvContent = [
+    "PORT=3002",
+    `DATABASE_URL=${testDatabaseUrl}`,
+    `DB_USER=${dbConfig.user}`,
+    `DB_HOST=${dbConfig.host}`,
+    `DB_NAME=${dbConfig.testDbName || dbConfig.dbName}`,
+    `DB_PASSWORD=${dbConfig.password}`,
+    `DB_PORT=${dbConfig.testPort || dbConfig.port}`,
+    `DB_SSL=${dbConfig.ssl}`,
+    `DB_SSL_REJECT_UNAUTHORIZED=${dbConfig.sslRejectUnauthorized}`,
+    "JWT_SECRET=secret-test"
   ].join("\n");
   writeFile(path.join(backDir, ".env"), envContent);
   writeFile(path.join(backDir, ".env.example"), envContent);
+  writeFile(path.join(backDir, ".env.test"), testEnvContent);
+  writeFile(path.join(backDir, ".env.test.example"), testEnvContent);
+}
+
+function writeFrontendEnvFiles(mvpRoot, mvpName) {
+  const frontDir = path.join(mvpRoot, `${mvpName}-front`);
+  if (!fileExists(frontDir)) return;
+  const envContent = "VITE_API_URL=http://localhost:3001";
+  writeFile(path.join(frontDir, ".env"), envContent);
+  writeFile(path.join(frontDir, ".env.example"), envContent);
+}
+
+function writeFrontendDevServer(mvpRoot, mvpName) {
+  const frontDir = path.join(mvpRoot, `${mvpName}-front`);
+  if (!fileExists(frontDir)) return false;
+  const scriptsDir = path.join(frontDir, "scripts");
+  ensureDir(scriptsDir);
+  writeFile(
+    path.join(scriptsDir, "dev-server.mjs"),
+    [
+      "import { createServer } from 'vite';",
+      "",
+      "const server = await createServer({",
+      "  server: { host: '127.0.0.1', port: 5170 },",
+      "});",
+      "",
+      "await server.listen();",
+      "server.printUrls();",
+      "",
+      "const shutdown = async () => {",
+      "  await server.close();",
+      "  process.exit(0);",
+      "};",
+      "",
+      "process.on('SIGINT', shutdown);",
+      "process.on('SIGTERM', shutdown);",
+      "await new Promise(() => {});"
+    ].join("\n")
+  );
+  const pkgPath = path.join(frontDir, "package.json");
+  const pkg = readJsonIfExists(pkgPath, null);
+  if (pkg) {
+    pkg.scripts = { ...(pkg.scripts || {}), dev: "node scripts/dev-server.mjs" };
+    writeFile(pkgPath, JSON.stringify(pkg, null, 2));
+  }
+  return true;
+}
+
+function collectUsedDockerPorts(rootDir) {
+  const ports = new Set();
+  const roots = [path.resolve(rootDir, "infra", "local"), path.resolve(rootDir, "mvp")];
+  for (const root of roots) {
+    if (!fileExists(root)) continue;
+    const files = listFilesRecursive(root).filter((file) => file.endsWith("docker-compose.yml") || file.endsWith("docker-compose.yaml"));
+    for (const file of files) {
+      const content = readFileSafe(path.join(root, file));
+      const matches = content.matchAll(/["']?(\d{4,5}):5432["']?/g);
+      for (const match of matches) ports.add(Number(match[1]));
+    }
+  }
+  return ports;
+}
+
+function allocateDbPorts(rootDir) {
+  const used = collectUsedDockerPorts(rootDir);
+  let port = 55434;
+  while (used.has(port) || used.has(port + 1)) port += 2;
+  return { dev: port, test: port + 1 };
+}
+
+function rewriteDockerComposeForMvp(dbDir, mvpName, ports) {
+  const composePath = path.join(dbDir, "docker-compose.yml");
+  if (!fileExists(composePath)) return false;
+  const safeName = safePackageName(mvpName).replace(/-/g, "_");
+  const dbName = `${safePackageName(mvpName)}-db`;
+  const testDbName = `${safePackageName(mvpName)}-test-db`;
+  let postgresDbIndex = 0;
+  let portIndex = 0;
+  const content = readFileSafe(composePath)
+    .replace(/container_name:\s*([^\r\n]+)/g, (_match, value) => `container_name: ${safePackageName(mvpName)}-${String(value).trim()}`)
+    .replace(/name:\s*([^\r\n]+)/g, (_match, value) => `name: ${safeName}_${String(value).trim()}`)
+    .replace(/POSTGRES_DB:\s*([^\r\n]+)/g, () => {
+      const selected = postgresDbIndex === 0 ? dbName : testDbName;
+      postgresDbIndex += 1;
+      return `POSTGRES_DB: ${selected}`;
+    })
+    .replace(/["']?(\d{4,5}):5432["']?/g, () => {
+      const selected = portIndex === 0 ? ports.dev : ports.test;
+      portIndex += 1;
+      return `"${selected}:5432"`;
+    });
+  writeFile(composePath, content);
+  return true;
+}
+
+function writeDbPackageScripts(mvpRoot, mvpName) {
+  const dbDir = path.join(mvpRoot, `${mvpName}-db`);
+  if (!fileExists(dbDir)) return false;
+  const services = readDockerComposeServices(path.join(dbDir, "docker-compose.yml"));
+  const devService = services.find((name) => !name.toLowerCase().includes("test")) || services[0] || "";
+  const testService = services.find((name) => name.toLowerCase().includes("test")) || devService;
+  const suffix = (service) => service ? ` ${service}` : "";
+  const pkgPath = path.join(dbDir, "package.json");
+  const pkg = readJsonIfExists(pkgPath, { version: "0.1.0", private: true });
+  pkg.name = `@platform/${safePackageName(mvpName)}-db`;
+  pkg.private = true;
+  pkg.scripts = {
+    up: `docker compose up --build${suffix(devService)}`,
+    down: `docker compose stop${suffix(devService)}`,
+    build: `docker compose build${suffix(devService)}`,
+    reset: `docker compose stop${suffix(devService)} && docker compose rm -f${suffix(devService)} && docker compose up --build${suffix(devService)}`,
+    "test:up": `docker compose up --build${suffix(testService)}`,
+    "test:down": `docker compose stop${suffix(testService)}`,
+    "test:build": `docker compose build${suffix(testService)}`,
+    "test:reset": `docker compose stop${suffix(testService)} && docker compose rm -f${suffix(testService)} && docker compose up --build${suffix(testService)}`
+  };
+  writeFile(pkgPath, JSON.stringify(pkg, null, 2));
+  return true;
+}
+
+function readDockerComposeServices(composePath) {
+  if (!fileExists(composePath)) return [];
+  const lines = readFileSafe(composePath).split(/\r?\n/);
+  const services = [];
+  let inServices = false;
+  for (const line of lines) {
+    if (/^services:\s*$/.test(line)) {
+      inServices = true;
+      continue;
+    }
+    if (inServices && /^[a-zA-Z0-9_-]+:\s*$/.test(line)) break;
+    const match = inServices ? line.match(/^  ([a-zA-Z0-9_-]+):\s*$/) : null;
+    if (match) services.push(match[1]);
+  }
+  return services;
 }
 
 function runScopedPnpmInstall(rootDir, mvpName, scope) {
@@ -943,19 +1116,38 @@ function executeNewMvp(rootDir, input) {
   const mvpRoot = path.resolve(rootDir, "mvp", input.name);
   ensureDir(mvpRoot);
   const created = [];
+  const dbPorts = allocateDbPorts(rootDir);
   if (input.scope !== "back") {
     const frontTarget = path.join(mvpRoot, `${input.name}-front`);
     const frontBase = path.resolve(rootDir, input.templateFront);
-    copyDir(frontBase, frontTarget, { ignore: ["node_modules", "dist"] });
+    copyDir(frontBase, frontTarget, { ignore: scaffoldIgnoreList() });
     created.push(path.relative(rootDir, frontTarget));
   }
   if (input.scope !== "front") {
     const backTarget = path.join(mvpRoot, `${input.name}-back`);
     const backBase = path.resolve(rootDir, input.templateBack);
-    copyDir(backBase, backTarget, { ignore: ["node_modules", "dist"] });
+    copyDir(backBase, backTarget, { ignore: scaffoldIgnoreList() });
     created.push(path.relative(rootDir, backTarget));
   }
-  const scripts = { "db:migrate": input.db.migrateCommand };
+  const dbTemplatePath = input.db.templatePath || (input.db.existingStack ? `infra/local/${input.db.provider || "postgres"}/${input.db.existingStack}` : "infra/local/postgres/modular-api-db");
+  const dbBase = path.resolve(rootDir, dbTemplatePath);
+  if (fileExists(dbBase)) {
+    const dbTarget = path.join(mvpRoot, `${input.name}-db`);
+    copyDir(dbBase, dbTarget, { ignore: scaffoldIgnoreList() });
+    rewriteDockerComposeForMvp(dbTarget, input.name, dbPorts);
+    created.push(path.relative(rootDir, dbTarget));
+  }
+  const scripts = {
+    "db:up": `pnpm --dir ./${input.name}-db run up`,
+    "db:down": `pnpm --dir ./${input.name}-db run down`,
+    "db:build": `pnpm --dir ./${input.name}-db run build`,
+    "db:reset": `pnpm --dir ./${input.name}-db run reset`,
+    "db:test:up": `pnpm --dir ./${input.name}-db run test:up`,
+    "db:test:down": `pnpm --dir ./${input.name}-db run test:down`,
+    "db:test:build": `pnpm --dir ./${input.name}-db run test:build`,
+    "db:test:reset": `pnpm --dir ./${input.name}-db run test:reset`,
+    "db:migrate": "pnpm run db:up"
+  };
   if (input.scope === "ambos") {
     scripts.install = `pnpm -C ../.. install --filter @platform/${safePackageName(input.name)}-front --filter @platform/${safePackageName(input.name)}-back`;
     scripts.build = "pnpm run build:front && pnpm run build:back";
@@ -1023,7 +1215,13 @@ function executeNewMvp(rootDir, input) {
       dbSelection.started = dbResult.target;
     }
   } else {
-    dbRuntime = getExistingDbPreset(input.db.existingStack || "soc-db-source");
+    dbRuntime = {
+      ...getExistingDbPreset(input.db.existingStack || "soc-db-source"),
+      port: String(dbPorts.dev),
+      testPort: String(dbPorts.test),
+      dbName: `${safePackageName(input.name)}-db`,
+      testDbName: `${safePackageName(input.name)}-test-db`
+    };
     dbSelection.stack = input.db.existingStack || "soc-db-source";
     if (input.db.startNow) {
       if (!isDockerAvailable()) throw new Error("Docker no disponible para levantar DB existente");
@@ -1034,10 +1232,13 @@ function executeNewMvp(rootDir, input) {
   if (dbRuntime) {
     writeBackendEnvFiles(mvpRoot, input.name, dbRuntime);
   }
+  writeFrontendEnvFiles(mvpRoot, input.name);
+  const frontendDevServerWritten = writeFrontendDevServer(mvpRoot, input.name);
+  const dbScriptsWritten = writeDbPackageScripts(mvpRoot, input.name);
 
   writeFile(
     path.join(mvpRoot, "README.md"),
-    `# ${input.name}\n\nMVP generado por new:mvp.\n\n## Install\n\n- npm run install\n\n## Build\n\n- npm run build\n\n## Dev\n\n- npm run dev (front+back)\n- npm run dev:front\n- npm run dev:back\n`
+    `# ${input.name}\n\nMVP generado por new:mvp.\n\n## Install\n\n- npm run install\n\n## Build\n\n- npm run build\n\n## Dev\n\n- npm run dev (front+back)\n- npm run dev:front\n- npm run dev:back\n\n## DB\n\n- npm run db:up\n- npm run db:down\n- npm run db:build\n- npm run db:reset\n- npm run db:test:up\n- npm run db:test:down\n- npm run db:test:build\n- npm run db:test:reset\n\n## Env\n\n- Front: ${input.name}-front/.env apunta a http://localhost:3001\n- Back: ${input.name}-back/.env apunta a la DB local copiada en ${input.name}-db\n`
   );
 
   const frontRequired = input.scope !== "back"
@@ -1075,7 +1276,9 @@ function executeNewMvp(rootDir, input) {
     statePath: path.relative(rootDir, statePath),
     scaffoldCheck,
     dbSelection,
-    dbRuntime
+    dbRuntime,
+    dbScriptsWritten,
+    frontendDevServerWritten
   };
 }
 
@@ -1378,6 +1581,22 @@ async function main() {
   const parsed = parseArgs(process.argv.slice(2));
   if (!parsed.action) {
     throw new Error("Debes indicar accion new:* (ej: new:mvp)");
+  }
+
+  if (parsed.action === "new:mvp" && !parsed.config && !parsed.confirm && process.stdin.isTTY) {
+    try {
+      childProcess.execSync('node "tools/platform-orchestrator/wizard-ink.mjs"', {
+        stdio: "inherit",
+        env: { ...process.env, PLATFORM_ORCHESTRATOR_ACTION: "new:mvp" }
+      });
+    } catch (_error) {
+      process.stdout.write("\nInk wizard no disponible. Usando wizard clasico...\n\n");
+      childProcess.execSync('node "tools/platform-orchestrator/wizard.js"', {
+        stdio: "inherit",
+        env: { ...process.env, PLATFORM_ORCHESTRATOR_ACTION: "new:mvp" }
+      });
+    }
+    return;
   }
 
   const inputFileConfig = resolveConfig(rootDir, parsed.config);

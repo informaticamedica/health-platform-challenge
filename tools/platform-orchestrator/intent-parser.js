@@ -35,6 +35,59 @@ function inferBackTemplate(text) {
   return "core/templates/modular-api-boilerplate";
 }
 
+function listDirNames(rootDir, relativePath) {
+  const fs = require("node:fs");
+  const base = path.resolve(rootDir || process.cwd(), relativePath);
+  if (!fs.existsSync(base)) return [];
+  return fs.readdirSync(base, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+}
+
+function nextMvpName(rootDir = process.cwd()) {
+  const names = listDirNames(rootDir, "mvp");
+  return `mvp-${names.length + 1}`;
+}
+
+function getTemplateOptionsFromRepo(rootDir = process.cwd(), scope = "ambos") {
+  const templates = listDirNames(rootDir, "core/templates");
+  const toPath = (name) => `core/templates/${name}`;
+  return {
+    front: scope !== "back"
+      ? templates.filter((name) => !name.toLowerCase().includes("api")).map(toPath)
+      : [],
+    back: scope !== "front"
+      ? templates.filter((name) => name.toLowerCase().includes("api")).map(toPath)
+      : []
+  };
+}
+
+function getDbOptionsFromRepo(rootDir = process.cwd()) {
+  const fs = require("node:fs");
+  const infraRoot = path.resolve(rootDir, "infra/local");
+  if (!fs.existsSync(infraRoot)) return [];
+  const result = [];
+  const types = fs.readdirSync(infraRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  for (const type of types) {
+    const typeRoot = path.join(infraRoot, type.name);
+    const templates = fs.readdirSync(typeRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+    for (const template of templates) {
+      result.push({
+        label: `${type.name}/${template.name}`,
+        type: type.name,
+        template: template.name,
+        path: `infra/local/${type.name}/${template.name}`
+      });
+    }
+  }
+  return result.sort((a, b) => {
+    if (a.path === "infra/local/postgres/modular-api-db") return -1;
+    if (b.path === "infra/local/postgres/modular-api-db") return 1;
+    return a.path.localeCompare(b.path);
+  });
+}
+
 function inferFrontTemplate(_text) {
   return "core/templates/react-app-boilerplate";
 }
@@ -57,7 +110,7 @@ function inferProvider(text) {
 
 function getNameSuggestions(action, inferredName) {
   const base = slugify(inferredName || "example");
-  if (action === "new:mvp") return [base, "patients-mvp", "clinical-mvp"];
+  if (action === "new:mvp") return [base, nextMvpName(), "patients-mvp"];
   if (action === "new:db") return [base, "clinical-db", "platform-db"];
   if (action === "new:package") return [base, "audit", "integration"];
   if (action === "new:template") return [base, "front-template", "back-template"];
@@ -128,20 +181,16 @@ function parseTextToProposal(text) {
 }
 
 function getTemplateOptions(scope) {
-  return {
-    front: scope !== "back"
-      ? ["core/templates/react-app-boilerplate"]
-      : [],
-    back: scope !== "front"
-      ? ["core/templates/modular-api-boilerplate", "core/templates/node-api-boilerplate"]
-      : []
-  };
+  return getTemplateOptionsFromRepo(process.cwd(), scope);
 }
 
 module.exports = {
   parseTextToProposal,
   getNameSuggestions,
   getTemplateOptions,
+  getTemplateOptionsFromRepo,
+  getDbOptionsFromRepo,
+  nextMvpName,
   slugify,
   path
 };

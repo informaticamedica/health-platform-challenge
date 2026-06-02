@@ -5,7 +5,7 @@ const os = require("node:os");
 const path = require("node:path");
 const childProcess = require("node:child_process");
 const readline = require("node:readline");
-const { parseTextToProposal, getNameSuggestions, getTemplateOptions, slugify } = require("./intent-parser.js");
+const { parseTextToProposal, getNameSuggestions, getTemplateOptionsFromRepo, getDbOptionsFromRepo, nextMvpName, slugify } = require("./intent-parser.js");
 
 const ANSI = {
   reset: "\x1b[0m",
@@ -56,12 +56,9 @@ function previewStructure(action, config) {
     const lines = [`mvp/${config.name}/`];
     if (config.scope !== "back") lines.push(`mvp/${config.name}/${config.name}-front/`);
     if (config.scope !== "front") lines.push(`mvp/${config.name}/${config.name}-back/`);
+    lines.push(`mvp/${config.name}/${config.name}-db/`);
     lines.push(`mvp/${config.name}/package.json`);
     lines.push(`mvp/${config.name}/README.md`);
-    if (config.db?.mode === "new" && config.db?.createNow) {
-      const dbName = String(config.db?.name || `${config.name}-db`).replace(/_/g, "-");
-      lines.push(`infra/local/postgres/${dbName}/`);
-    }
     return lines;
   }
   if (action === "new:db") {
@@ -96,12 +93,8 @@ async function askMenu(rl, title, options) {
 }
 
 async function askName(rl, action, suggested) {
-  const options = [
-    { label: `${suggested[0]} (recomendado)`, value: suggested[0] },
-    { label: suggested[1], value: suggested[1] },
-    { label: suggested[2], value: suggested[2] },
-    { label: "Escribir nombre custom", value: "__custom__" }
-  ];
+  const options = suggested.map((value, index) => ({ label: index === 0 ? `${value} (recomendado)` : value, value }));
+  options.push({ label: "Escribir nombre custom", value: "__custom__" });
   const selected = await askMenu(rl, "Nombre para el recurso", options);
   if (selected !== "__custom__") return selected;
   while (true) {
@@ -120,7 +113,7 @@ async function gatherByAction(rl, action, config) {
     ]);
     config.scope = scope;
 
-    const tpl = getTemplateOptions(scope);
+    const tpl = getTemplateOptionsFromRepo(process.cwd(), scope);
     if (tpl.front.length > 0) {
       config.templateFront = await askMenu(rl, "Template frontend", tpl.front.map((x) => ({ label: x, value: x })));
     }
@@ -131,35 +124,20 @@ async function gatherByAction(rl, action, config) {
     config.packagesFront = ["@platform/design-system", "@platform/contracts"];
     config.packagesBack = ["@platform/fhir", "@platform/contracts", "@platform/middleware", "@platform/config", "@platform/logger"];
 
-    const dbProvider = await askMenu(rl, "DB provider", [{ label: "postgres", value: "postgres" }]);
-    const dbMode = await askMenu(rl, "DB mode", [
-      { label: "Usar DB existente (recomendado)", value: "existing" },
-      { label: "Crear DB nueva", value: "new" }
-    ]);
-    let existingStack = "soc-db-source";
-    let createNow = false;
-    if (dbMode === "existing") {
-      existingStack = await askMenu(rl, "DB existente sugerida", [
-        { label: "soc-db-source (55433)", value: "soc-db-source" },
-        { label: "modular-api-db (55434)", value: "modular-api-db" }
-      ]);
-    } else {
-      createNow = true;
-    }
-    const startNow = (await askMenu(rl, "Levantar DB ahora", [
-      { label: "Si", value: "yes" },
-      { label: "No", value: "no" }
-    ])) === "yes";
+    const dbOptions = getDbOptionsFromRepo(process.cwd());
+    const selectedDbLabel = await askMenu(rl, "DB local", dbOptions.map((x) => ({ label: x.label, value: x.label })));
+    const selectedDb = dbOptions.find((x) => x.label === selectedDbLabel) || { type: "postgres", template: "modular-api-db", path: "infra/local/postgres/modular-api-db" };
     const dbDefaultName = `platform_${config.name.replace(/-/g, "_")}`;
     const dbName = await ask(rl, `${color("DB name", ANSI.blue)} [${dbDefaultName}]: `);
     config.db = {
-      provider: dbProvider,
+      provider: selectedDb.type,
       name: dbName || dbDefaultName,
       migrateCommand: "pnpm run db:migrate",
-      mode: dbMode,
-      existingStack,
-      createNow,
-      startNow
+      mode: "existing",
+      existingStack: selectedDb.template,
+      templatePath: selectedDb.path,
+      createNow: false,
+      startNow: false
     };
     config.testing = "ambos";
   }
@@ -219,15 +197,18 @@ async function main() {
   const rl = createRl();
   try {
     process.stdout.write(`${color("Atajos", ANSI.dim)}: Enter para confirmar opciones numericas.\n\n`);
-    renderTabs(0, "Selecciona el tipo de creacion o usa texto libre.");
-    const first = await askMenu(rl, "Que quieres crear", [
-      { label: "MVP", value: "new:mvp" },
-      { label: "DB", value: "new:db" },
-      { label: "Package", value: "new:package" },
-      { label: "Template", value: "new:template" },
-      { label: "Project to Template (p2t)", value: "new:p2t" },
-      { label: "Describir en texto libre", value: "__text__" }
-    ]);
+    let first = process.env.PLATFORM_ORCHESTRATOR_ACTION || "";
+    if (!first) {
+      renderTabs(0, "Selecciona el tipo de creacion o usa texto libre.");
+      first = await askMenu(rl, "Que quieres crear", [
+        { label: "MVP", value: "new:mvp" },
+        { label: "DB", value: "new:db" },
+        { label: "Package", value: "new:package" },
+        { label: "Template", value: "new:template" },
+        { label: "Project to Template (p2t)", value: "new:p2t" },
+        { label: "Describir en texto libre", value: "__text__" }
+      ]);
+    }
 
     let action = first;
     let baseConfig = {};
@@ -247,7 +228,7 @@ async function main() {
     }
 
     renderTabs(1, `Definir nombre para ${action}.`);
-    const suggestions = getNameSuggestions(action, baseConfig.name || "example-item");
+    const suggestions = action === "new:mvp" ? [baseConfig.name || nextMvpName(process.cwd()), "patients-mvp", "clinical-mvp"] : getNameSuggestions(action, baseConfig.name || "example-item");
     const name = await askName(rl, action, suggestions);
     const config = { ...baseConfig, name };
 

@@ -8,7 +8,7 @@ import path from "node:path";
 import childProcess from "node:child_process";
 import parserModule from "./intent-parser.js";
 
-const { parseTextToProposal, getNameSuggestions, getTemplateOptions, slugify } = parserModule;
+const { parseTextToProposal, getNameSuggestions, getTemplateOptionsFromRepo, getDbOptionsFromRepo, nextMvpName, slugify } = parserModule;
 
 const ACTIONS = [
   { label: "MVP", value: "new:mvp" },
@@ -47,12 +47,9 @@ function previewStructure(action, config) {
     const lines = [`mvp/${config.name}/`];
     if (config.scope !== "back") lines.push(`mvp/${config.name}/${config.name}-front/`);
     if (config.scope !== "front") lines.push(`mvp/${config.name}/${config.name}-back/`);
+    lines.push(`mvp/${config.name}/${config.name}-db/`);
     lines.push(`mvp/${config.name}/package.json`);
     lines.push(`mvp/${config.name}/README.md`);
-    if (config.dbMode === "new") {
-      const dbName = String(config.db?.name || `platform_${config.name}`).replace(/_/g, "-");
-      lines.push(`infra/local/postgres/${dbName}/`);
-    }
     return lines;
   }
   if (action === "new:db") {
@@ -68,12 +65,14 @@ function previewStructure(action, config) {
 
 function App() {
   const { exit } = useApp();
-  const [step, setStep] = useState(0);
+  const forcedAction = process.env.PLATFORM_ORCHESTRATOR_ACTION || "";
+  const isForcedMvp = forcedAction === "new:mvp";
+  const [step, setStep] = useState(isForcedMvp ? 1 : 0);
   const [cursor, setCursor] = useState(0);
   const [mode, setMode] = useState("menu");
   const [textBuffer, setTextBuffer] = useState("");
-  const [action, setAction] = useState("");
-  const [config, setConfig] = useState({});
+  const [action, setAction] = useState(isForcedMvp ? "new:mvp" : "");
+  const [config, setConfig] = useState(isForcedMvp ? { name: nextMvpName(process.cwd()) } : {});
   const [log, setLog] = useState("");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [editingFinal, setEditingFinal] = useState(false);
@@ -82,21 +81,20 @@ function App() {
   const [implementRequirement, setImplementRequirement] = useState("");
 
   const nameSuggestions = useMemo(
-    () => (action ? getNameSuggestions(action, config.name || "example-item") : []),
+    () => (action === "new:mvp" ? [config.name || nextMvpName(process.cwd()), "Escribir custom"] : (action ? [...getNameSuggestions(action, config.name || "example-item"), "Escribir custom"] : [])),
     [action, config.name]
   );
 
   const configQuestions = useMemo(() => {
     if (action === "new:mvp") {
       const scope = config.scope || "ambos";
-      const templates = getTemplateOptions(scope);
+      const templates = getTemplateOptionsFromRepo(process.cwd(), scope);
+      const dbOptions = getDbOptionsFromRepo(process.cwd());
       return [
         { key: "scope", type: "select", label: "Scope", options: ["ambos", "front", "back"] },
         ...(templates.front.length ? [{ key: "templateFront", type: "select", label: "Template front", options: templates.front }] : []),
         ...(templates.back.length ? [{ key: "templateBack", type: "select", label: "Template back", options: templates.back }] : []),
-        { key: "dbMode", type: "select", label: "DB mode", options: ["existing", "new"] },
-        ...(config.dbMode === "existing" ? [{ key: "existingStack", type: "select", label: "DB existente", options: ["soc-db-source", "modular-api-db"] }] : []),
-        { key: "startNow", type: "select", label: "Levantar DB ahora", options: ["yes", "no"] },
+        ...(dbOptions.length ? [{ key: "dbSelection", type: "select", label: "DB local", options: dbOptions.map((x) => x.label) }] : []),
         { key: "dbName", type: "input", label: "DB name", defaultValue: `platform_${(config.name || "example").replace(/-/g, "_")}` }
       ];
     }
@@ -127,11 +125,11 @@ function App() {
       ];
     }
     return [];
-  }, [action, config.layer, config.name, config.scope, config.sourceType, config.dbMode]);
+  }, [action, config.layer, config.name, config.scope, config.sourceType]);
 
   const activeOptions = useMemo(() => {
     if (step === 0) return ACTIONS.map((x) => x.label);
-    if (step === 1) return [...nameSuggestions, "Escribir custom"];
+    if (step === 1) return nameSuggestions;
     if (step === 2) {
       const q = configQuestions[questionIndex];
       return q && q.type === "select" ? q.options : [];
@@ -189,13 +187,14 @@ function App() {
             setConfig((prev) => ({
               ...prev,
               db: {
-                provider: "postgres",
+                ...(prev.db || {}),
+                provider: prev.db?.provider || "postgres",
                 name: val,
                 migrateCommand: "pnpm run db:migrate",
-                mode: prev.dbMode || "existing",
-                existingStack: prev.existingStack || "soc-db-source",
-                createNow: (prev.dbMode || "existing") === "new",
-                startNow: (prev.startNow || "no") === "yes"
+                mode: "existing",
+                existingStack: prev.db?.existingStack || "modular-api-db",
+                createNow: false,
+                startNow: false
               },
               testing: "ambos",
               packagesFront: ["@platform/design-system", "@platform/contracts"],
@@ -272,7 +271,7 @@ function App() {
           setTextBuffer("");
         } else {
           setAction(selected);
-          setConfig({ name: "" });
+          setConfig({ name: selected === "new:mvp" ? nextMvpName(process.cwd()) : "" });
           setStep(1);
           setCursor(0);
         }
@@ -280,7 +279,7 @@ function App() {
       }
 
       if (step === 1) {
-        if (cursor === 3) {
+        if (cursor === nameSuggestions.length - 1) {
           setMode("input");
           setTextBuffer("");
         } else {
@@ -296,7 +295,25 @@ function App() {
       if (step === 2 && currentQuestion) {
         if (currentQuestion.type === "select") {
           const value = currentQuestion.options[cursor];
-          setConfig((prev) => ({ ...prev, [currentQuestion.key]: value }));
+          if (action === "new:mvp" && currentQuestion.key === "dbSelection") {
+            const selectedDb = getDbOptionsFromRepo(process.cwd()).find((x) => x.label === value);
+            setConfig((prev) => ({
+              ...prev,
+              dbSelection: value,
+              db: {
+                provider: selectedDb?.type || "postgres",
+                name: prev.db?.name || `platform_${(prev.name || "example").replace(/-/g, "_")}`,
+                migrateCommand: "pnpm run db:migrate",
+                mode: "existing",
+                existingStack: selectedDb?.template || "modular-api-db",
+                templatePath: selectedDb?.path || "infra/local/postgres/modular-api-db",
+                createNow: false,
+                startNow: false
+              }
+            }));
+          } else {
+            setConfig((prev) => ({ ...prev, [currentQuestion.key]: value }));
+          }
           const nextQ = questionIndex + 1;
           if (nextQ >= configQuestions.length) {
             setStep(3);
@@ -364,7 +381,7 @@ function App() {
     React.createElement(
       Box,
       { width: 92, marginLeft: 1, flexDirection: "column" },
-      React.createElement(Text, { bold: true, color: "cyan" }, "Health Platform Orchestrator"),
+      React.createElement(Text, { bold: true, color: "cyan" }, action === "new:mvp" ? "Nuevo MVP" : "Health Platform Orchestrator"),
       React.createElement(Text, { color: "gray" }, "------------------------------------------------------------------------"),
       React.createElement(Box, null, TABS.map((tab, i) => React.createElement(Text, { key: tab, color: i === step ? "magenta" : "gray" }, `[${i + 1} ${tab}] `))),
       React.createElement(Text, { dimColor: true }, stepSubtitle(step)),
