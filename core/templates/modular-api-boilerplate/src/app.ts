@@ -5,7 +5,10 @@ import swaggerUi from 'swagger-ui-express';
 
 import { openApiDocument } from './docs/openapi';
 import { activityRoutes } from './modules/activities/activity.routes';
+import { authRoutes } from './modules/auth/auth.routes';
 import { contactRoutes } from './modules/contacts/contact.routes';
+import { observationRoutes } from './modules/observations/observation.routes';
+import { patientRoutes } from './modules/patients/patient.routes';
 import { errorHandler } from './shared/errors/error-handler.middleware';
 import { sendSuccess } from './shared/http/api-response';
 import { httpLogger } from './shared/logging/http-logger';
@@ -23,7 +26,14 @@ app.get('/health', (_req, res) => {
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
+app.use('/auth', authRoutes);
+app.use('/patients', patientRoutes);
+app.use('/observations', observationRoutes);
 app.use('/contacts', contactRoutes);
 app.use('/activities', activityRoutes);
+
+app.use((_req, res) => {
+  res.status(404).json({ message: 'Ruta no encontrada' });
+});
 
 app.use(errorHandler);

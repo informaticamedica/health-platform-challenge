@@ -1,18 +1,28 @@
+import { authPaths, authSchemas } from '../modules/auth/auth.docs';
+import { observationParameters, observationPaths, observationSchemas } from '../modules/observations/observation.docs';
+import { patientParameters, patientPaths, patientSchemas } from '../modules/patients/patient.docs';
+
 export const openApiDocument = {
   openapi: '3.0.3',
   info: {
-    title: 'Plantilla Modular API - Agenda de Contactos',
+    title: 'Plantilla Modular API',
     version: '1.0.0',
     description:
-      'API RESTful para gestionar una agenda de contactos con telefonos, direcciones y actividades (llamadas, reuniones y emails).',
+      'API RESTful modular con dominios de agenda de contactos y compatibilidad de endpoints clinicos del node-api-boilerplate.',
   },
   servers: [{ url: 'http://localhost:3001' }],
   tags: [
+    { name: 'Auth', description: 'Registro, login y autenticacion compatible.' },
+    { name: 'Patients', description: 'Operaciones sobre pacientes.' },
+    { name: 'Observations', description: 'Operaciones sobre observaciones clinicas.' },
     { name: 'Contactos', description: 'Operaciones sobre contactos de la agenda.' },
     { name: 'Actividades', description: 'Operaciones sobre actividades de contactos.' },
     { name: 'Salud', description: 'Chequeos de disponibilidad de la API.' },
   ],
   paths: {
+    ...authPaths,
+    ...patientPaths,
+    ...observationPaths,
     '/health': {
       get: {
         tags: ['Salud'],
@@ -321,6 +331,16 @@ export const openApiDocument = {
     },
   },
   components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+      },
+    },
+    parameters: {
+      ...patientParameters,
+      ...observationParameters,
+    },
     responses: {
       BadRequest: {
         description: 'Solicitud invalida a nivel de reglas de negocio o base de datos',
@@ -328,6 +348,15 @@ export const openApiDocument = {
           'application/json': {
             schema: { $ref: '#/components/schemas/ErrorResponse' },
             example: { message: 'Los datos enviados no cumplen las reglas de la base.' },
+          },
+        },
+      },
+      Unauthorized: {
+        description: 'No autorizado',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/CompatErrorResponse' },
+            example: { message: 'No autorizado', error: 'UnauthorizedError' },
           },
         },
       },
@@ -368,6 +397,9 @@ export const openApiDocument = {
       },
     },
     schemas: {
+      ...authSchemas,
+      ...patientSchemas,
+      ...observationSchemas,
       ActivityType: {
         type: 'string',
         enum: ['call', 'meeting', 'email'],
@@ -522,6 +554,13 @@ export const openApiDocument = {
         type: 'object',
         properties: {
           message: { type: 'string', example: 'Error interno inesperado.' },
+        },
+      },
+      CompatErrorResponse: {
+        type: 'object',
+        properties: {
+          message: { type: 'string', example: 'No autorizado' },
+          error: { type: 'string', example: 'UnauthorizedError' },
         },
       },
       ValidationErrorResponse: {

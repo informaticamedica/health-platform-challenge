@@ -62,3 +62,22 @@ This template ships with an example contacts-and-activities domain:
 - `GET /activities/search`
 
 You can replace the example module while preserving the same architecture and testing setup.
+
+## Health API compatibility
+
+This template also implements the same public health API endpoints as `node-api-boilerplate`:
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /patients`
+- `GET /patients/:id`
+- `GET /patients/:id/observations`
+- `POST /patients/:id/observations`
+- `POST /patients`
+- `PUT /patients/:id`
+- `DELETE /patients/:id`
+- `GET /observations/categories`
+- `GET /observations/loinc`
+- `GET /observations/:id/fhir`
+- `PUT /observations/:id`
+- `DELETE /observations/:id`
