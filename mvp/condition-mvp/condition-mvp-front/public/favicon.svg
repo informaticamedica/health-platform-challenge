@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Emergencias">
-  <rect width="64" height="64" rx="14" fill="#ffffff"/>
-  <path d="M45 6c0 9-5 10-13 10-10 0-16 7-16 18" fill="none" stroke="#ff8f1f" stroke-width="5" stroke-linecap="round"/>
-  <path d="M19 58c0-9 5-10 13-10 10 0 16-7 16-18" fill="none" stroke="#ff8f1f" stroke-width="5" stroke-linecap="round"/>
-  <text x="12" y="41" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-style="italic" font-weight="700" fill="#0b63b0">e</text>
-</svg>
