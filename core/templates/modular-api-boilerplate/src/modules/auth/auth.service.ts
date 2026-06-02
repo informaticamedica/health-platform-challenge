@@ -8,15 +8,15 @@ import { unauthorizedError, validationError } from '../../shared/errors/compat-e
 export class AuthService {
   private readonly repository = new AuthRepository();
 
-  public register(input: RegisterInput): User {
-    const existing = this.repository.findByEmail(input.email);
+  public async register(input: RegisterInput): Promise<User> {
+    const existing = await this.repository.findByEmail(input.email);
     if (existing) throw validationError('El usuario ya existe');
 
     return this.repository.create(input);
   }
 
-  public login(input: LoginInput): { token: string } {
-    const user = this.repository.findByEmail(input.email);
+  public async login(input: LoginInput): Promise<{ token: string }> {
+    const user = await this.repository.findByEmail(input.email);
     if (!user || user.password !== input.password) throw unauthorizedError('Credenciales invalidas');
 
     return { token: tokenRepository.create(user.id) };

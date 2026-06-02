@@ -5,6 +5,8 @@ import { ObservationType } from "@/types/dto.type";
 import { ObservationCategoryType } from "@/types/fhir.type";
 import { ActivityIcon, CalendarDaysIcon, UserIcon } from "lucide-react";
 
+const shortId = (id?: string) => (id ? id.slice(0, 8) : "-");
+
 export const CardObservation = ({
   observation,
   categories,
@@ -20,12 +22,12 @@ export const CardObservation = ({
   return (
     <Card
       variant="secondary"
-      title={`Observacion ${observation.id}`}
+      title={`Observacion ${shortId(observation.id)}`}
       className="border-primary/25 bg-card shadow-md shadow-primary/10"
       subtitle={
         <div className="mt-1 flex items-center gap-2">
           <Chip variant="outline" showClose={false}>{categoryDisplay}</Chip>
-          <Chip variant="muted" showClose={false}>ID #{observation.id}</Chip>
+          <Chip variant="muted" showClose={false}>ID #{shortId(observation.id)}</Chip>
         </div>
       }
       meta={
@@ -49,11 +51,13 @@ export const CardObservation = ({
             </p>
             <p className="flex items-center gap-2">
               <ActivityIcon className="size-4 text-info" />
-              <strong className="text-primary">ID Paciente:</strong> {observation.patient_id}
+              <strong className="text-primary">ID Paciente:</strong>{" "}
+              <span title={observation.patient_id}>{shortId(observation.patient_id)}</span>
             </p>
             <p className="flex items-center gap-2">
               <UserIcon className="size-4 text-info" />
-              <strong className="text-primary">ID Usuario:</strong> {observation.user_id}
+              <strong className="text-primary">ID Usuario:</strong>{" "}
+              <span title={observation.user_id}>{shortId(observation.user_id)}</span>
             </p>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
 import { app } from '../../src/app';
@@ -6,6 +7,7 @@ describe('Integracion observations compatible', () => {
   let accessToken = '';
   let patientId = '';
   let observationId = '';
+  let stringComponentObservationId = '';
 
   beforeAll(async () => {
     const user = {
@@ -110,7 +112,52 @@ describe('Integracion observations compatible', () => {
     expect(loincResponse.body.data.length).toBeGreaterThan(0);
   });
 
+  it('crea observaciones con valor de componente numerico enviado como string', async () => {
+    const response = await request(app)
+      .post(`/patients/${patientId}/observations`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        category: 'imaging',
+        code: '8462-4',
+        value: '25',
+        date: '2026-06-01',
+        components: [{ code: '8462-4', value: '2', unit: 'ml' }],
+        patient_id: patientId,
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.data.components[0].value).toBe(2);
+    stringComponentObservationId = response.body.data.id;
+  });
+
+  it('rechaza observaciones cuando el token referencia un usuario inexistente', async () => {
+    const staleToken = jwt.sign(
+      { id: '99999999-9999-4999-8999-999999999999' },
+      process.env.JWT_SECRET || 'secret',
+    );
+
+    const response = await request(app)
+      .post(`/patients/${patientId}/observations`)
+      .set('Authorization', `Bearer ${staleToken}`)
+      .send({
+        category: 'imaging',
+        code: '8462-4',
+        value: '25',
+        date: '2026-06-01',
+        components: [{ code: '8462-4', value: '2', unit: 'ml' }],
+      });
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe('UnauthorizedError');
+  });
+
   afterAll(async () => {
+    if (stringComponentObservationId) {
+      await request(app)
+        .delete(`/observations/${stringComponentObservationId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+    }
+
     if (observationId) {
       await request(app)
         .delete(`/observations/${observationId}`)

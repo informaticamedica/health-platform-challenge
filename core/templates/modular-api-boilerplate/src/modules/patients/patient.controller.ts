@@ -8,42 +8,42 @@ import { sendCompatError, sendCompatSuccess } from '../../shared/http/compat-res
 export class PatientController {
   private readonly service = new PatientService();
 
-  public findAll = (_req: Request, res: Response): void => {
-    sendCompatSuccess(res, this.service.findAll());
+  public findAll = async (_req: Request, res: Response): Promise<void> => {
+    sendCompatSuccess(res, await this.service.findAll());
   };
 
-  public findById = (req: Request, res: Response): void => {
+  public findById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = patientIdSchema.parse(req.params);
-      sendCompatSuccess(res, this.service.findById(id));
+      sendCompatSuccess(res, await this.service.findById(id));
     } catch (error) {
       sendCompatError(res, error);
     }
   };
 
-  public create = (req: Request, res: Response): void => {
+  public create = async (req: Request, res: Response): Promise<void> => {
     try {
-      const patient = this.service.create(patientSchema.parse(req.body));
+      const patient = await this.service.create(patientSchema.parse(req.body));
       sendCompatSuccess(res, patient, 201);
     } catch (error) {
       sendCompatError(res, error);
     }
   };
 
-  public update = (req: Request, res: Response): void => {
+  public update = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = patientIdSchema.parse(req.params);
-      const patient = this.service.update(id, patientSchema.parse(req.body));
+      const patient = await this.service.update(id, patientSchema.parse(req.body));
       sendCompatSuccess(res, patient);
     } catch (error) {
       sendCompatError(res, error);
     }
   };
 
-  public delete = (req: Request, res: Response): void => {
+  public delete = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = patientIdSchema.parse(req.params);
-      sendCompatSuccess(res, this.service.delete(id));
+      sendCompatSuccess(res, await this.service.delete(id));
     } catch (error) {
       sendCompatError(res, error);
     }

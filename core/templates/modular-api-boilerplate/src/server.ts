@@ -15,7 +15,7 @@ const bootstrap = async (): Promise<void> => {
   }
 
   app.listen(env.PORT, () => {
-    logStartup({ port: env.PORT, dbConnected: true });
+    logStartup({ port: env.PORT, dbConnected: true, databaseUrl: env.DATABASE_URL });
   });
 };
 

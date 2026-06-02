@@ -1,15 +1,16 @@
-import { randomUUID } from 'node:crypto';
+import jwt from 'jsonwebtoken';
 
-const tokens = new Map<string, string>();
+const getJwtSecret = (): string => process.env.JWT_SECRET || 'secret';
 
 export class TokenRepository {
   public create(userId: string): string {
-    const token = randomUUID();
-    tokens.set(token, userId);
-    return token;
+    return jwt.sign({ id: userId }, getJwtSecret(), { expiresIn: '8h' });
   }
 
   public findUserId(token: string): string | undefined {
-    return tokens.get(token);
+    const payload = jwt.verify(token, getJwtSecret());
+    if (typeof payload === 'string') return undefined;
+
+    return typeof payload.id === 'string' ? payload.id : undefined;
   }
 }

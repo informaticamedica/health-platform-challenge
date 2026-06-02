@@ -7,6 +7,8 @@ Local PostgreSQL infrastructure for `modular-api-boilerplate`.
 - PostgreSQL 16 service for development on `55434`
 - PostgreSQL 16 service for integration tests on `55435`
 - Automatic schema and seed initialization on clean volumes
+- Contact example schema used by `/contacts` and `/activities`
+- Health API compatibility schema used by `/auth`, `/patients`, and `/observations`
 
 ## Credentials
 
@@ -15,10 +17,31 @@ Local PostgreSQL infrastructure for `modular-api-boilerplate`.
 - Dev database: `modular_dev`
 - Test database: `modular_test`
 
+## Demo users
+
+- `admin@mail.com`
+- `user@mail.com`
+- Password: `Test1234`
+
+## Tables
+
+- `person`
+- `phone_type`
+- `phone`
+- `address`
+- `contact_activities`
+- `users`
+- `patients`
+- `observations`
+- `observation_components`
+
 ## SQL initialization order
 
 1. `sql/01_schema.sql`
-2. `seed/default/zz_seed_phone_types.sql`
+2. `seed/default/zz_seed_health_api.sql`
+3. `seed/default/zz_seed_phone_types.sql`
+
+PostgreSQL runs files copied into `/docker-entrypoint-initdb.d` in alphabetical order when the database volume is created for the first time.
 
 ## Scripts
 

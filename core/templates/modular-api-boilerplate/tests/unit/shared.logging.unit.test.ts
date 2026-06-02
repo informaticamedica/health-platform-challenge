@@ -154,12 +154,17 @@ describe('startup-logger unit', () => {
   });
 
   it('logStartup imprime mensajes con db conectada', () => {
-    logStartup({ port: 3001, dbConnected: true });
+    logStartup({
+      port: 3001,
+      dbConnected: true,
+      databaseUrl: 'postgresql://modular:modular@127.0.0.1:55434/modular_dev',
+    });
 
     expect(console.log).toHaveBeenCalled();
     const allCalls = (console.log as jest.Mock).mock.calls.join(' ');
     expect(allCalls).toContain('3001');
-    expect(allCalls).toContain('Conectada');
+    expect(allCalls).toContain('modular_dev @ 127.0.0.1:55434');
+    expect(allCalls).not.toContain('modular:modular');
   });
 
   it('logStartup imprime mensajes con db desconectada', () => {

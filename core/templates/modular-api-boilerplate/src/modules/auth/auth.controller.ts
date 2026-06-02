@@ -8,18 +8,18 @@ import { sendCompatError, sendCompatSuccess } from '../../shared/http/compat-res
 export class AuthController {
   private readonly service = new AuthService();
 
-  public register = (req: Request, res: Response): void => {
+  public register = async (req: Request, res: Response): Promise<void> => {
     try {
-      const user = this.service.register(registerSchema.parse(req.body));
+      const user = await this.service.register(registerSchema.parse(req.body));
       sendCompatSuccess(res, user, 201);
     } catch (error) {
       sendCompatError(res, error);
     }
   };
 
-  public login = (req: Request, res: Response): void => {
+  public login = async (req: Request, res: Response): Promise<void> => {
     try {
-      const token = this.service.login(loginSchema.parse(req.body));
+      const token = await this.service.login(loginSchema.parse(req.body));
       sendCompatSuccess(res, token, 201);
     } catch (error) {
       sendCompatError(res, error);

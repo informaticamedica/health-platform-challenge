@@ -3,39 +3,58 @@ import type { Observation, ObservationInput } from './observation.types';
 import { ObservationRepository } from './observation.repository';
 import { observationCategories } from './observation.schemas';
 
-import { notFoundError, validationError } from '../../shared/errors/compat-error';
+import { PG_ERROR_CODES } from '../../shared/errors/db-error-codes';
+import { notFoundError, unauthorizedError, validationError } from '../../shared/errors/compat-error';
 import { PatientService } from '../patients/patient.service';
+
+const hasPgCode = (error: unknown): error is { code: string; constraint?: string } => {
+  return typeof error === 'object' && error !== null && 'code' in error;
+};
 
 export class ObservationService {
   private readonly repository = new ObservationRepository();
   private readonly patientService = new PatientService();
 
-  public findByPatientId(patientId: string) {
-    const patient = this.patientService.findById(patientId);
-    return { ...patient, observations: this.repository.findByPatientId(patientId) };
+  public async findByPatientId(patientId: string) {
+    const patient = await this.patientService.findById(patientId);
+    return { ...patient, observations: await this.repository.findByPatientId(patientId) };
   }
 
-  public createForPatient(patientId: string, userId: string, input: ObservationInput): Observation {
-    this.patientService.findById(patientId);
-    return this.repository.create(patientId, userId, input);
+  public async createForPatient(
+    patientId: string,
+    userId: string,
+    input: ObservationInput,
+  ): Promise<Observation> {
+    await this.patientService.findById(patientId);
+    try {
+      return await this.repository.create(patientId, userId, input);
+    } catch (error) {
+      this.mapDbError(error);
+    }
   }
 
-  public update(id: string, userId: string, input: ObservationInput): Observation {
-    const observation = this.repository.update(id, userId, input);
+  public async update(id: string, userId: string, input: ObservationInput): Promise<Observation> {
+    let observation: Observation | undefined;
+    try {
+      observation = await this.repository.update(id, userId, input);
+    } catch (error) {
+      this.mapDbError(error);
+    }
+
     if (!observation) throw notFoundError('Observacion no encontrada');
 
     return observation;
   }
 
-  public delete(id: string): Observation {
-    const observation = this.repository.delete(id);
+  public async delete(id: string): Promise<Observation> {
+    const observation = await this.repository.delete(id);
     if (!observation) throw notFoundError('Observacion no encontrada');
 
     return observation;
   }
 
-  public deleteByPatientId(patientId: string): void {
-    this.repository.deleteByPatientId(patientId);
+  public async deleteByPatientId(patientId: string): Promise<void> {
+    await this.repository.deleteByPatientId(patientId);
   }
 
   public categories() {
@@ -48,11 +67,11 @@ export class ObservationService {
       .slice(0, limit);
   }
 
-  public toFhir(id: string) {
-    const observation = this.repository.findById(id);
+  public async toFhir(id: string) {
+    const observation = await this.repository.findById(id);
     if (!observation) throw validationError('Observation not found');
 
-    const patient = this.patientService.findById(observation.patient_id);
+    const patient = await this.patientService.findById(observation.patient_id);
     return {
       resourceType: 'Observation',
       id: observation.id,
@@ -90,6 +109,18 @@ export class ObservationService {
         },
       })),
     };
+  }
+
+  private mapDbError(error: unknown): never {
+    if (hasPgCode(error) && error.code === PG_ERROR_CODES.FOREIGN_KEY_VIOLATION) {
+      if (error.constraint?.includes('user')) {
+        throw unauthorizedError('El usuario autenticado no existe en la base de datos');
+      }
+
+      throw notFoundError('Paciente relacionado no encontrado');
+    }
+
+    throw error;
   }
 }
 

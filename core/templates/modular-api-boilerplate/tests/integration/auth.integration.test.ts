@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
 import { app } from '../../src/app';
@@ -24,6 +25,9 @@ describe('Integracion auth compatible', () => {
     expect(loginResponse.status).toBe(201);
     expect(loginResponse.body?.error).toBe(false);
     expect(loginResponse.body?.data?.token).toBeTruthy();
+    expect(jwt.verify(loginResponse.body.data.token, process.env.JWT_SECRET || 'secret')).toMatchObject({
+      id: registerResponse.body.data.id,
+    });
   });
 
   it('POST /auth/login rechaza credenciales invalidas', async () => {

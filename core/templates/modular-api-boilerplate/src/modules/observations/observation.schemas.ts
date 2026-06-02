@@ -26,7 +26,7 @@ export const observationSchema = z.object({
     .array(
       z.object({
         code: z.string().min(1).max(100),
-        value: z.number().min(0),
+        value: z.coerce.number().min(0),
         unit: z.string().min(1).max(50),
       }),
     )

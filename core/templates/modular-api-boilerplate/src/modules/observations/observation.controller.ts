@@ -10,43 +10,47 @@ import { sendCompatError, sendCompatSuccess } from '../../shared/http/compat-res
 export class ObservationController {
   private readonly service = new ObservationService();
 
-  public findByPatientId = (req: Request, res: Response): void => {
+  public findByPatientId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = observationIdSchema.parse(req.params);
-      sendCompatSuccess(res, this.service.findByPatientId(id));
+      sendCompatSuccess(res, await this.service.findByPatientId(id));
     } catch (error) {
       sendCompatError(res, error);
     }
   };
 
-  public createForPatient = (req: AuthenticatedRequest, res: Response): void => {
+  public createForPatient = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       if (!req.userId) throw unauthorizedError();
 
       const { id } = observationIdSchema.parse(req.params);
-      const observation = this.service.createForPatient(id, req.userId, observationSchema.parse(req.body));
+      const observation = await this.service.createForPatient(
+        id,
+        req.userId,
+        observationSchema.parse(req.body),
+      );
       sendCompatSuccess(res, observation, 201);
     } catch (error) {
       sendCompatError(res, error);
     }
   };
 
-  public update = (req: AuthenticatedRequest, res: Response): void => {
+  public update = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       if (!req.userId) throw unauthorizedError();
 
       const { id } = observationIdSchema.parse(req.params);
-      const observation = this.service.update(id, req.userId, observationSchema.parse(req.body));
+      const observation = await this.service.update(id, req.userId, observationSchema.parse(req.body));
       sendCompatSuccess(res, observation);
     } catch (error) {
       sendCompatError(res, error);
     }
   };
 
-  public delete = (req: Request, res: Response): void => {
+  public delete = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = observationIdSchema.parse(req.params);
-      sendCompatSuccess(res, this.service.delete(id));
+      sendCompatSuccess(res, await this.service.delete(id));
     } catch (error) {
       sendCompatError(res, error);
     }
@@ -62,10 +66,10 @@ export class ObservationController {
     sendCompatSuccess(res, this.service.loincSuggestions(query, limit));
   };
 
-  public fhir = (req: Request, res: Response): void => {
+  public fhir = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = observationIdSchema.parse(req.params);
-      sendCompatSuccess(res, this.service.toFhir(id));
+      sendCompatSuccess(res, await this.service.toFhir(id));
     } catch (error) {
       sendCompatError(res, error);
     }
